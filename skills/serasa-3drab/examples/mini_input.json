@@ -1,0 +1,61 @@
+{
+ "project": {"title": "RUKO BKL (0113_BENGKULU HOUSE) - Area Ruko 2 Unit", "tab": "Ruko BKL", "analisa_tab": "Analisa BKU", "zona": "Kota Bengkulu", "basis": "Kota Bogor"},
+ "luasan": {
+  "tanah_label": "Luas Tapak (area merah: ruko 2 unit + teras)", "tanah": 58.9,
+  "lantai": [
+   {"short": "Lt.1", "label": "Luas Lantai 1 (2 toko + teras beratap)", "items": [["toko 2 unit", 47.9], ["teras bawah kanopi", 7.9]]},
+   {"short": "Lt.2", "label": "Luas Lantai 2 (2 ruang + balkon beratap)", "items": [["ruang Lt.2", 47.9], ["balkon timur", 7.9]]}
+  ],
+  "note": "Luas kotor dari model SKP (sisi luar dinding). Area tanpa atap tidak termasuk."
+ },
+ "opening_codes": {"openingan": "RKO-01", "swing": "RKO-02", "swing_hw": "RKO-03", "glass": "RKO-02", "slide_hw": "RKO-03", "fixed": "RKO-06", "louvre": "RKO-06"},
+ "analisa": [
+  {"code": "RKO-01", "name": "Openingan kusen - plester & aci sponneng bukaan (lebar 15 cm), termasuk tali air", "sat": "m1",
+   "components": [
+    {"name": "Plester 5mm (PD2) lebar 15 cm", "sat": "m2", "koef": 0.15, "price": "MASTER:PD2", "src": "MASTER PD2"},
+    {"name": "Aci 5mm (AD1) lebar 15 cm", "sat": "m2", "koef": 0.15, "price": "MASTER:AD1", "src": "MASTER AD1"},
+    {"name": "Upah tali air & perapihan", "sat": "m1", "koef": 1, "price": 18000}]},
+  {"code": "RKO-02", "name": "Pintu kaca swing tempered 10 mm + kusen aluminium hitam", "sat": "m2",
+   "components": [
+    {"name": "Kusen aluminium 4\" powder coat", "sat": "m1", "koef": 2.6, "price": 175000},
+    {"name": "Kaca tempered 10 mm", "sat": "m2", "koef": 1, "price": 850000},
+    {"name": "Upah pasang", "sat": "m2", "koef": 1, "price": 175000}]},
+  {"code": "RKO-03", "name": "Hardware pintu kaca per daun (patch fitting/engsel, handle, kunci)", "sat": "daun",
+   "components": [{"name": "Patch fitting + handle + kunci", "sat": "set", "koef": 1, "price": 1250000}, {"name": "Upah setel", "sat": "daun", "koef": 1, "price": 150000}]},
+  {"code": "RKO-06", "name": "Jendela kaca mati rangka aluminium hitam, kaca 6 mm", "sat": "m2",
+   "components": [{"name": "Kusen aluminium", "sat": "m1", "koef": 3.5, "price": 165000}, {"name": "Kaca 6 mm", "sat": "m2", "koef": 1, "price": 350000}, {"name": "Upah pasang", "sat": "m2", "koef": 1, "price": 125000}]}
+ ],
+ "walls": [
+  {"room": "Toko 1", "lantai": "Lantai 1", "interior": true, "parts": {"ekspos": 30.66, "putih": 34.85}},
+  {"room": "Fasad Barat (Lt.1-2 + parapet)", "lantai": "All Floor", "interior": false, "parts": {"terracotta": 65.24}},
+  {"room": "Fasad Utara", "lantai": "All Floor", "interior": false, "parts": {"ekspos": 17.4, "putih": 20.3}, "finish_code": {"putih": "W20"}}
+ ],
+ "openings": [
+  {"uraian": "Teras > Toko 1 / Pintu kaca swing 1 daun", "lantai": "Lantai 1", "w": 1.04, "h": 2.0, "type": "swing", "panels": 1},
+  {"uraian": "Toko 1 > Teras / Jendela kaca mati", "lantai": "Lantai 1", "w": 2.65, "h": 1.4, "type": "fix"},
+  {"uraian": "Ruang Lt.2 > Balkon / Pintu kaca swing 2 daun", "lantai": "Lantai 2", "w": 2.71, "h": 2.44, "type": "swing", "panels": 2},
+  {"uraian": "Storage > Depan / Pintu besi plat (AHS, per m2)", "lantai": "Lantai 1", "w": 2.7, "h": 2.4, "type": "ahs_m2",
+   "ahs": "Pembuatan dan pemasangan 1 m2 pintu besi pelat baja tebal 2 mm rangkap, rangka baja siku1,967,200.00"}
+ ],
+ "bab": [
+  {"no": "I", "title": "Pekerjaan Persiapan", "rows": [
+   {"type": "master", "uraian": "Pembersihan lokasi", "ruang": "Area merah", "lantai": "All Floor", "code": "PP3", "sat": "bln", "vol": 4, "spec": "Pembersihan lokasi rutin (PP3, harga per bulan)"},
+   {"type": "ahs", "uraian": "Bouwplank", "ruang": "Keliling massa", "lantai": "All Floor", "ahs": "Pasangan 1 m' bouwplank", "sat": "m1", "vol": 27.9}
+  ]},
+  {"no": "III", "title": "Pekerjaan Struktur", "rows": [
+   {"type": "note", "uraian": "Tidak dihitung - model struktur belum tersedia", "spec": "Menyusul setelah desain struktur"}
+  ]},
+  {"no": "IV", "title": "Pekerjaan Dinding, Plester & Acian", "rows": [
+   {"type": "sub", "title": "Pasangan dinding"},
+   {"type": "master", "uraian": "Pasangan dinding bata ringan", "ruang": "Toko 1 & 2", "lantai": "Lantai 1", "code": "PW1", "sat": "M2", "vol": 104.33},
+   {"type": "wall_plaster_aci"}
+  ]},
+  {"no": "V", "title": "Pekerjaan Kusen, Pintu & Jendela", "rows": [{"type": "openings"}]},
+  {"no": "IX", "title": "Pekerjaan Finishing Arsitektur", "rows": [
+   {"type": "wall_finish"},
+   {"type": "sub", "title": "FINISHING LANTAI"},
+   {"type": "master", "uraian": "", "ruang": "Toko 1 Fin. Keramik 60x60 Grey", "lantai": "Lantai 1", "code": "F20", "sat": "M2", "vol": 22.52},
+   {"type": "analisa", "uraian": "Openingan bukaan roster (contoh baris analisa)", "ruang": "Dinding roster Toko 1", "lantai": "Lantai 1", "code": "RKO-01", "sat": "m1", "vol": 4.5}
+  ]}
+ ]
+}

@@ -1,0 +1,169 @@
+{
+ "project": {"title": "RUKO BKL (0113_BENGKULU HOUSE) - Area Ruko 2 Unit", "tab": "Ruko BKL", "analisa_tab": "Analisa BKU", "zona": "Kota Bengkulu", "basis": "Kota Bogor"},
+ "luasan": {
+  "tanah_label": "Luas Tapak (area merah: ruko 2 unit + teras)",
+  "tanah": 58.9,
+  "lantai": [
+   {"short": "Lt.1", "label": "Luas Lantai 1 (2 toko + teras beratap)", "items": [["toko 2 unit", 47.9], ["teras depan bawah kanopi", 7.9]]},
+   {"short": "Lt.2", "label": "Luas Lantai 2 (2 ruang + balkon beratap)", "items": [["ruang Lt.2 2 unit", 47.9], ["balkon timur beratap", 7.9]]}
+  ],
+  "note": "Luas kotor dari model SKP (sisi luar dinding). Parkir depan & area tanpa atap tidak termasuk."
+ },
+ "opening_codes": {"openingan": "RKO-01", "swing": "RKO-02", "swing_hw": "RKO-03", "glass": "RKO-02", "slide_hw": "RKO-03", "fixed": "RKO-06", "louvre": "RKO-06"},
+ "analisa": [
+  {"code": "RKO-01", "name": "Openingan kusen - plester & aci sponneng bukaan pintu/jendela (lebar 15 cm), termasuk tali air", "sat": "m1",
+   "note": "Volume = keliling bukaan (2 x tinggi + lebar, jendela 2 x (lebar+tinggi))",
+   "components": [
+    {"name": "Plester tebal 5mm (PD2) lebar 15 cm", "sat": "m2", "koef": 0.15, "price": "MASTER:PD2", "src": "MASTER PD2"},
+    {"name": "Aci tebal 5mm (AD1) lebar 15 cm", "sat": "m2", "koef": 0.15, "price": "MASTER:AD1", "src": "MASTER AD1"},
+    {"name": "Upah tali air, profil sudut & perapihan", "sat": "m1", "koef": 1, "price": 18000, "src": "asumsi"}]},
+  {"code": "RKO-02", "name": "Pintu kaca swing, kaca tempered 10 mm clear + kusen aluminium powder coat hitam", "sat": "m2", "note": "Pintu toko Lt.1 & pintu balkon Lt.2",
+   "components": [
+    {"name": "Kusen aluminium 4\" powder coat hitam (rata-rata 2,6 m1/m2 bukaan)", "sat": "m1", "koef": 2.6, "price": 175000, "src": "asumsi"},
+    {"name": "Kaca tempered 10 mm clear", "sat": "m2", "koef": 1, "price": 850000, "src": "asumsi"},
+    {"name": "Sealant, karet & aksesori", "sat": "ls", "koef": 1, "price": 75000, "src": "asumsi"},
+    {"name": "Upah pasang", "sat": "m2", "koef": 1, "price": 175000, "src": "asumsi"}]},
+  {"code": "RKO-03", "name": "Hardware pintu kaca swing per daun (patch fitting / engsel, handle tarik stainless, kunci)", "sat": "daun", "note": "",
+   "components": [
+    {"name": "Patch fitting atas-bawah / engsel kaca", "sat": "set", "koef": 1, "price": 650000, "src": "asumsi"},
+    {"name": "Handle tarik stainless", "sat": "set", "koef": 1, "price": 350000, "src": "asumsi"},
+    {"name": "Kunci lantai / kunci kaca", "sat": "bh", "koef": 1, "price": 250000, "src": "asumsi"},
+    {"name": "Upah pasang & setel", "sat": "daun", "koef": 1, "price": 150000, "src": "asumsi"}]},
+  {"code": "RKO-06", "name": "Jendela kaca mati rangka aluminium hitam, kaca 6 mm", "sat": "m2", "note": "",
+   "components": [
+    {"name": "Kusen aluminium powder coat hitam", "sat": "m1", "koef": 3.5, "price": 165000, "src": "asumsi"},
+    {"name": "Kaca clear 6 mm", "sat": "m2", "koef": 1, "price": 350000, "src": "asumsi"},
+    {"name": "Sealant & aksesori", "sat": "ls", "koef": 1, "price": 50000, "src": "asumsi"},
+    {"name": "Upah pasang", "sat": "m2", "koef": 1, "price": 125000, "src": "asumsi"}]},
+  {"code": "RKO-13", "name": "Railing / handrail besi hollow 40x40 + pipa handrail, finish cat hitam (h = 1,0 m)", "sat": "m1", "note": "",
+   "components": [
+    {"name": "Besi hollow 40x40 (tiang + rel)", "sat": "m1", "koef": 4, "price": 60000, "src": "asumsi"},
+    {"name": "Pipa handrail", "sat": "m1", "koef": 1, "price": 85000, "src": "asumsi"},
+    {"name": "Cat besi", "sat": "m1", "koef": 1, "price": 35000, "src": "asumsi"},
+    {"name": "Upah fabrikasi & pasang", "sat": "m1", "koef": 1, "price": 150000, "src": "asumsi"}]}
+ ],
+ "walls": [
+  {"room": "Toko 1 (Shop 1)", "lantai": "Lantai 1", "interior": true, "parts": {"ekspos": 30.66, "putih": 34.85}},
+  {"room": "Toko 2 (Shop 2)", "lantai": "Lantai 1", "interior": true, "parts": {"ekspos": 46.02, "putih": 4.8}},
+  {"room": "Ruang Lt.2 Unit 1", "lantai": "Lantai 2", "interior": true, "parts": {"ekspos": 17.4, "putih": 38.34}},
+  {"room": "Ruang Lt.2 Unit 2", "lantai": "Lantai 2", "interior": true, "parts": {"ekspos": 14.16, "putih": 35.1}},
+  {"room": "Fasad Barat (sisi parkir motor, Lt.1-2 + parapet)", "lantai": "All Floor", "interior": false, "parts": {"terracotta": 65.24}},
+  {"room": "Fasad Selatan (di balik secondary skin)", "lantai": "All Floor", "interior": false, "parts": {"ekspos": 38.28}},
+  {"room": "Fasad Utara", "lantai": "All Floor", "interior": false, "parts": {"ekspos": 17.4, "putih": 20.3}},
+  {"room": "Fasad Timur (muka toko & balkon Lt.2)", "lantai": "All Floor", "interior": false, "parts": {"ekspos": 29.9, "putih": 8.8}},
+  {"room": "Tonjolan dinding barat & sisi dalam parapet", "lantai": "Atap", "interior": false, "parts": {"ekspos": 11.76}},
+  {"room": "Fascia tepi kanopi & balkon (el. +2,50 s.d. +4,10)", "lantai": "Lantai 1", "interior": false, "parts": {"terracotta": 26.8}},
+  {"room": "Parapet atap (2 sisi)", "lantai": "Atap", "interior": false, "parts": {"terracotta": 40.3}}
+ ],
+ "openings": [
+  {"uraian": "Teras > Toko 1 / Pintu kaca swing 1 daun, kaca tempered + kusen aluminium hitam", "lantai": "Lantai 1", "w": 1.04, "h": 2.0, "type": "swing", "panels": 1},
+  {"uraian": "Teras > Toko 2 / Pintu kaca swing 1 daun, kaca tempered + kusen aluminium hitam", "lantai": "Lantai 1", "w": 1.04, "h": 2.0, "type": "swing", "panels": 1},
+  {"uraian": "Toko 1 > Teras / Jendela kaca mati di atas dinding rendah, rangka aluminium hitam", "lantai": "Lantai 1", "w": 2.65, "h": 1.4, "type": "fix", "panels": 1},
+  {"uraian": "Toko 2 > Teras / Jendela kaca mati di atas dinding rendah, rangka aluminium hitam", "lantai": "Lantai 1", "w": 2.09, "h": 1.4, "type": "fix", "panels": 1},
+  {"uraian": "Ruang Lt.2 Unit 1 > Balkon / Pintu kaca swing 2 daun, kusen aluminium hitam", "lantai": "Lantai 2", "w": 2.71, "h": 2.44, "type": "swing", "panels": 2},
+  {"uraian": "Ruang Lt.2 Unit 2 > Balkon / Pintu kaca swing 2 daun, kusen aluminium hitam", "lantai": "Lantai 2", "w": 2.5, "h": 2.44, "type": "swing", "panels": 2}
+ ],
+ "bab": [
+  {"no": "I", "title": "Pekerjaan Persiapan", "rows": [
+   {"type": "master", "uraian": "Pembersihan lokasi selama & setelah pekerjaan", "ruang": "Area merah (ruko 2 unit)", "lantai": "All Floor", "code": "PP3", "sat": "bln", "vol": 4, "spec": "Pembersihan lokasi rutin (PP3, harga per bulan)"},
+   {"type": "ahs", "uraian": "Pembersihan & pengupasan permukaan lahan", "ruang": "Area merah ± 59 m2", "lantai": "All Floor", "ahs": "(c) 1 m2 Pembersihan dan Pengupasan Permukaan Tanah (Striping ) s.d. Tanaman Ø 2cm", "sat": "m2", "vol": 58.9},
+   {"type": "ahs", "uraian": "Pengukuran & pemasangan bouwplank", "ruang": "Keliling massa ruko (2 x (6,15 + 7,79) m)", "lantai": "All Floor", "ahs": "Pasangan 1 m' bouwplank", "sat": "m1", "vol": 27.9},
+   {"type": "master", "uraian": "Listrik kerja", "ruang": "Seluruh area", "lantai": "All Floor", "code": "PP1", "sat": "bln", "vol": 4}
+  ]},
+  {"no": "II", "title": "Pekerjaan Tanah, Galian & Urugan", "rows": [
+   {"type": "ahs", "uraian": "Urugan pasir bawah lantai t = 5 cm", "ruang": "Toko 1 & Toko 2 (± 47,3 m2)", "lantai": "Lantai 1", "ahs": "1 m3 urukan pasir uruk untuk volume s.d 200 m3 tanpa pemadatan secara manual", "sat": "m3", "vol": 2.37},
+   {"type": "ahs", "uraian": "Pemadatan urugan pasir", "ruang": "Idem", "lantai": "Lantai 1", "ahs": "(a) 1 m3 Pemadatan pasir setebal 15 cm menggunakan mesin Stamper Kodok secara semi mekanis", "sat": "m3", "vol": 2.37},
+   {"type": "master", "uraian": "Lantai kerja bawah lantai (plur)", "ruang": "Idem", "lantai": "Lantai 1", "code": "F25", "sat": "m2", "vol": 47.3}
+  ]},
+  {"no": "III", "title": "Pekerjaan Struktur", "rows": [
+   {"type": "note", "uraian": "Tidak dihitung - perhitungan & model struktur (pondasi, sloof, kolom, balok, pelat Lt.2, kanopi beton, tangga beton, ring balk) belum tersedia", "spec": "Menyusul setelah desain struktur"}
+  ]},
+  {"no": "IV", "title": "Pekerjaan Dinding, Plester & Acian", "rows": [
+   {"type": "sub", "title": "Pasangan dinding"},
+   {"type": "master", "uraian": "Pasangan dinding bata ringan", "ruang": "Toko 1 & 2 (dinding keliling, sekat antar unit, muka toko, dinding rendah & sirip)", "lantai": "Lantai 1", "code": "PW1", "sat": "M2", "vol": 104.33},
+   {"type": "master", "uraian": "Pasangan dinding bata ringan", "ruang": "Ruang Lt.2 Unit 1 & 2 (keliling + sekat)", "lantai": "Lantai 2", "code": "PW1", "sat": "M2", "vol": 90.89},
+   {"type": "master", "uraian": "Pasangan dinding bata ringan", "ruang": "Parapet atap (h ± 0,7-1,35 m)", "lantai": "Atap", "code": "PW1", "sat": "M2", "vol": 31.12},
+   {"type": "master", "uraian": "Pasangan dinding bata ringan", "ruang": "Fascia tepi kanopi & balkon (el. +2,50 s.d. +4,10)", "lantai": "Lantai 1", "code": "PW1", "sat": "M2", "vol": 23.85},
+   {"type": "wall_plaster_aci"}
+  ]},
+  {"no": "V", "title": "Pekerjaan Kusen, Pintu & Jendela", "rows": [{"type": "openings"}]},
+  {"no": "VI", "title": "Pekerjaan Atap & Kanopi", "rows": [
+   {"type": "master", "uraian": "Rangka atap baja ringan", "ruang": "Atap datar di balik parapet (6,6 x 7,8 m)", "lantai": "Atap", "code": "RF4", "sat": "M2", "vol": 50.61},
+   {"type": "master", "uraian": "Penutup atap spandek", "ruang": "Atap datar di balik parapet", "lantai": "Atap", "code": "R20", "sat": "M2", "vol": 50.61},
+   {"type": "master", "uraian": "Insulasi atap", "ruang": "Atap datar di balik parapet", "lantai": "Atap", "code": "R14", "sat": "M2", "vol": 50.61},
+   {"type": "master", "uraian": "Talang atap", "ruang": "Sisi rendah atap, sepanjang parapet", "lantai": "Atap", "code": "R10", "sat": "m1", "vol": 7.8}
+  ]},
+  {"no": "VII", "title": "Pekerjaan Plumbing & Sanitari", "rows": [
+   {"type": "sub", "title": "PLUMBING (estimasi - WC tiap unit sesuai denah, belum dimodelkan di SKP)"},
+   {"type": "master", "uraian": "Instalasi air bersih pipa 3/4\"", "ruang": "Distribusi utama 2 unit", "lantai": "All Floor", "code": "PL2", "sat": "m1", "vol": 20},
+   {"type": "master", "uraian": "Instalasi air bersih pipa 1/2\"", "ruang": "Cabang ke titik", "lantai": "All Floor", "code": "PL1", "sat": "m1", "vol": 12},
+   {"type": "master", "uraian": "Instalasi air kotor pipa PVC D 4\"", "ruang": "WC > septic tank", "lantai": "Lantai 1", "code": "PL13", "sat": "m1", "vol": 12},
+   {"type": "master", "uraian": "Instalasi air bekas pipa 2\"", "ruang": "Wastafel & floor drain", "lantai": "Lantai 1", "code": "PL6", "sat": "m1", "vol": 12},
+   {"type": "master", "uraian": "Instalasi air hujan pipa 3\"", "ruang": "Talang atap & balkon > saluran", "lantai": "All Floor", "code": "PL8", "sat": "m1", "vol": 18},
+   {"type": "master", "uraian": "Bak kontrol + tutup beton", "ruang": "Depan ruko", "lantai": "Lantai 1", "code": "BK1", "sat": "unit", "vol": 2},
+   {"type": "master", "uraian": "Septic tank biofil", "ruang": "1 per unit", "lantai": "Lantai 1", "code": "ST1", "sat": "unit", "vol": 2},
+   {"type": "master", "uraian": "Roof tank / toren 1200 L", "ruang": "Atap, 1 per unit", "lantai": "Atap", "code": "TO1", "sat": "unit", "vol": 2},
+   {"type": "master", "uraian": "Jet pump", "ruang": "1 per unit", "lantai": "All Floor", "code": "PJ", "sat": "unit", "vol": 2},
+   {"type": "master", "uraian": "Roof drain", "ruang": "Balkon Lt.2", "lantai": "Lantai 2", "code": "SR2", "sat": "unit", "vol": 2},
+   {"type": "sub", "title": "SANITARI (estimasi)"},
+   {"type": "master", "uraian": "Kloset duduk", "ruang": "WC bawah tangga Toko 1 & 2", "lantai": "Lantai 1", "code": "SC3", "sat": "unit", "vol": 2},
+   {"type": "master", "uraian": "Jet washer", "ruang": "WC Toko 1 & 2", "lantai": "Lantai 1", "code": "SJ1", "sat": "unit", "vol": 2},
+   {"type": "master", "uraian": "Wastafel", "ruang": "WC Toko 1 & 2", "lantai": "Lantai 1", "code": "SW3", "sat": "unit", "vol": 2},
+   {"type": "master", "uraian": "Floor drain", "ruang": "WC Toko 1 & 2", "lantai": "Lantai 1", "code": "SF1", "sat": "unit", "vol": 2},
+   {"type": "master", "uraian": "Kran air", "ruang": "Teras depan", "lantai": "Lantai 1", "code": "SK1", "sat": "unit", "vol": 2}
+  ]},
+  {"no": "VIII", "title": "Pekerjaan Listrik & Sistem Pendukung", "rows": [
+   {"type": "sub", "title": "LISTRIK (estimasi - titik belum dimodelkan di SKP)"},
+   {"type": "master", "uraian": "Instalasi titik penerangan", "ruang": "2 unit x (6 Lt.1 + 6 Lt.2 + 1 WC + 2 teras/balkon)", "lantai": "All Floor", "code": "PE1", "sat": "titik", "vol": 30},
+   {"type": "master", "uraian": "Instalasi titik stopkontak", "ruang": "2 unit x 8 titik", "lantai": "All Floor", "code": "PE2", "sat": "titik", "vol": 16},
+   {"type": "master", "uraian": "Lampu downlight 15W", "ruang": "Toko, ruang Lt.2 & WC", "lantai": "All Floor", "code": "E5", "sat": "titik", "vol": 26},
+   {"type": "master", "uraian": "Lampu downlight outbow", "ruang": "Teras bawah kanopi & balkon Lt.2", "lantai": "All Floor", "code": "E19", "sat": "titik", "vol": 4},
+   {"type": "master", "uraian": "Saklar tunggal", "ruang": "Seluruh ruang", "lantai": "All Floor", "code": "E2", "sat": "titik", "vol": 6},
+   {"type": "master", "uraian": "Saklar ganda", "ruang": "Seluruh ruang", "lantai": "All Floor", "code": "E3", "sat": "titik", "vol": 6},
+   {"type": "master", "uraian": "Stopkontak dinding", "ruang": "Seluruh ruang", "lantai": "All Floor", "code": "E1", "sat": "titik", "vol": 16},
+   {"type": "master", "uraian": "Stopkontak AC", "ruang": "Toko 1 & 2, Ruang Lt.2 Unit 1 & 2", "lantai": "All Floor", "code": "E12", "sat": "titik", "vol": 4},
+   {"type": "master", "uraian": "Instalasi panel", "ruang": "1 per unit", "lantai": "Lantai 1", "code": "E13", "sat": "unit", "vol": 2},
+   {"type": "master", "uraian": "Box panel", "ruang": "1 per unit", "lantai": "Lantai 1", "code": "E14", "sat": "unit", "vol": 2},
+   {"type": "master", "uraian": "MCB 10A", "ruang": "Panel (4 per unit)", "lantai": "Lantai 1", "code": "E16", "sat": "unit", "vol": 8}
+  ]},
+  {"no": "IX", "title": "Pekerjaan Finishing Arsitektur", "rows": [
+   {"type": "wall_finish"},
+   {"type": "master", "uraian": "", "ruang": "Cladding WPC dinding rendah & sirip muka toko (dalam + luar)", "lantai": "Lantai 1", "code": "C5", "sat": "M2", "vol": 13.1},
+   {"type": "sub", "title": "SECONDARY SKIN"},
+   {"type": "master", "uraian": "Secondary skin metal (mesh / metal cutting) + rangka", "ruang": "Fasad selatan & timur Lt.2 (el. +2,90 s.d. +7,10)", "lantai": "Lantai 2", "code": "W53", "sat": "M2", "vol": 64.9},
+   {"type": "sub", "title": "FINISHING LANTAI"},
+   {"type": "master", "uraian": "", "ruang": "Toko 1 Fin. Keramik 60x60 Grey", "lantai": "Lantai 1", "code": "F20", "sat": "M2", "vol": 22.52},
+   {"type": "master", "uraian": "", "ruang": "Toko 2 Fin. Keramik 60x60 Grey", "lantai": "Lantai 1", "code": "F20", "sat": "M2", "vol": 19.28},
+   {"type": "master", "uraian": "", "ruang": "Teras depan Fin. Decking Kayu", "lantai": "Lantai 1", "code": "F66", "sat": "M2", "vol": 7.88},
+   {"type": "master", "uraian": "", "ruang": "Ruang Lt.2 Unit 1 Fin. Keramik 60x60 Grey (di luar void tangga)", "lantai": "Lantai 2", "code": "F20", "sat": "M2", "vol": 19.52},
+   {"type": "master", "uraian": "", "ruang": "Ruang Lt.2 Unit 2 Fin. Keramik 60x60 Grey (di luar void tangga)", "lantai": "Lantai 2", "code": "F20", "sat": "M2", "vol": 16.28},
+   {"type": "master", "uraian": "", "ruang": "Balkon timur Lt.2 Fin. Semen Ekspos", "lantai": "Lantai 2", "code": "F8", "sat": "M2", "vol": 7.88},
+   {"type": "sub", "title": "FINISHING TANGGA"},
+   {"type": "master", "uraian": "Penutup anak tangga & bordes", "ruang": "Tangga Toko 1 & 2 (2 x 17 trap + bordes)", "lantai": "Lantai 1", "code": "F8", "sat": "M2", "vol": 12.2},
+   {"type": "master", "uraian": "Penutup bidang tegak anak tangga", "ruang": "Tangga Toko 1 & 2 (2 x 18 x 1,0 x 0,2)", "lantai": "Lantai 1", "code": "F8", "sat": "M2", "vol": 7.2},
+   {"type": "master", "uraian": "Step nosing tangga", "ruang": "Tangga Toko 1 & 2", "lantai": "Lantai 1", "code": "F36", "sat": "m1", "vol": 34},
+   {"type": "analisa", "uraian": "Railing / handrail besi tangga", "ruang": "Tangga Toko 1 & 2 (2 x 4,5 m)", "lantai": "Lantai 1", "code": "RKO-13", "sat": "m1", "vol": 9},
+   {"type": "sub", "title": "PEKERJAAN PLAFON"},
+   {"type": "master", "uraian": "", "ruang": "Plafon Toko 1 (di luar void tangga)", "lantai": "Lantai 1", "code": "C1", "sat": "M2", "vol": 19.52},
+   {"type": "master", "uraian": "", "ruang": "Plafon Toko 2 (di luar void tangga)", "lantai": "Lantai 1", "code": "C1", "sat": "M2", "vol": 16.28},
+   {"type": "master", "uraian": "", "ruang": "Plafon Ruang Lt.2 Unit 1 (asumsi, plafon Lt.2 tidak dimodelkan)", "lantai": "Lantai 2", "code": "C1", "sat": "M2", "vol": 22.52},
+   {"type": "master", "uraian": "", "ruang": "Plafon Ruang Lt.2 Unit 2 (asumsi, plafon Lt.2 tidak dimodelkan)", "lantai": "Lantai 2", "code": "C1", "sat": "M2", "vol": 19.28},
+   {"type": "master", "uraian": "", "ruang": "Plafon balkon timur Lt.2 - eksterior (GRC)", "lantai": "Lantai 2", "code": "C2", "sat": "M2", "vol": 7.0},
+   {"type": "master", "uraian": "Cat plafon", "ruang": "Plafon Toko 1", "lantai": "Lantai 1", "code": "C4", "sat": "M2", "vol": 19.52},
+   {"type": "master", "uraian": "", "ruang": "Plafon Toko 2", "lantai": "Lantai 1", "code": "C4", "sat": "M2", "vol": 16.28},
+   {"type": "master", "uraian": "", "ruang": "Plafon Ruang Lt.2 Unit 1", "lantai": "Lantai 2", "code": "C4", "sat": "M2", "vol": 22.52},
+   {"type": "master", "uraian": "", "ruang": "Plafon Ruang Lt.2 Unit 2", "lantai": "Lantai 2", "code": "C4", "sat": "M2", "vol": 19.28},
+   {"type": "master", "uraian": "", "ruang": "Plafon balkon timur Lt.2 (GRC)", "lantai": "Lantai 2", "code": "C4", "sat": "M2", "vol": 7.0},
+   {"type": "master", "uraian": "Plester sisi bawah & tepi kanopi beton", "ruang": "Kanopi teras depan & sisi selatan", "lantai": "Lantai 1", "code": "PD2", "sat": "M2", "vol": 19.53},
+   {"type": "master", "uraian": "Aci ekspos sisi bawah & tepi kanopi beton", "ruang": "Kanopi teras depan & sisi selatan", "lantai": "Lantai 1", "code": "AD2", "sat": "M2", "vol": 19.53},
+   {"type": "master", "uraian": "Coating aci ekspos sisi bawah & tepi kanopi beton", "ruang": "Kanopi teras depan & sisi selatan", "lantai": "Lantai 1", "code": "W6", "sat": "M2", "vol": 19.53},
+   {"type": "sub", "title": "WATERPROOFING BANGUNAN"},
+   {"type": "master", "uraian": "Waterproofing", "ruang": "Permukaan atas kanopi beton (incl. naik 15 cm)", "lantai": "Lantai 1", "code": "WP1", "sat": "M2", "vol": 16.7},
+   {"type": "master", "uraian": "Waterproofing", "ruang": "Lantai balkon timur Lt.2 (incl. naik 15 cm)", "lantai": "Lantai 2", "code": "WP1", "sat": "M2", "vol": 9.1},
+   {"type": "master", "uraian": "Waterproofing", "ruang": "Lantai & dinding basah WC Toko 1 & 2 (estimasi)", "lantai": "Lantai 1", "code": "WP1", "sat": "M2", "vol": 6.0}
+  ]},
+  {"no": "X", "title": "Pekerjaan Luar & Lanskap", "rows": [
+   {"type": "master", "uraian": "Koral sebar", "ruang": "Jalur koral sisi selatan ruko (7,15 x 0,35 m)", "lantai": "Lantai 1", "code": "F39", "sat": "M2", "vol": 2.5}
+  ]}
+ ]
+}

@@ -1,79 +1,93 @@
 ---
 name: serasa-3drab
-description: Buat RAB (Rencana Anggaran Biaya) format PT Serasa Rancang Indonesia dari model SketchUp (.skp) dan gambar denah (PDF/gambar). Rincian per ruang (plester, aci, finishing per ruang), harga dari MASTER AHS / AHS + koefisien IKK, analisa harga baru di tab Analisa. Pakai saat user minta "buat RAB", "hitung RAB dari skp", "RAB format Serasa", atau melampirkan skp + denah untuk dihitung biayanya.
+description: Buat RAB (Rencana Anggaran Biaya) format PT Serasa Rancang Indonesia dari model SketchUp (.skp) dan denah (PDF/gambar) - rincian per ruang (plester, aci, finishing), harga MASTER AHS/AHS + koefisien IKK, analisa harga di tab Analisa, di salinan Template RAB Google Sheet atau tab baru di file proyek yang sudah ada. Pakai saat user minta "buat RAB", "hitung RAB dari skp", "RAB format Serasa", atau melampirkan skp + denah untuk dihitung biayanya.
 ---
 
 # Serasa 3D RAB (serasa-3drab) — dari SKP + denah ke Google Sheet RAB
 
-Output akhir: **satu file Google Sheet baru** (salinan template Serasa) berisi tab RAB proyek dengan rincian per ruang, plus tab Analisa untuk item yang tidak ada di MASTER AHS. Contoh hasil jadi: proyek 0113_BENGKULU HOUSE (lihat `examples/bku_input.json`).
+Output: tab RAB format Serasa (rincian per ruang) + analisa harga untuk item di luar MASTER AHS, di
+- **file baru** = salinan Template RAB (proyek baru), atau
+- **tab baru di file proyek yang sudah ada** (mis. area Ruko di file 0113_BENGKULU HOUSE).
 
-- Template (WAJIB dipakai, jangan buat dari nol): https://docs.google.com/spreadsheets/d/1zwpn8sGUDQK4_FUd86FiYBzSVwW9y-pygasOf73Kahg  (tab penting: `Serasa Template`, `MASTER AHS`, `AHS`, `IKK`)
+- Template (WAJIB dipakai, jangan buat dari nol): https://docs.google.com/spreadsheets/d/1zwpn8sGUDQK4_FUd86FiYBzSVwW9y-pygasOf73Kahg (tab `Serasa Template`, `MASTER AHS`, `AHS`, `IKK`)
 - Referensi gaya rincian per ruang: RAB RBL House https://docs.google.com/spreadsheets/d/1OFg-ooIzrkmzNZQf-UvXY1StVOcY0_GXjFseb8Lh60U (tab `RBL House`)
+- Contoh hasil: file 0113_BENGKULU HOUSE (tab `BKU House` = proyek baru, tab `Ruko BKL` = tab baru di file yang ada).
+
+## Hemat token — aturan utama
+1. **Baca reference hanya saat masuk langkahnya.** Jangan baca semua dokumen di awal; `examples/bku_input.json` (40 KB) hanya bila butuh contoh bab panjang — pakai `examples/mini_input.json`.
+2. **Script dipakai dari file, tidak ditulis/ditempel ulang.** Ruby: `load` path (lihat langkah 2). Python: salin `scripts/build_rab.py` ke workspace apa adanya.
+3. **Data RAB tidak lewat chat.** Pakai `--push` (service account). Tanpa kredensial: kirim isi file output builder apa adanya (3 panggilan), tanpa mencetak baris ke chat.
+4. **Verifikasi = satu sel cek**, bukan membaca ulang seluruh sheet atau MASTER AHS.
+5. Screenshot secukupnya (2 plan + 1–2 perspektif), max_size ≤ 1200.
+
+## Lokasi scripts & references (cek berurutan)
+1. Folder skill ini (`scripts/`, `references/`, `examples/`).
+2. (Claude) Project "Automasi gambar kerja": `serasa-3drab/scripts/{skp_extract.rb,build_rab.py}`, `serasa-3drab/references/*.md`, `serasa-3drab/examples/{mini_input,ruko_bkl_input,bku_input}.json` (baca dengan project_read saat dibutuhkan, tulis ke workspace).
+3. Paket `serasa-3drab.zip` / repo `serasa-skills` dari user. Kalau tidak ada sama sekali, minta user melampirkannya.
+
+## Alat
+- SketchUp: MCP SketchUp (`eval_ruby`, `get_viewport_screenshot`) atau Ruby Console yang dijalankan user.
+- Denah PDF: render ke PNG (≥150 dpi) dengan pymupdf / pdf tool.
+- Google Sheets/Drive: service account (`--push`, paling hemat) atau connector.
+- Python 3 untuk `build_rab.py`.
 
 ## Input dari user
-1. File **.skp** (desain final — kalau berbeda dengan PDF, **SKP yang dipakai**).
-2. **Denah** (PDF/gambar) — untuk nama ruang, dimensi, dan **area yang ditandai** (mis. lingkaran merah). Hanya area yang ditandai yang dihitung.
-3. Opsional: lokasi proyek (untuk IKK), batasan (mis. "struktur tidak dihitung"), nama file output (default = nama folder proyek).
+1. Model **.skp** (desain final — kalau beda dengan denah, **SKP yang dipakai**), terbuka di SketchUp (MCP SketchUp) atau file.
+2. **Denah** dengan area yang ditandai (mis. kotak merah) — hanya area itu yang dihitung.
+3. Tujuan sheet: file baru, atau link file proyek + nama tab baru. Opsional: lokasi (IKK), batasan ("struktur tidak dihitung").
 
-Kalau ada hal yang tidak bisa diputuskan dari model (fungsi ruang tanpa label, material ambigu), ambil asumsi paling masuk akal, **tulis asumsinya di kolom Ruang/Spec**, dan laporkan di akhir. Jangan berhenti untuk bertanya kecuali keputusan itu mahal untuk diulang.
-
-## Alat yang dibutuhkan (agent apa pun)
-- Akses baca model SketchUp: MCP SketchUp (`eval_ruby`, `get_viewport_screenshot`) **atau** Ruby Console SketchUp yang dijalankan user. Script: `scripts/skp_extract.rb`.
-- Pembaca PDF (pymupdf / pdf tool) untuk denah.
-- Akses Google Sheets/Drive (connector, MCP, atau service account + `scripts/build_rab.py --push`).
-- Python 3 untuk `scripts/build_rab.py`.
+Hal yang tidak bisa diputuskan dari model → ambil asumsi paling masuk akal, tulis di kolom Ruang/Spec, laporkan di akhir. Jangan berhenti bertanya kecuali keputusannya mahal diulang.
 
 ## Alur kerja
 
-### 1. Baca denah & tentukan area hitung
-- Render PDF ke PNG (≥150 dpi), lihat halaman denah. Catat ruang, level lantai (±0.00 dst), dimensi pokok, dan batas area yang ditandai.
-- Bandingkan dengan SKP: jika layout beda, ikuti SKP; nama ruang boleh diambil dari denah bila masih cocok.
+### 1. Denah → area hitung
+Lihat gambar, catat ruang, fungsi, dimensi pokok, batas area yang ditandai. Nama ruang dari denah bila layout cocok.
 
-### 2. Analisis SKP (lihat `references/skp-method.md`)
-1. Load `scripts/skp_extract.rb` (kirim isinya lewat `eval_ruby`, atau `load` di Ruby Console). Panggil `SerasaRAB.save_camera` dulu.
-2. `SerasaRAB.info([xmin,xmax,ymin,ymax])` → daftar entitas di area. Tentukan region (mm) dari area yang ditandai.
-3. Screenshot tampak atas dengan potongan: `SerasaRAB.plan_view(cx, cy, tinggi_mm, 1200)` (Lt.1) dan cut di Lt.2 (mis. 4600), plus 2–3 view perspektif. Petakan ruang.
-4. Cek massa yang diputar: ambil sudut dinding utama (lihat `leaf_table`), pakai sebagai `angle`.
-5. Definisikan ruang (JSON: `uv` rect atau `xy` polygon + rentang z per lantai) → `SerasaRAB.classify_walls(pids, rooms_json, angle)` → luas muka dinding **per ruang per material** (interior), muka eksterior per massa/arah, dan luas 1 sisi tiap dinding (= volume pasangan).
-6. `SerasaRAB.horizontals(region, zmin, zmax, true)` → lantai/deck/perkerasan; `(..., false)` → plafon. `SerasaRAB.glazing(region)` → pintu/jendela kaca. `SerasaRAB.slopes(pids_atap)` → luas atap per material & kemiringan. `count_components` untuk elemen berulang (bata roster, lampu, sanitair).
-7. `SerasaRAB.restore` — kembalikan kamera & hapus section plane. Jangan mengubah geometri model.
+### 2. SKP → kuantitas (`references/skp-method.md`)
+1. `defined?(SerasaRAB) ? SerasaRAB::VERSION : 'belum'`. Kalau bukan `2.0`: `load "<path>/skp_extract.rb"` dari folder Plugins SketchUp atau `<folder proyek>/_serasa_tools/`. Kalau file belum ada di komputer user, tulis ke folder proyek yang terhubung (staged path bernama unik per versi), lalu `load`. **Jangan tempel isi script.**
+2. `SerasaRAB.save_camera` → `info(region)` (pid & layer per massa) → `plan_view(cx,cy,h,z)` Lt.1 & Lt.2 + `persp(...)` → `materials(region)` (ada tebakan finishing).
+3. Massa diputar terhadap sumbu dunia → ambil sudut dinding utama (`leaf_table`) sebagai `angle`, ruang pakai rect `uv`.
+   Definisikan ruang (rect/poly + rentang z) dan `bands` per lantai → **satu panggilan** `SerasaRAB.takeoff(region, rooms, bands, angle, wall_pids)` → dinding per ruang × tipe, eksterior per pita × arah, pasangan per pita, lantai/plafon, bukaan (ukuran kusen dari `frame_xyz`).
+4. Tambahan seperlunya: `slopes` (atap miring), `count_components` (roster, lampu, sanitair).
+5. `SerasaRAB.restore`. Jangan mengubah geometri.
 
-Perhatian: muka `"-"` (tanpa material) biasanya = cat putih; luas grup "tebal" dua sisi; lantai grup sering terhitung atas+bawah (bagi 2); hindari menghitung kontur/site, mobil, vegetasi.
+Perhatian: muka `-` (tanpa material) = cat putih; dinding tebal terhitung dua sisi; pelat bertumpuk/grup lantai bisa terhitung atas+bawah; jangan hitung kontur/site, mobil, vegetasi, signage.
 
-### 3. Pemetaan material → kode MASTER AHS
-Lihat `references/finishing-mapping.md`. Prioritas harga: **MASTER AHS → AHS (nama persis) → tab Analisa** (buat analisa singkat bila tidak ada; contoh: openingan kusen, pintu/jendela).
+### 3. Material → kode (`references/finishing-mapping.md`)
+Prioritas harga: **MASTER AHS → AHS (nama persis) → Analisa**. Default dinding: ekspos = PD2+AD2+W6 · putih = PD2+AD1+W1/W2 · terracotta = PD2+AD1+W76 · pola = PD2+W7. Kode bernama `#N/A` di master → isi `spec`.
 
-### 4. Susun input JSON
-Format lengkap: `references/input-format.md`; contoh nyata: `examples/bku_input.json`. Isi:
-- `project` (judul, nama file, nama tab, zona IKK, basis), `luasan` (tanah, luas tiap lantai termasuk deck/teras beratap),
-- `walls` (per ruang & per zona eksterior: luas per tipe finishing `ekspos|putih|terracotta|pola`),
-- `openings` (pintu/jendela: uraian "Ruang A > Ruang B / jenis", lebar, tinggi, tipe, jumlah daun),
-- `analisa` (item analisa harga), `bab` I–XI dengan baris `master|ahs|analisa|note|sub` + blok otomatis `wall_plaster_aci`, `openings`, `wall_finish`.
+### 4. Input JSON (`references/input-format.md`, contoh `examples/mini_input.json`)
+`project`, `luasan`, `opening_codes`, `analisa`, `walls`, `openings`, `bab` I–XI. Di file proyek yang sudah ada, kode analisa pakai **prefix baru** (mis. `RKO-`).
 
-Jalankan: `python3 scripts/build_rab.py input.json --out out` → cek `out/summary.txt`.
+### 5. Tulis ke sheet (`references/sheet-format.md`)
+- Proyek baru: salin template (connector Drive `copy_file`, judul = nama folder proyek) → `--prepare template`.
+- Tab baru di file yang ada: `--prepare clone:"<tab proyek lama>" --header-row <baris "Bab" di tab itu> --analisa-start auto`.
+- Dengan service account: `python3 build_rab.py input.json --push --creds <key.json> --spreadsheet <ID> --prepare …` → script menyiapkan tab, menulis, dan mencetak ringkasan (error, harga 0, total, subtotal per bab).
+- Tanpa kredensial: siapkan tab via connector (duplicateSheet + kosongkan), jalankan builder tanpa `--push` dengan `--sheet-id/--analisa-sheet-id`, kirim `analisa.json` → `values_AH.json` → `connector_batch.json` apa adanya, lalu `check_cell.json`.
 
-### 5. Siapkan spreadsheet (lihat `references/sheet-format.md`)
-1. Salin template → judul = nama folder proyek (jika folder template tidak bisa ditulis, salin ke root Drive user).
-2. Duplikat tab `Serasa Template` → nama tab proyek; tambah tab `Analisa <kode>`.
-3. Di tab proyek: **unmerge** baris ≥10, kosongkan isi & format A10:K akhir, **sisipkan 6 baris di bawah baris 2** (baris 3–8 untuk luasan), lalu **cutPaste blok IKK E9:F11 → E3:F5** supaya koefisien tetap di `F5`. Tambah baris sampai cukup (≥ baris total + 5).
-4. Buat named range: `MAH` = `'MASTER AHS'!B1:G400`, `ANL` = `'Analisa <kode>'!A1:H300`.
-5. Set `F1` = zona proyek (nama persis di tab IKK, mis. "Kota Bengkulu"), `F2` = basis (default "Kota Bogor").
-
-### 6. Tulis ke sheet
-Urutan: `analisa_rows.json` → `header.json` (A1:C8) → `colheader.json` (baris 16) → `rab_values.json` (A17:H…) → `rab_formulas_F.json` → `rab_formulas_IJ.json` → `rab_overrides.json` (menimpa sel tertentu) → `format_requests.json` (batchUpdate; isi `--sheet-id`/`--analisa-sheet-id`).
-Semua rumus memakai locale Indonesia (`;` dan desimal `,`). Dengan service account: `--push --creds key.json --spreadsheet <id>`.
-
-### 7. Rapikan & verifikasi
-- Hapus tab yang tidak dipakai (RBL House, Serasa Template, TOP Cost n Fee, RBL House Alternatif, Sheet14, HPP…, INTGR, Sheet4, dll). **Sisakan & sembunyikan**: `AHS`, `IKK`, `MASTER AHS`, `Analisa <kode>`. Tab proyek satu-satunya yang terlihat.
-- Baca ulang sheet: tidak ada `#N/A`/`#REF!`, Spec terisi, harga ≠ 0 (kecuali struktur), subtotal tiap bab di kolom K, total di kolom I baris "Total".
-- Laporkan ke user: link file, total & subtotal per bab, luasan, **daftar asumsi** (nama ruang, material, item estimasi), dan **komponen desain yang belum dihitung**.
+### 6. Verifikasi & laporan
+- Hasil cek harus `error=0`, `harga0=0` (kecuali baris struktur bertanda `-`).
+- Mode template: hapus tab contoh (RBL House, Serasa Template, TOP Cost n Fee, RBL House Alternatif, Sheet14, HPP…, INTGR, Sheet4, dll); sisakan & sembunyikan `AHS`, `IKK`, `MASTER AHS`, tab Analisa.
+- Laporkan: total & subtotal per bab, luasan, **asumsi** (nama ruang, material, item estimasi), dan **komponen yang belum dihitung**.
 
 ## Aturan format Serasa (ringkas)
 - Kolom: Bab | Uraian Pekerjaan | Ruang / Area | Lantai | Kode Specs | Spec | Satuan | Volume | Harga Satuan | Total Harga | (K = subtotal bab).
-- Bab: I Persiapan · II Tanah/Galian/Urugan · III Struktur · IV Dinding, Plester & Acian · V Kusen, Pintu & Jendela · VI Atap & Kanopi · VII Plumbing & Sanitari · VIII Listrik · IX Finishing (dinding, lantai, tangga, plafon, railing, waterproofing) · X Luar & Lanskap · XI Kolam.
-- **Per ruang**: plester, aci, dan finishing dinding satu baris per (ruang × tipe finishing), label `Dinding Interior <Ruang> Fin. <finishing>` / `Dinding Eksterior <zona> Fin. ...`. Lantai & plafon juga per ruang.
-- Pintu/jendela: satu baris per bukaan, uraian `Ruang A > Ruang B / jenis, material, jumlah panel, bukaan`, kolom Ruang = ukuran `LxT` cm.
-- Openingan kusen dihitung m1 keliling bukaan per lantai (analisa sponneng plester+aci).
-- Harga satuan = harga basis × 1,001 × koefisien IKK (`$F$5`) untuk MASTER AHS; AHS & Analisa × `$F$5`.
-- Item yang tidak dimodelkan (MEP) boleh diisi estimasi, tulis "estimasi" di uraian/sub-judul.
-- Blok luasan di bawah judul: Luas Tanah, Luas Bangunan Total, Luas tiap lantai (**termasuk deck/teras/selasar yang beratap**; carport & area tanpa atap tidak), plus catatan rincian.
+- Bab: I Persiapan · II Tanah · III Struktur · IV Dinding, Plester & Acian · V Kusen, Pintu & Jendela · VI Atap & Kanopi · VII Plumbing & Sanitari · VIII Listrik · IX Finishing · X Luar & Lanskap · XI Kolam (bab yang tidak relevan dilewati).
+- Per ruang: plester, aci, finishing dinding satu baris per (ruang × tipe), label `Dinding Interior <Ruang> Fin. <finishing>` / `Dinding Eksterior <zona> Fin. …`. Lantai & plafon per ruang.
+- Pintu/jendela: satu baris per bukaan, `Ruang A > Ruang B / jenis, material, jumlah daun`, kolom Ruang = `LxT` cm. Hardware swing dikali jumlah daun.
+- Openingan kusen: m1 keliling bukaan per lantai.
+- Harga = basis × 1,001 × koefisien IKK (`$F$5`) untuk MASTER AHS; AHS & Analisa × `$F$5`.
+- MEP yang tidak dimodelkan boleh estimasi; tulis "estimasi" di sub-judul.
+- Blok luasan: tanah/tapak, total, tiap lantai (**termasuk deck/teras/balkon beratap**; carport & area tanpa atap tidak), catatan rincian.
+
+## Jebakan yang sudah ditemui
+- Template punya merge di baris 10–11, E97:F97, 327–328 → unmerge dulu (dikerjakan `--prepare template`).
+- Sheet hanya 11 kolom: sel bantu harus di kolom A–K.
+- `fields` bertanda kurung bisa ditolak → pakai path bertitik.
+- Desimal di dalam rumus harus koma. Locale `;`.
+- Dinding yang menerus beberapa lantai: pakai `takeoff`/`walls_sampled` (per pita z), bukan `classify_walls` lama.
+- Kaca tanpa material tidak terdeteksi `glazing` → cek leaf tipis di `info`/screenshot.
+- `plan_view` sudah menyalakan section cut; kalau potongan tetap tidak tampil, cek `rendering_options['DisplaySectionCuts']`.
+- Commit file ke komputer user dari staged path yang sama bisa mengirim versi lama → pakai nama staged unik.
+- Service account tidak bisa memiliki file baru di Drive → salin template lewat connector/manual, lalu share ke email SA.
+- Copy template bisa gagal permission di folder tim → salin ke root Drive user lalu beri tahu user.
