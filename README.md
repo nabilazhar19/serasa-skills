@@ -20,7 +20,7 @@ npx skills add <OWNER>/serasa-skills --skill serasa-rab -g -a claude-code -a cod
 
 Lokasi hasil install:
 - Claude Code: `~/.claude/skills/serasa-rab/`
-- Codex: `~/.codex/skills/serasa-rab/`
+- Codex: `~/.agents/skills/serasa-rab/` (lokasi standar Agent Skills yang dibaca Codex)
 
 Update ke versi terbaru: jalankan ulang perintah `npx skills add` yang sama.
 
