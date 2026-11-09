@@ -30,7 +30,8 @@ Cek isi repo tanpa install: `npx skills add <OWNER>/serasa-skills --list`
 - Akses SketchUp lewat MCP (eval_ruby + screenshot) atau Ruby Console.
 - Akses Google Sheets/Drive ke Template RAB Serasa (`1zwpn8sGUDQK4_FUd86FiYBzSVwW9y-pygasOf73Kahg`).
 - Python 3 (opsional `pip install -r skills/serasa-3drab/requirements.txt`).
-- Disarankan: plugin SketchUp (`bash ~/.agents/skills/serasa-3drab/scripts/install_sketchup_plugin.sh` atau dari folder skill Claude) dan service account Google untuk `--push`.
+- Plugin SketchUp terpasang otomatis saat skill pertama dipakai (`SerasaRAB.install_plugin`); `npx skills add` sendiri hanya menyalin file.
+- Disarankan: service account Google untuk `--push` (lihat `references/sheet-format.md`).
 
 ## Menambah skill baru
 Buat folder `skills/<nama-skill>/` berisi `SKILL.md` (frontmatter `name` + `description`), lalu commit & push.

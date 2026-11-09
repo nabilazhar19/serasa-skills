@@ -23,6 +23,12 @@ Persiapan sekali per user/komputer:
 4. `pip install google-api-python-client google-auth` di environment yang punya akses internet ke googleapis.com
    (shell komputer user bila jaringan cloud dibatasi).
 
+Jalankan di **shell komputer user** (Cowork: `device_bash`, Linux VM): library harus di-install di shell itu juga
+(`python3 -m pip install --user google-api-python-client google-auth`; install di macOS biasa tidak terbaca VM).
+Key di luar folder proyek, mis. `00 Serasa Architect/_serasa_keys/` — minta akses folder itu (read) bila belum
+terhubung; path di shell: `$HOME/mnt/_serasa_keys/<file>.json`. Jangan pernah mencetak isi key; cukup cek `client_email`.
+Sudah diuji (9 Nov 2026, mode clone, ±7 detik): hasil identik dengan penulisan via connector.
+
 Salin template tetap lewat connector Drive (`copy_file`) atau manual — service account tidak punya kuota Drive untuk memiliki file. Lalu:
 ```
 python3 build_rab.py input.json --push --creds ~/.serasa/sa-key.json --spreadsheet <ID> --prepare template

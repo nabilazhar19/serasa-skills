@@ -1,21 +1,32 @@
 # skp_extract.rb - Serasa RAB: ekstraksi kuantitas dari model SketchUp (v2)
 #
 # Pemasangan (sekali per komputer, paling hemat token):
-#   Salin file ini ke folder Plugins SketchUp supaya termuat otomatis:
-#     macOS  : ~/Library/Application Support/SketchUp 20xx/SketchUp/Plugins/
-#     Windows: %APPDATA%\SketchUp\SketchUp 20xx\SketchUp\Plugins\
+#   load "<folder skill>/scripts/skp_extract.rb"; SerasaRAB.install_plugin
+#   -> menyalin file ini ke folder Plugins SketchUp (Mac/Windows) sehingga termuat otomatis.
 #   Agen cukup cek:  defined?(SerasaRAB) ? SerasaRAB::VERSION : 'belum'
-#   Kalau belum: load "/path/skp_extract.rb"  (satu baris, jangan tempel isi file).
+#   Kalau belum / versi lebih lama: load ulang dari folder skill lalu install_plugin (jangan tempel isi file).
 #
 # Satuan mm / m2. region = [xmin, xmax, ymin, ymax] (mm, koordinat dunia).
 # bands = [["Lt1", z0, z1], ["Lt2", z1, z2], ["Parapet", z2, 99999]] (mm, elevasi absolut).
 # rooms = [{name:, type:'uv'|'xy', rect:[u0,u1,v0,v1] | poly:[[x,y],..], z:[z0,z1]}]
 # Semua fungsi mengembalikan string JSON.
 require 'json'
+require 'fileutils'
 
 module SerasaRAB
-  VERSION = '2.0'
+  VERSION = '2.1'
+  SRC = File.expand_path(__FILE__) rescue nil
   module_function
+
+  # Pasang diri sendiri ke folder Plugins SketchUp (Mac & Windows) -> termuat otomatis tiap SketchUp dibuka.
+  # Panggil sekali setelah `load "<folder skill>/scripts/skp_extract.rb"`.
+  def install_plugin
+    return 'gagal: script tidak dimuat dari file (pakai load "<path>")' unless SRC && File.file?(SRC)
+    dir = Sketchup.find_support_file('Plugins')
+    dest = File.join(dir, 'serasa_skp_extract.rb')
+    FileUtils.cp(SRC, dest) unless File.expand_path(dest) == SRC
+    "terpasang #{VERSION}: #{dest}"
+  end
 
   SKIP_LAYERS = /KONTUR|PLAN|STREET|VEGET|CAR BIKE|AMBIENCE/i
   SKIP_DEFS   = /SCF|CAY|Decid|tree|pohon|car|mobil|motor|person|people/i

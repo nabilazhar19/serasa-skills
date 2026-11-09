@@ -29,7 +29,7 @@ Untuk membuat RAB format Serasa, ikuti ~/.codex/skills/serasa-3drab/SKILL.md
 - Python 3; opsional `pip install -r requirements.txt` untuk `--push` dan `pymupdf` untuk membaca PDF denah.
 
 ## Setelah install (sekali per komputer)
-1. SketchUp (macOS): `bash scripts/install_sketchup_plugin.sh`, restart SketchUp.
+1. SketchUp: otomatis — saat skill pertama kali dipakai, agen menjalankan `SerasaRAB.install_plugin` (Mac & Windows). Manual (macOS): `bash scripts/install_sketchup_plugin.sh`, lalu restart SketchUp.
 2. Service account Google (agar data RAB tidak lewat chat): lihat `references/sheet-format.md` bagian "Service account".
 
 ## Uji cepat

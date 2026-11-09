@@ -1,14 +1,16 @@
 # Metode take-off dari SKP (v2)
 
-Fungsi ada di `scripts/skp_extract.rb` (modul `SerasaRAB`, VERSION 2.0). Satuan mm / m². Semua output JSON ringkas.
+Fungsi ada di `scripts/skp_extract.rb` (modul `SerasaRAB`, VERSION 2.1). Satuan mm / m². Semua output JSON ringkas.
 
 ## 0. Muat script (hemat token)
-1. `defined?(SerasaRAB) ? SerasaRAB::VERSION : 'belum'` — kalau `2.0`, langsung pakai.
-2. Kalau belum / versi lama: `load "<path>/skp_extract.rb"` (satu baris). Path yang dipakai:
-   folder Plugins SketchUp (dimuat otomatis) atau salinan di folder proyek (`_serasa_tools/skp_extract.rb`).
-   Kalau file belum ada di komputer user: tulis file ke folder proyek yang terhubung (device_commit_files,
-   **staged path dengan nama unik tiap versi** — commit ulang dari staged path yang sama bisa mengirim versi lama),
-   lalu `load`. **Jangan menempel isi script ke eval_ruby.**
+1. `defined?(SerasaRAB) ? SerasaRAB::VERSION : 'belum'` — kalau `2.1`+, langsung pakai (plugin sudah terpasang).
+2. Kalau belum / versi lama: `load "<folder skill>/scripts/skp_extract.rb"; SerasaRAB.install_plugin`.
+   `install_plugin` menyalin file ke folder Plugins SketchUp (`Sketchup.find_support_file('Plugins')`, Mac & Windows)
+   sebagai `serasa_skp_extract.rb` → termuat otomatis di sesi berikutnya. `npx skills add` tidak memasang plugin;
+   langkah ini yang memasangnya, sekali per komputer (atau `scripts/install_sketchup_plugin.sh` di macOS).
+   Agen cloud (folder skill tidak ada di komputer user): tulis file ke folder proyek yang terhubung
+   (`_serasa_tools/skp_extract.rb`, device_commit_files dengan **staged path bernama unik tiap versi**), lalu
+   `load` + `install_plugin`. **Jangan menempel isi script ke eval_ruby.**
 3. `SerasaRAB.save_camera` sebelum mengubah tampilan; `SerasaRAB.restore` di akhir. Jangan edit geometri.
 
 ## 1. Kenali area & ruang (±4 panggilan)

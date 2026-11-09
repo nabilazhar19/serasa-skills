@@ -22,7 +22,7 @@ Output: tab RAB format Serasa (rincian per ruang) + analisa harga untuk item di 
 
 ## Lokasi scripts & references (cek berurutan)
 1. Folder skill ini (`scripts/`, `references/`, `examples/`).
-2. (Claude) Project "Automasi gambar kerja": `serasa-3drab/scripts/{skp_extract.rb,build_rab.py}`, `serasa-3drab/references/*.md`, `serasa-3drab/examples/{mini_input,ruko_bkl_input,bku_input}.json` (baca dengan project_read saat dibutuhkan, tulis ke workspace).
+2. Claude Project "Automasi gambar kerja": `serasa-3drab/scripts/{skp_extract.rb,build_rab.py}`, `serasa-3drab/references/*.md`, `serasa-3drab/examples/{mini_input,ruko_bkl_input,bku_input}.json` (baca dengan project_read saat dibutuhkan, tulis ke workspace).
 3. Paket `serasa-3drab.zip` / repo `serasa-skills` dari user. Kalau tidak ada sama sekali, minta user melampirkannya.
 
 ## Alat
@@ -44,7 +44,8 @@ Hal yang tidak bisa diputuskan dari model → ambil asumsi paling masuk akal, tu
 Lihat gambar, catat ruang, fungsi, dimensi pokok, batas area yang ditandai. Nama ruang dari denah bila layout cocok.
 
 ### 2. SKP → kuantitas (`references/skp-method.md`)
-1. `defined?(SerasaRAB) ? SerasaRAB::VERSION : 'belum'`. Kalau bukan `2.0`: `load "<path>/skp_extract.rb"` dari folder Plugins SketchUp atau `<folder proyek>/_serasa_tools/`. Kalau file belum ada di komputer user, tulis ke folder proyek yang terhubung (staged path bernama unik per versi), lalu `load`. **Jangan tempel isi script.**
+1. `defined?(SerasaRAB) ? SerasaRAB::VERSION : 'belum'`. Kalau `2.1` atau lebih baru: langsung pakai (sudah terpasang sebagai plugin).
+   Kalau belum / versi lebih lama: `load "<folder skill>/scripts/skp_extract.rb"; SerasaRAB.install_plugin` — memuat sekaligus memasang ke folder Plugins SketchUp (Mac & Windows), jadi sesi berikutnya tidak perlu load lagi. Agen yang berjalan di cloud (folder skill tidak ada di komputer user): tulis file ke folder proyek yang terhubung (`_serasa_tools/`, staged path bernama unik per versi), lalu `load` + `install_plugin` dari path itu. **Jangan tempel isi script.**
 2. `SerasaRAB.save_camera` → `info(region)` (pid & layer per massa) → `plan_view(cx,cy,h,z)` Lt.1 & Lt.2 + `persp(...)` → `materials(region)` (ada tebakan finishing).
 3. Massa diputar terhadap sumbu dunia → ambil sudut dinding utama (`leaf_table`) sebagai `angle`, ruang pakai rect `uv`.
    Definisikan ruang (rect/poly + rentang z) dan `bands` per lantai → **satu panggilan** `SerasaRAB.takeoff(region, rooms, bands, angle, wall_pids)` → dinding per ruang × tipe, eksterior per pita × arah, pasangan per pita, lantai/plafon, bukaan (ukuran kusen dari `frame_xyz`).
@@ -87,6 +88,7 @@ Prioritas harga: **MASTER AHS → AHS (nama persis) → Analisa**. Default dindi
 - Desimal di dalam rumus harus koma. Locale `;`.
 - Dinding yang menerus beberapa lantai: pakai `takeoff`/`walls_sampled` (per pita z), bukan `classify_walls` lama.
 - Kaca tanpa material tidak terdeteksi `glazing` → cek leaf tipis di `info`/screenshot.
+- `npx skills add` hanya menyalin folder skill; plugin SketchUp terpasang saat `install_plugin` pertama kali dijalankan (atau `scripts/install_sketchup_plugin.sh` di macOS).
 - `plan_view` sudah menyalakan section cut; kalau potongan tetap tidak tampil, cek `rendering_options['DisplaySectionCuts']`.
 - Commit file ke komputer user dari staged path yang sama bisa mengirim versi lama → pakai nama staged unik.
 - Service account tidak bisa memiliki file baru di Drive → salin template lewat connector/manual, lalu share ke email SA.
