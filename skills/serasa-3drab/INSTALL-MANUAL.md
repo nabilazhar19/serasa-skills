@@ -1,4 +1,4 @@
-# serasa-rab — skill RAB format Serasa (SKP + denah → Google Sheet)
+# serasa-3drab — skill RAB format Serasa (SKP + denah → Google Sheet)
 
 Skill agent AI untuk membuat RAB format PT Serasa Rancang Indonesia dari model SketchUp dan gambar denah.
 Format mengikuti standar Agent Skills (`SKILL.md` + `scripts/` + `references/`), bisa dipakai Claude, Codex, atau agent lain.
@@ -11,11 +11,11 @@ Format mengikuti standar Agent Skills (`SKILL.md` + `scripts/` + `references/`),
 - `examples/bku_input.json` — input lengkap proyek 0113 Bengkulu House (hasil nyata)
 
 ## Instalasi
-**Claude Code / Claude (desktop)**: salin folder ke `~/.claude/skills/serasa-rab/` (personal) atau `<repo>/.claude/skills/serasa-rab/` (per proyek).
+**Claude Code / Claude (desktop)**: salin folder ke `~/.claude/skills/serasa-3drab/` (personal) atau `<repo>/.claude/skills/serasa-3drab/` (per proyek).
 
-**Codex (CLI/IDE)**: salin folder ke `~/.codex/skills/serasa-rab/` (atau `.codex/skills/` di repo). Codex membaca `SKILL.md` yang sama. Jika versi Codex belum mendukung skills, tambahkan ke `AGENTS.md`:
+**Codex (CLI/IDE)**: salin folder ke `~/.codex/skills/serasa-3drab/` (atau `.codex/skills/` di repo). Codex membaca `SKILL.md` yang sama. Jika versi Codex belum mendukung skills, tambahkan ke `AGENTS.md`:
 ```
-Untuk membuat RAB format Serasa, ikuti ~/.codex/skills/serasa-rab/SKILL.md
+Untuk membuat RAB format Serasa, ikuti ~/.codex/skills/serasa-3drab/SKILL.md
 ```
 
 **Agent lain**: berikan isi `SKILL.md` sebagai instruksi sistem dan sediakan folder ini di workspace.

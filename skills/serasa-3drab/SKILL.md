@@ -1,9 +1,9 @@
 ---
-name: serasa-rab
+name: serasa-3drab
 description: Buat RAB (Rencana Anggaran Biaya) format PT Serasa Rancang Indonesia dari model SketchUp (.skp) dan gambar denah (PDF/gambar). Rincian per ruang (plester, aci, finishing per ruang), harga dari MASTER AHS / AHS + koefisien IKK, analisa harga baru di tab Analisa. Pakai saat user minta "buat RAB", "hitung RAB dari skp", "RAB format Serasa", atau melampirkan skp + denah untuk dihitung biayanya.
 ---
 
-# Serasa RAB — dari SKP + denah ke Google Sheet RAB
+# Serasa 3D RAB (serasa-3drab) — dari SKP + denah ke Google Sheet RAB
 
 Output akhir: **satu file Google Sheet baru** (salinan template Serasa) berisi tab RAB proyek dengan rincian per ruang, plus tab Analisa untuk item yang tidak ada di MASTER AHS. Contoh hasil jadi: proyek 0113_BENGKULU HOUSE (lihat `examples/bku_input.json`).
 
