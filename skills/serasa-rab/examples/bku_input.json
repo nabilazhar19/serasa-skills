@@ -1,0 +1,2876 @@
+{
+ "project": {
+  "title": "BKU HOUSE (0113_BENGKULU HOUSE) - Area Rumah, Farm & Carport",
+  "file_name": "0113_BENGKULU HOUSE",
+  "tab": "BKU House",
+  "analisa_tab": "Analisa BKU",
+  "zona": "Kota Bengkulu",
+  "basis": "Kota Bogor"
+ },
+ "luasan": {
+  "tanah_label": "Luas Tanah (area merah: rumah, farm, carport)",
+  "tanah": 625,
+  "lantai": [
+   {
+    "short": "Lt.1",
+    "label": "Luas Lantai 1 (bangunan + deck/teras beratap)",
+    "items": [
+     [
+      "rumah",
+      94.7
+     ],
+     [
+      "Storage Mushroom",
+      16.3
+     ],
+     [
+      "deck barat bawah plafon",
+      32.7
+     ],
+     [
+      "deck timur bawah kanopi kaca",
+      9.9
+     ],
+     [
+      "teras utara beratap",
+      13.7
+     ],
+     [
+      "teras bawah overstek Lt.2",
+      10.0
+     ],
+     [
+      "menara tangga roster",
+      11.2
+     ]
+    ]
+   },
+   {
+    "short": "Lt.2",
+    "label": "Luas Lantai 2 (bangunan + selasar beratap)",
+    "items": [
+     [
+      "ruang dalam",
+      85.8
+     ],
+     [
+      "selasar barat di bawah atap",
+      32.3
+     ]
+    ]
+   }
+  ]
+ },
+ "opening_codes": {
+  "openingan": "X-01",
+  "swing": "X-02",
+  "swing_hw": "X-03",
+  "glass": "X-04",
+  "slide_hw": "X-05",
+  "fixed": "X-06",
+  "louvre": "X-07"
+ },
+ "analisa": [
+  {
+   "code": "X-01",
+   "name": "Openingan kusen - plester & aci sponneng bukaan pintu/jendela (lebar 15 cm), termasuk tali air",
+   "sat": "m1",
+   "note": "Volume = keliling bukaan (2 x tinggi + lebar, jendela 2 x (lebar+tinggi))",
+   "components": [
+    {
+     "name": "Plester tebal 5mm (PD2) lebar 15 cm",
+     "sat": "m2",
+     "koef": 0.15,
+     "price": "MASTER:PD2",
+     "src": "MASTER PD2"
+    },
+    {
+     "name": "Aci tebal 5mm (AD1) lebar 15 cm",
+     "sat": "m2",
+     "koef": 0.15,
+     "price": "MASTER:AD1",
+     "src": "MASTER AD1"
+    },
+    {
+     "name": "Upah tali air, profil sudut & perapihan",
+     "sat": "m1",
+     "koef": 1,
+     "price": 18000,
+     "src": "asumsi"
+    }
+   ]
+  },
+  {
+   "code": "X-02",
+   "name": "Pintu swing kusen aluminium 4\" powder coat hitam + daun HMR 18mm lapis HPL 2 sisi",
+   "sat": "m2",
+   "note": "",
+   "components": [
+    {
+     "name": "Kusen aluminium 4\" powder coat hitam (rata-rata 2,6 m1/m2 bukaan)",
+     "sat": "m1",
+     "koef": 2.6,
+     "price": 175000,
+     "src": "asumsi"
+    },
+    {
+     "name": "Daun pintu HMR 18mm + rangka, lapis HPL 2 sisi",
+     "sat": "m2",
+     "koef": 1,
+     "price": 950000,
+     "src": "asumsi"
+    },
+    {
+     "name": "Upah pasang kusen & daun",
+     "sat": "m2",
+     "koef": 1,
+     "price": 150000,
+     "src": "asumsi"
+    }
+   ]
+  },
+  {
+   "code": "X-03",
+   "name": "Hardware pintu swing (engsel 3 bh, handle + kunci, door stop)",
+   "sat": "set",
+   "note": "",
+   "components": [
+    {
+     "name": "Engsel stainless 4\"",
+     "sat": "bh",
+     "koef": 3,
+     "price": 85000,
+     "src": "asumsi"
+    },
+    {
+     "name": "Handle lever + body kunci + silinder",
+     "sat": "set",
+     "koef": 1,
+     "price": 550000,
+     "src": "asumsi"
+    },
+    {
+     "name": "Door stop",
+     "sat": "bh",
+     "koef": 1,
+     "price": 75000,
+     "src": "asumsi"
+    },
+    {
+     "name": "Upah pasang",
+     "sat": "set",
+     "koef": 1,
+     "price": 100000,
+     "src": "asumsi"
+    }
+   ]
+  },
+  {
+   "code": "X-04",
+   "name": "Pintu / jendela kaca rangka aluminium hitam, kaca tempered 8 mm clear (sliding / swing)",
+   "sat": "m2",
+   "note": "",
+   "components": [
+    {
+     "name": "Kusen + rangka daun aluminium powder coat hitam",
+     "sat": "m1",
+     "koef": 3.0,
+     "price": 185000,
+     "src": "asumsi"
+    },
+    {
+     "name": "Kaca tempered 8 mm clear",
+     "sat": "m2",
+     "koef": 1,
+     "price": 650000,
+     "src": "asumsi"
+    },
+    {
+     "name": "Sealant, karet & aksesori",
+     "sat": "ls",
+     "koef": 1,
+     "price": 75000,
+     "src": "asumsi"
+    },
+    {
+     "name": "Upah pasang",
+     "sat": "m2",
+     "koef": 1,
+     "price": 175000,
+     "src": "asumsi"
+    }
+   ]
+  },
+  {
+   "code": "X-05",
+   "name": "Hardware pintu sliding (rel atas-bawah, roda, handle tarik, kunci) per daun",
+   "sat": "daun",
+   "note": "",
+   "components": [
+    {
+     "name": "Rel & roda sliding heavy duty",
+     "sat": "set",
+     "koef": 1,
+     "price": 650000,
+     "src": "asumsi"
+    },
+    {
+     "name": "Handle tarik + kunci sliding",
+     "sat": "set",
+     "koef": 1,
+     "price": 350000,
+     "src": "asumsi"
+    },
+    {
+     "name": "Upah setel",
+     "sat": "daun",
+     "koef": 1,
+     "price": 150000,
+     "src": "asumsi"
+    }
+   ]
+  },
+  {
+   "code": "X-06",
+   "name": "Jendela kaca mati / jungkit rangka aluminium hitam, kaca 6 mm",
+   "sat": "m2",
+   "note": "",
+   "components": [
+    {
+     "name": "Kusen aluminium powder coat hitam",
+     "sat": "m1",
+     "koef": 3.5,
+     "price": 165000,
+     "src": "asumsi"
+    },
+    {
+     "name": "Kaca clear 6 mm",
+     "sat": "m2",
+     "koef": 1,
+     "price": 350000,
+     "src": "asumsi"
+    },
+    {
+     "name": "Sealant & aksesori",
+     "sat": "ls",
+     "koef": 1,
+     "price": 50000,
+     "src": "asumsi"
+    },
+    {
+     "name": "Upah pasang",
+     "sat": "m2",
+     "koef": 1,
+     "price": 125000,
+     "src": "asumsi"
+    }
+   ]
+  },
+  {
+   "code": "X-07",
+   "name": "Kisi-kisi / louvre aluminium hitam (Ruang AC)",
+   "sat": "m2",
+   "note": "",
+   "components": [
+    {
+     "name": "Blade louvre aluminium powder coat",
+     "sat": "m2",
+     "koef": 1,
+     "price": 750000,
+     "src": "asumsi"
+    },
+    {
+     "name": "Rangka aluminium",
+     "sat": "m1",
+     "koef": 2,
+     "price": 165000,
+     "src": "asumsi"
+    },
+    {
+     "name": "Upah pasang",
+     "sat": "m2",
+     "koef": 1,
+     "price": 150000,
+     "src": "asumsi"
+    }
+   ]
+  },
+  {
+   "code": "X-08",
+   "name": "Pasangan roster bata merah press ekspos susun berongga + coating",
+   "sat": "m2",
+   "note": "Roster tangga, dinding roster annex, roster selasar & roster deck timur",
+   "components": [
+    {
+     "name": "Bata merah press ekspos",
+     "sat": "bh",
+     "koef": 35,
+     "price": 1500,
+     "src": "asumsi"
+    },
+    {
+     "name": "Mortar instan perekat",
+     "sat": "kg",
+     "koef": 12,
+     "price": 2200,
+     "src": "asumsi"
+    },
+    {
+     "name": "Besi angkur / tulangan horisontal d6 tiap 4 lapis",
+     "sat": "kg",
+     "koef": 2.5,
+     "price": 15000,
+     "src": "asumsi"
+    },
+    {
+     "name": "Coating clear water repellent",
+     "sat": "m2",
+     "koef": 1,
+     "price": 35000,
+     "src": "asumsi"
+    },
+    {
+     "name": "Upah tukang + kenek (pasang presisi)",
+     "sat": "m2",
+     "koef": 1,
+     "price": 140000,
+     "src": "asumsi"
+    }
+   ]
+  },
+  {
+   "code": "X-09",
+   "name": "Kisi kayu WPC 50x100 jarak 100 mm + rangka hollow galvanis (kanopi)",
+   "sat": "m2",
+   "note": "",
+   "components": [
+    {
+     "name": "Profil WPC 50x100",
+     "sat": "m1",
+     "koef": 6.7,
+     "price": 95000,
+     "src": "asumsi"
+    },
+    {
+     "name": "Rangka hollow galvanis 40x40",
+     "sat": "m1",
+     "koef": 2,
+     "price": 60000,
+     "src": "asumsi"
+    },
+    {
+     "name": "Upah pasang",
+     "sat": "m2",
+     "koef": 1,
+     "price": 125000,
+     "src": "asumsi"
+    }
+   ]
+  },
+  {
+   "code": "X-10",
+   "name": "Kisi kayu WPC 50x100 di atas skylight (incl. bracket)",
+   "sat": "m1",
+   "note": "",
+   "components": [
+    {
+     "name": "Profil WPC 50x100",
+     "sat": "m1",
+     "koef": 1,
+     "price": 95000,
+     "src": "asumsi"
+    },
+    {
+     "name": "Bracket + baut",
+     "sat": "m1",
+     "koef": 1,
+     "price": 25000,
+     "src": "asumsi"
+    },
+    {
+     "name": "Upah pasang",
+     "sat": "m1",
+     "koef": 1,
+     "price": 20000,
+     "src": "asumsi"
+    }
+   ]
+  },
+  {
+   "code": "X-11",
+   "name": "Lisplang / flashing plat galvalum 0,4 mm finish powder coat hitam (bentangan 30 cm)",
+   "sat": "m1",
+   "note": "",
+   "components": [
+    {
+     "name": "Plat galvalum 0,4 mm powder coat",
+     "sat": "m2",
+     "koef": 0.35,
+     "price": 120000,
+     "src": "asumsi"
+    },
+    {
+     "name": "Rangka penggantung",
+     "sat": "m1",
+     "koef": 1,
+     "price": 35000,
+     "src": "asumsi"
+    },
+    {
+     "name": "Sealant & sekrup",
+     "sat": "m1",
+     "koef": 1,
+     "price": 10000,
+     "src": "asumsi"
+    },
+    {
+     "name": "Upah",
+     "sat": "m1",
+     "koef": 1,
+     "price": 45000,
+     "src": "asumsi"
+    }
+   ]
+  },
+  {
+   "code": "X-12",
+   "name": "Jembatan / selasar grating baja galvanis + rangka hollow, finish cat hitam",
+   "sat": "m2",
+   "note": "Tidak termasuk struktur utama (kolom/balok) - struktur belum dihitung",
+   "components": [
+    {
+     "name": "Steel grating galvanis 25x5",
+     "sat": "m2",
+     "koef": 1,
+     "price": 1250000,
+     "src": "asumsi"
+    },
+    {
+     "name": "Rangka hollow galvanis 50x100",
+     "sat": "m1",
+     "koef": 3,
+     "price": 145000,
+     "src": "asumsi"
+    },
+    {
+     "name": "Cat besi hitam",
+     "sat": "m2",
+     "koef": 1,
+     "price": 45000,
+     "src": "asumsi"
+    },
+    {
+     "name": "Upah fabrikasi & pasang",
+     "sat": "m2",
+     "koef": 1,
+     "price": 250000,
+     "src": "asumsi"
+    }
+   ]
+  },
+  {
+   "code": "X-13",
+   "name": "Railing / handrail besi hollow 40x40 + pipa handrail, finish cat hitam (h = 1,0 m)",
+   "sat": "m1",
+   "note": "",
+   "components": [
+    {
+     "name": "Besi hollow 40x40 (tiang + rel)",
+     "sat": "m1",
+     "koef": 4,
+     "price": 60000,
+     "src": "asumsi"
+    },
+    {
+     "name": "Pipa handrail",
+     "sat": "m1",
+     "koef": 1,
+     "price": 85000,
+     "src": "asumsi"
+    },
+    {
+     "name": "Cat besi",
+     "sat": "m1",
+     "koef": 1,
+     "price": 35000,
+     "src": "asumsi"
+    },
+    {
+     "name": "Upah fabrikasi & pasang",
+     "sat": "m1",
+     "koef": 1,
+     "price": 150000,
+     "src": "asumsi"
+    }
+   ]
+  },
+  {
+   "code": "X-14",
+   "name": "Bangku masif (bata ringan + plester aci) dudukan decking kayu, lebar 50 cm tinggi 45 cm",
+   "sat": "m1",
+   "note": "",
+   "components": [
+    {
+     "name": "Pasangan bata ringan (PW1)",
+     "sat": "m2",
+     "koef": 0.9,
+     "price": "MASTER:PW1",
+     "src": "MASTER PW1"
+    },
+    {
+     "name": "Plester (PD2)",
+     "sat": "m2",
+     "koef": 1.4,
+     "price": "MASTER:PD2",
+     "src": "MASTER PD2"
+    },
+    {
+     "name": "Aci (AD1)",
+     "sat": "m2",
+     "koef": 1.4,
+     "price": "MASTER:AD1",
+     "src": "MASTER AD1"
+    },
+    {
+     "name": "Dudukan decking kayu (F66)",
+     "sat": "m2",
+     "koef": 0.5,
+     "price": "MASTER:F66",
+     "src": "MASTER F66"
+    },
+    {
+     "name": "Upah tambahan bentuk",
+     "sat": "m1",
+     "koef": 1,
+     "price": 50000,
+     "src": "asumsi"
+    }
+   ]
+  },
+  {
+   "code": "X-15",
+   "name": "Olah lahan area farm: urug tanah subur 15 cm + pupuk kandang + bedengan",
+   "sat": "m2",
+   "note": "Tidak termasuk bibit tanaman produksi",
+   "components": [
+    {
+     "name": "Urukan tanah subur (AHS)",
+     "sat": "m3",
+     "koef": 0.15,
+     "price": "AHS:1 m3 Urukan tanah subur tanpa pemadatan secara manual",
+     "src": "AHS"
+    },
+    {
+     "name": "Pupuk kandang / kompos",
+     "sat": "kg",
+     "koef": 5,
+     "price": 2500,
+     "src": "asumsi"
+    },
+    {
+     "name": "Upah olah tanah & bedengan",
+     "sat": "m2",
+     "koef": 1,
+     "price": 40000,
+     "src": "asumsi"
+    }
+   ]
+  },
+  {
+   "code": "X-K01",
+   "name": "Persiapan & pengukuran kolam",
+   "sat": "paket",
+   "note": "",
+   "components": [
+    {
+     "name": "Persiapan & pengukuran kolam",
+     "sat": "paket",
+     "koef": 1,
+     "price": 500000,
+     "src": "ref. RAB RBL House"
+    }
+   ]
+  },
+  {
+   "code": "X-K02",
+   "name": "Galian tanah kolam",
+   "sat": "m3",
+   "note": "",
+   "components": [
+    {
+     "name": "Galian tanah kolam",
+     "sat": "m3",
+     "koef": 1,
+     "price": 150000,
+     "src": "ref. RAB RBL House"
+    }
+   ]
+  },
+  {
+   "code": "X-K03",
+   "name": "Urugan kembali & pemadatan sisi kolam",
+   "sat": "m3",
+   "note": "",
+   "components": [
+    {
+     "name": "Urugan kembali & pemadatan sisi kolam",
+     "sat": "m3",
+     "koef": 1,
+     "price": 95000,
+     "src": "ref. RAB RBL House"
+    }
+   ]
+  },
+  {
+   "code": "X-K04",
+   "name": "Pembuangan tanah sisa",
+   "sat": "m3",
+   "note": "",
+   "components": [
+    {
+     "name": "Pembuangan tanah sisa",
+     "sat": "m3",
+     "koef": 1,
+     "price": 100000,
+     "src": "ref. RAB RBL House"
+    }
+   ]
+  },
+  {
+   "code": "X-K05",
+   "name": "Urugan pasir dasar kolam t=5 cm",
+   "sat": "m3",
+   "note": "",
+   "components": [
+    {
+     "name": "Urugan pasir dasar kolam t=5 cm",
+     "sat": "m3",
+     "koef": 1,
+     "price": 380000,
+     "src": "ref. RAB RBL House"
+    }
+   ]
+  },
+  {
+   "code": "X-K06",
+   "name": "Lantai kerja kolam t=5 cm",
+   "sat": "m3",
+   "note": "",
+   "components": [
+    {
+     "name": "Lantai kerja kolam t=5 cm",
+     "sat": "m3",
+     "koef": 1,
+     "price": 1000000,
+     "src": "ref. RAB RBL House"
+    }
+   ]
+  },
+  {
+   "code": "X-K07",
+   "name": "Beton pelat & dinding kolam t=15 cm",
+   "sat": "m3",
+   "note": "",
+   "components": [
+    {
+     "name": "Beton pelat & dinding kolam t=15 cm",
+     "sat": "m3",
+     "koef": 1,
+     "price": 1550000,
+     "src": "ref. RAB RBL House"
+    }
+   ]
+  },
+  {
+   "code": "X-K08",
+   "name": "Pembesian kolam",
+   "sat": "kg",
+   "note": "",
+   "components": [
+    {
+     "name": "Pembesian kolam",
+     "sat": "kg",
+     "koef": 1,
+     "price": 16500,
+     "src": "ref. RAB RBL House"
+    }
+   ]
+  },
+  {
+   "code": "X-K09",
+   "name": "Bekisting kolam",
+   "sat": "m2",
+   "note": "",
+   "components": [
+    {
+     "name": "Bekisting kolam",
+     "sat": "m2",
+     "koef": 1,
+     "price": 180000,
+     "src": "ref. RAB RBL House"
+    }
+   ]
+  },
+  {
+   "code": "X-K10",
+   "name": "Waterstop sambungan beton",
+   "sat": "m1",
+   "note": "",
+   "components": [
+    {
+     "name": "Waterstop sambungan beton",
+     "sat": "m1",
+     "koef": 1,
+     "price": 45000,
+     "src": "ref. RAB RBL House"
+    }
+   ]
+  },
+  {
+   "code": "X-K11",
+   "name": "Perataan lantai & dinding kolam",
+   "sat": "m2",
+   "note": "",
+   "components": [
+    {
+     "name": "Perataan lantai & dinding kolam",
+     "sat": "m2",
+     "koef": 1,
+     "price": 80000,
+     "src": "ref. RAB RBL House"
+    }
+   ]
+  },
+  {
+   "code": "X-K12",
+   "name": "Sudut lengkung (tali air) kolam",
+   "sat": "m1",
+   "note": "",
+   "components": [
+    {
+     "name": "Sudut lengkung (tali air) kolam",
+     "sat": "m1",
+     "koef": 1,
+     "price": 25000,
+     "src": "ref. RAB RBL House"
+    }
+   ]
+  },
+  {
+   "code": "X-K13",
+   "name": "Finishing bibir kolam",
+   "sat": "m2",
+   "note": "",
+   "components": [
+    {
+     "name": "Finishing bibir kolam",
+     "sat": "m2",
+     "koef": 1,
+     "price": 95000,
+     "src": "ref. RAB RBL House"
+    }
+   ]
+  },
+  {
+   "code": "X-K14",
+   "name": "Waterproofing kolam 2 lapis",
+   "sat": "m2",
+   "note": "",
+   "components": [
+    {
+     "name": "Waterproofing kolam 2 lapis",
+     "sat": "m2",
+     "koef": 1,
+     "price": 100000,
+     "src": "ref. RAB RBL House"
+    }
+   ]
+  },
+  {
+   "code": "X-K15",
+   "name": "Bak filter modular + media filter",
+   "sat": "set",
+   "note": "",
+   "components": [
+    {
+     "name": "Bak filter modular + media filter",
+     "sat": "set",
+     "koef": 1,
+     "price": 3000000,
+     "src": "ref. RAB RBL House"
+    }
+   ]
+  },
+  {
+   "code": "X-K16",
+   "name": "Pompa sirkulasi kolam",
+   "sat": "unit",
+   "note": "",
+   "components": [
+    {
+     "name": "Pompa sirkulasi kolam",
+     "sat": "unit",
+     "koef": 1,
+     "price": 850000,
+     "src": "ref. RAB RBL House"
+    }
+   ]
+  },
+  {
+   "code": "X-K17",
+   "name": "Bottom drain bersaringan",
+   "sat": "titik",
+   "note": "",
+   "components": [
+    {
+     "name": "Bottom drain bersaringan",
+     "sat": "titik",
+     "koef": 1,
+     "price": 250000,
+     "src": "ref. RAB RBL House"
+    }
+   ]
+  },
+  {
+   "code": "X-K18",
+   "name": "Instalasi pipa & valve kolam",
+   "sat": "paket",
+   "note": "",
+   "components": [
+    {
+     "name": "Instalasi pipa & valve kolam",
+     "sat": "paket",
+     "koef": 1,
+     "price": 1800000,
+     "src": "ref. RAB RBL House"
+    }
+   ]
+  },
+  {
+   "code": "X-K19",
+   "name": "Instalasi listrik kolam (ELCB, kabel, stopkontak)",
+   "sat": "set",
+   "note": "",
+   "components": [
+    {
+     "name": "Instalasi listrik kolam (ELCB, kabel, stopkontak)",
+     "sat": "set",
+     "koef": 1,
+     "price": 850000,
+     "src": "ref. RAB RBL House"
+    }
+   ]
+  },
+  {
+   "code": "X-K20",
+   "name": "Pengujian kebocoran & sistem",
+   "sat": "paket",
+   "note": "",
+   "components": [
+    {
+     "name": "Pengujian kebocoran & sistem",
+     "sat": "paket",
+     "koef": 1,
+     "price": 500000,
+     "src": "ref. RAB RBL House"
+    }
+   ]
+  }
+ ],
+ "walls": [
+  {
+   "room": "Living & Pantry",
+   "lantai": "Lantai 1",
+   "interior": true,
+   "parts": {
+    "ekspos": 44.55,
+    "putih": 12.1
+   }
+  },
+  {
+   "room": "Bedroom 1",
+   "lantai": "Lantai 1",
+   "interior": true,
+   "parts": {
+    "putih": 45.15
+   }
+  },
+  {
+   "room": "Guest Bedroom",
+   "lantai": "Lantai 1",
+   "interior": true,
+   "parts": {
+    "putih": 52.25,
+    "ekspos": 3.14
+   }
+  },
+  {
+   "room": "Selasar Entrance",
+   "lantai": "Lantai 1",
+   "interior": true,
+   "parts": {
+    "ekspos": 20.8
+   }
+  },
+  {
+   "room": "Annex A - WC",
+   "lantai": "Lantai 1",
+   "interior": true,
+   "parts": {
+    "ekspos": 14.35,
+    "putih": 8.85
+   }
+  },
+  {
+   "room": "Annex B - KM / Shower Outdoor",
+   "lantai": "Lantai 1",
+   "interior": true,
+   "parts": {
+    "putih": 8.38
+   }
+  },
+  {
+   "room": "Storage Mushroom",
+   "lantai": "Lantai 1",
+   "interior": true,
+   "parts": {
+    "putih": 31.47
+   }
+  },
+  {
+   "room": "Area Menara Tangga Roster",
+   "lantai": "Lantai 1",
+   "interior": true,
+   "parts": {
+    "ekspos": 10.84,
+    "putih": 15.36
+   }
+  },
+  {
+   "room": "Bedroom 2 (Selatan)",
+   "lantai": "Lantai 2",
+   "interior": true,
+   "parts": {
+    "ekspos": 47.62,
+    "putih": 21.2
+   }
+  },
+  {
+   "room": "Bedroom 3 (Tengah)",
+   "lantai": "Lantai 2",
+   "interior": true,
+   "parts": {
+    "ekspos": 21.77,
+    "putih": 24.06
+   }
+  },
+  {
+   "room": "Hall Tangga",
+   "lantai": "Lantai 2",
+   "interior": true,
+   "parts": {
+    "ekspos": 32.0
+   }
+  },
+  {
+   "room": "Master Bedroom",
+   "lantai": "Lantai 2",
+   "interior": true,
+   "parts": {
+    "ekspos": 10.01,
+    "putih": 34.18
+   }
+  },
+  {
+   "room": "Ruang AC / Void",
+   "lantai": "Lantai 2",
+   "interior": true,
+   "parts": {
+    "ekspos": 7.57,
+    "putih": 10.77
+   }
+  },
+  {
+   "room": "Massa Utama Lt.1 (Living & Bedroom 1)",
+   "lantai": "Lantai 1",
+   "interior": false,
+   "parts": {
+    "ekspos": 64.67
+   }
+  },
+  {
+   "room": "Massa Lt.2 & Gevel",
+   "lantai": "Lantai 2",
+   "interior": false,
+   "parts": {
+    "ekspos": 84.01,
+    "putih": 24.41
+   }
+  },
+  {
+   "room": "Guest Bedroom & Entrance (sisi carport)",
+   "lantai": "Lantai 1",
+   "interior": false,
+   "parts": {
+    "pola": 19.01,
+    "ekspos": 28.63
+   }
+  },
+  {
+   "room": "Annex (sisi selasar / deck)",
+   "lantai": "Lantai 1",
+   "interior": false,
+   "parts": {
+    "terracotta": 19.31
+   }
+  },
+  {
+   "room": "Dinding atas / parapet",
+   "lantai": "Lantai 2",
+   "interior": false,
+   "parts": {
+    "ekspos": 27.64,
+    "putih": 26.23
+   }
+  },
+  {
+   "room": "Dinding kolam timur",
+   "lantai": "Lantai 1",
+   "interior": false,
+   "parts": {
+    "ekspos": 4.45
+   }
+  },
+  {
+   "room": "Storage Mushroom",
+   "lantai": "Lantai 1",
+   "interior": false,
+   "parts": {
+    "pola": 17.5,
+    "ekspos": 16.28
+   }
+  }
+ ],
+ "openings": [
+  {
+   "uraian": "Deck Barat > Bedroom 1 / Pintu swing aluminium hitam + daun HMR lapis HPL, 1 daun",
+   "lantai": "Lantai 1",
+   "w": 1.2,
+   "h": 2.4,
+   "type": "swing",
+   "panels": 1
+  },
+  {
+   "uraian": "Deck Barat > Bedroom 1 (pintu ke-2) / Pintu swing aluminium hitam + HMR lapis HPL",
+   "lantai": "Lantai 1",
+   "w": 0.91,
+   "h": 2.4,
+   "type": "swing",
+   "panels": 1
+  },
+  {
+   "uraian": "Living > Bedroom 1 / Pintu swing aluminium hitam + HMR lapis HPL",
+   "lantai": "Lantai 1",
+   "w": 0.91,
+   "h": 2.4,
+   "type": "swing",
+   "panels": 1
+  },
+  {
+   "uraian": "Living > Deck Barat (dekat tangga) / Pintu swing aluminium hitam + HMR lapis HPL",
+   "lantai": "Lantai 1",
+   "w": 1.0,
+   "h": 2.4,
+   "type": "swing",
+   "panels": 1
+  },
+  {
+   "uraian": "Carport > Guest Bedroom / Pintu swing aluminium hitam + HMR lapis HPL",
+   "lantai": "Lantai 1",
+   "w": 1.18,
+   "h": 2.4,
+   "type": "swing",
+   "panels": 1
+  },
+  {
+   "uraian": "Selasar Entrance > Deck Barat / Pintu swing aluminium hitam + HMR lapis HPL",
+   "lantai": "Lantai 1",
+   "w": 0.71,
+   "h": 2.4,
+   "type": "swing",
+   "panels": 1
+  },
+  {
+   "uraian": "Selasar > Annex A (WC) / Pintu swing aluminium hitam + HMR lapis HPL",
+   "lantai": "Lantai 1",
+   "w": 0.71,
+   "h": 2.4,
+   "type": "swing",
+   "panels": 1
+  },
+  {
+   "uraian": "Selasar > Annex B (KM Outdoor) / Pintu swing aluminium hitam + HMR lapis HPL",
+   "lantai": "Lantai 1",
+   "w": 0.84,
+   "h": 2.4,
+   "type": "swing",
+   "panels": 1
+  },
+  {
+   "uraian": "Living > Deck Barat / Pintu kaca sliding 3 panel, rangka aluminium hitam, tempered 8 mm",
+   "lantai": "Lantai 1",
+   "w": 3.2,
+   "h": 2.44,
+   "type": "slide",
+   "panels": 3
+  },
+  {
+   "uraian": "Living > Deck Timur / Pintu kaca sliding 4 panel, rangka aluminium hitam, tempered 8 mm",
+   "lantai": "Lantai 1",
+   "w": 4.5,
+   "h": 2.44,
+   "type": "slide",
+   "panels": 4
+  },
+  {
+   "uraian": "Area Tangga > Deck Timur / Pintu kaca sliding 2 panel, rangka aluminium hitam, tempered 8 mm",
+   "lantai": "Lantai 1",
+   "w": 2.05,
+   "h": 2.44,
+   "type": "slide",
+   "panels": 2
+  },
+  {
+   "uraian": "Guest Bedroom > Timur / Jendela kaca mati horizontal, rangka aluminium hitam",
+   "lantai": "Lantai 1",
+   "w": 2.66,
+   "h": 0.4,
+   "type": "fix",
+   "panels": 1
+  },
+  {
+   "uraian": "Hall Lt.2 > Bedroom 2 / Pintu swing aluminium hitam + HMR lapis HPL",
+   "lantai": "Lantai 2",
+   "w": 0.91,
+   "h": 2.4,
+   "type": "swing",
+   "panels": 1
+  },
+  {
+   "uraian": "Hall Lt.2 > Bedroom 3 / Pintu swing aluminium hitam + HMR lapis HPL",
+   "lantai": "Lantai 2",
+   "w": 0.91,
+   "h": 2.4,
+   "type": "swing",
+   "panels": 1
+  },
+  {
+   "uraian": "Hall Lt.2 > Master Bedroom / Pintu swing aluminium hitam + HMR lapis HPL",
+   "lantai": "Lantai 2",
+   "w": 0.91,
+   "h": 2.4,
+   "type": "swing",
+   "panels": 1
+  },
+  {
+   "uraian": "Master Bedroom > Ruang AC / Pintu akses aluminium hitam + HMR lapis HPL",
+   "lantai": "Lantai 2",
+   "w": 0.6,
+   "h": 2.4,
+   "type": "swing",
+   "panels": 1
+  },
+  {
+   "uraian": "Bedroom 2 > Barat / Pintu-jendela kaca 2 panel, rangka aluminium hitam, tempered 8 mm",
+   "lantai": "Lantai 2",
+   "w": 2.28,
+   "h": 2.4,
+   "type": "slide",
+   "panels": 2
+  },
+  {
+   "uraian": "Bedroom 3 > Barat / Pintu-jendela kaca 4 panel, rangka aluminium hitam, tempered 8 mm",
+   "lantai": "Lantai 2",
+   "w": 4.61,
+   "h": 2.4,
+   "type": "slide",
+   "panels": 4
+  },
+  {
+   "uraian": "Master Bedroom > Utara / Pintu-jendela kaca 3 panel, rangka aluminium hitam, tempered 8 mm",
+   "lantai": "Lantai 2",
+   "w": 2.95,
+   "h": 2.44,
+   "type": "slide",
+   "panels": 3
+  },
+  {
+   "uraian": "Bedroom 2 > Timur / Jendela kaca mati vertikal, rangka aluminium hitam",
+   "lantai": "Lantai 2",
+   "w": 0.5,
+   "h": 1.3,
+   "type": "fix",
+   "panels": 1
+  },
+  {
+   "uraian": "Hall Lt.2 > Barat / Jendela kaca mati vertikal, rangka aluminium hitam",
+   "lantai": "Lantai 2",
+   "w": 0.4,
+   "h": 1.3,
+   "type": "fix",
+   "panels": 1
+  },
+  {
+   "uraian": "Bedroom 3 > Timur / Jendela clerestory kaca mati 2 bh (171x28), rangka aluminium hitam",
+   "lantai": "Lantai 2",
+   "w": 3.42,
+   "h": 0.28,
+   "type": "fix",
+   "panels": 1
+  },
+  {
+   "uraian": "Ruang AC > Utara / Kisi-kisi louvre aluminium hitam",
+   "lantai": "Lantai 2",
+   "w": 1.15,
+   "h": 2.4,
+   "type": "louvre",
+   "panels": 1
+  },
+  {
+   "uraian": "Storage Mushroom > Depan / Pintu besi plat 2 mm rangkap rangka baja, finish cat",
+   "lantai": "Lantai 1",
+   "w": 2.7,
+   "h": 2.4,
+   "type": "ahs_m2",
+   "ahs": "Pembuatan dan pemasangan 1 m2 pintu besi pelat baja tebal 2 mm rangkap, rangka baja siku1,967,200.00"
+  }
+ ],
+ "bab": [
+  {
+   "no": "I",
+   "title": "Pekerjaan Persiapan",
+   "rows": [
+    {
+     "type": "master",
+     "uraian": "Pembersihan lokasi selama & setelah pekerjaan",
+     "ruang": "Area merah (rumah, farm, carport)",
+     "lantai": "All Floor",
+     "code": "PP3",
+     "sat": "bln",
+     "vol": 6
+    },
+    {
+     "type": "ahs",
+     "uraian": "Pembersihan & pengupasan permukaan lahan",
+     "ruang": "Area merah ± 625 m2",
+     "lantai": "All Floor",
+     "ahs": "(c) 1 m2 Pembersihan dan Pengupasan Permukaan Tanah (Striping ) s.d. Tanaman Ø 2cm",
+     "sat": "m2",
+     "vol": 625
+    },
+    {
+     "type": "ahs",
+     "uraian": "Pengukuran & pemasangan bouwplank",
+     "ruang": "Keliling massa rumah",
+     "lantai": "All Floor",
+     "ahs": "Pasangan 1 m' bouwplank",
+     "sat": "m1",
+     "vol": 73
+    },
+    {
+     "type": "master",
+     "uraian": "Listrik kerja",
+     "ruang": "Seluruh area",
+     "lantai": "All Floor",
+     "code": "PP1",
+     "sat": "bln",
+     "vol": 6
+    },
+    {
+     "type": "ahs",
+     "uraian": "Pagar pengaman sementara (seng)",
+     "ruang": "Sisi jalan area rumah",
+     "lantai": "All Floor",
+     "ahs": "Pembuatan 1 m’ pagar sementara seng gelombang rangka baja L.40.40.4 tinggi pagar 1.8 meter",
+     "sat": "m1",
+     "vol": 24.2
+    }
+   ]
+  },
+  {
+   "no": "II",
+   "title": "Pekerjaan Tanah, Galian & Urugan",
+   "rows": [
+    {
+     "type": "ahs",
+     "uraian": "Urugan pasir bawah lantai t = 5 cm",
+     "ruang": "Living, Bedroom 1, Guest, Selasar, Annex, Storage, Teras utara (±128.50 m2)",
+     "lantai": "Lantai 1",
+     "ahs": "1 m3 urukan pasir uruk untuk volume s.d 200 m3 tanpa pemadatan secara manual",
+     "sat": "m3",
+     "vol": 6.43
+    },
+    {
+     "type": "ahs",
+     "uraian": "Pemadatan urugan pasir",
+     "ruang": "Idem",
+     "lantai": "Lantai 1",
+     "ahs": "(a) 1 m3 Pemadatan pasir setebal 15 cm menggunakan mesin Stamper Kodok secara semi mekanis",
+     "sat": "m3",
+     "vol": 6.43
+    },
+    {
+     "type": "master",
+     "uraian": "Lantai kerja bawah lantai (plur)",
+     "ruang": "Idem",
+     "lantai": "Lantai 1",
+     "code": "F25",
+     "sat": "m2",
+     "vol": 128.5
+    }
+   ]
+  },
+  {
+   "no": "III",
+   "title": "Pekerjaan Struktur",
+   "rows": [
+    {
+     "type": "note",
+     "uraian": "Tidak dihitung - perhitungan & model 3D struktur (pondasi, sloof, kolom, balok, pelat, tangga beton, dak) belum tersedia",
+     "spec": "Menyusul setelah desain struktur"
+    }
+   ]
+  },
+  {
+   "no": "IV",
+   "title": "Pekerjaan Dinding, Plester & Acian",
+   "rows": [
+    {
+     "type": "sub",
+     "title": "Pasangan dinding"
+    },
+    {
+     "type": "master",
+     "uraian": "Pasangan dinding bata ringan",
+     "ruang": "Massa utama (Living & Bedroom 1)",
+     "lantai": "Lantai 1",
+     "code": "PW1",
+     "sat": "M2",
+     "vol": 81.99
+    },
+    {
+     "type": "master",
+     "uraian": "Pasangan dinding bata ringan",
+     "ruang": "Massa Guest Bedroom & Entrance",
+     "lantai": "Lantai 1",
+     "code": "PW1",
+     "sat": "M2",
+     "vol": 56.11
+    },
+    {
+     "type": "master",
+     "uraian": "Pasangan dinding bata ringan",
+     "ruang": "Annex (WC & KM Outdoor)",
+     "lantai": "Lantai 1",
+     "code": "PW1",
+     "sat": "M2",
+     "vol": 23.2
+    },
+    {
+     "type": "master",
+     "uraian": "Pasangan dinding bata ringan",
+     "ruang": "Storage Mushroom",
+     "lantai": "Lantai 1",
+     "code": "PW1",
+     "sat": "M2",
+     "vol": 30.75
+    },
+    {
+     "type": "master",
+     "uraian": "Pasangan dinding bata ringan",
+     "ruang": "Bedroom 2, Bedroom 3, Hall, Master Bedroom, R. AC (termasuk gevel)",
+     "lantai": "Lantai 2",
+     "code": "PW1",
+     "sat": "M2",
+     "vol": 146.86
+    },
+    {
+     "type": "master",
+     "uraian": "Pasangan dinding bata ringan",
+     "ruang": "Dinding atas / parapet (atas annex, teras utara, dinding kolam, sisi atap)",
+     "lantai": "Lantai 2",
+     "code": "PW1",
+     "sat": "M2",
+     "vol": 28.7
+    },
+    {
+     "type": "sub",
+     "title": "Pasangan roster"
+    },
+    {
+     "type": "analisa",
+     "uraian": "Pasangan roster bata",
+     "ruang": "Menara tangga roster (sisi selatan & barat)",
+     "lantai": "Lantai 1",
+     "code": "X-08",
+     "sat": "m2",
+     "vol": 27.1
+    },
+    {
+     "type": "analisa",
+     "uraian": "Pasangan roster bata",
+     "ruang": "Dinding roster barat Annex (t = 4,2 m)",
+     "lantai": "Lantai 1",
+     "code": "X-08",
+     "sat": "m2",
+     "vol": 21.4
+    },
+    {
+     "type": "analisa",
+     "uraian": "Pasangan roster bata",
+     "ruang": "Roster selasar dekat Annex",
+     "lantai": "Lantai 1",
+     "code": "X-08",
+     "sat": "m2",
+     "vol": 4.3
+    },
+    {
+     "type": "analisa",
+     "uraian": "Pasangan roster bata",
+     "ruang": "Roster sisi utara Annex",
+     "lantai": "Lantai 1",
+     "code": "X-08",
+     "sat": "m2",
+     "vol": 5.3
+    },
+    {
+     "type": "analisa",
+     "uraian": "Pasangan roster bata",
+     "ruang": "Roster deck timur / kolam",
+     "lantai": "Lantai 1",
+     "code": "X-08",
+     "sat": "m2",
+     "vol": 12.2
+    },
+    {
+     "type": "wall_plaster_aci"
+    }
+   ]
+  },
+  {
+   "no": "V",
+   "title": "Pekerjaan Kusen, Pintu & Jendela",
+   "rows": [
+    {
+     "type": "openings"
+    }
+   ]
+  },
+  {
+   "no": "VI",
+   "title": "Pekerjaan Atap & Kanopi",
+   "rows": [
+    {
+     "type": "master",
+     "uraian": "Rangka atap utama baja ringan",
+     "ruang": "Atap pelana massa utama (kemiringan 30-40°)",
+     "lantai": "Atap",
+     "code": "RF1",
+     "sat": "M2",
+     "vol": 156.17
+    },
+    {
+     "type": "master",
+     "uraian": "Penutup atap utama bitumen shingle + underlayment multipleks",
+     "ruang": "Atap pelana massa utama",
+     "lantai": "Atap",
+     "code": "R32",
+     "sat": "M2",
+     "vol": 156.17
+    },
+    {
+     "type": "master",
+     "uraian": "Insulasi atap",
+     "ruang": "Atap pelana massa utama",
+     "lantai": "Atap",
+     "code": "R14",
+     "sat": "M2",
+     "vol": 156.17
+    },
+    {
+     "type": "master",
+     "uraian": "Penutup dinding / fasad shingle bitumen + underlayment multipleks (incl. rangka)",
+     "ruang": "Fasad timur & sisi gevel berlapis shingle",
+     "lantai": "Lantai 2",
+     "code": "R32",
+     "sat": "M2",
+     "vol": 57.4
+    },
+    {
+     "type": "analisa",
+     "uraian": "Lisplang & flashing atap",
+     "ruang": "Keliling atap (lisplang tritis & sisi gevel)",
+     "lantai": "Atap",
+     "code": "X-11",
+     "sat": "m1",
+     "vol": 55.4
+    },
+    {
+     "type": "master",
+     "uraian": "Talang atap",
+     "ruang": "Tritisan barat & timur",
+     "lantai": "Atap",
+     "code": "R10",
+     "sat": "m1",
+     "vol": 35.4
+    },
+    {
+     "type": "master",
+     "uraian": "Rangka skylight",
+     "ruang": "Skylight bubungan (pemisah dua massa atap)",
+     "lantai": "Atap",
+     "code": "RF2",
+     "sat": "M2",
+     "vol": 19.48
+    },
+    {
+     "type": "master",
+     "uraian": "Penutup skylight kaca",
+     "ruang": "Skylight bubungan",
+     "lantai": "Atap",
+     "code": "R27",
+     "sat": "M2",
+     "vol": 19.48
+    },
+    {
+     "type": "analisa",
+     "uraian": "Kisi kayu di atas skylight",
+     "ruang": "Skylight bubungan (8 batang x ±7 m)",
+     "lantai": "Atap",
+     "code": "X-10",
+     "sat": "m1",
+     "vol": 56.0
+    },
+    {
+     "type": "master",
+     "uraian": "Rangka kanopi carport (hollow)",
+     "ruang": "Kanopi carport / jalur masuk 16,9 x 3,5 m",
+     "lantai": "Lantai 1",
+     "code": "RF2",
+     "sat": "M2",
+     "vol": 59.2
+    },
+    {
+     "type": "master",
+     "uraian": "Penutup kanopi carport - spandek",
+     "ruang": "Kanopi carport (bidang metal)",
+     "lantai": "Lantai 1",
+     "code": "R20",
+     "sat": "M2",
+     "vol": 22.1
+    },
+    {
+     "type": "master",
+     "uraian": "Penutup kanopi carport - UPVC putih",
+     "ruang": "Kanopi carport (bidang putih)",
+     "lantai": "Lantai 1",
+     "code": "R19",
+     "sat": "M2",
+     "vol": 29.6
+    },
+    {
+     "type": "analisa",
+     "uraian": "Kisi kayu kanopi carport",
+     "ruang": "Kanopi carport (bidang kisi)",
+     "lantai": "Lantai 1",
+     "code": "X-09",
+     "sat": "m2",
+     "vol": 7.5
+    },
+    {
+     "type": "master",
+     "uraian": "Rangka kanopi kaca",
+     "ruang": "Kanopi kaca deck timur, teras utara & sisi Bedroom 1 (3 bh)",
+     "lantai": "Lantai 1",
+     "code": "RF2",
+     "sat": "M2",
+     "vol": 16.4
+    },
+    {
+     "type": "master",
+     "uraian": "Penutup kanopi kaca",
+     "ruang": "Idem",
+     "lantai": "Lantai 1",
+     "code": "R27",
+     "sat": "M2",
+     "vol": 16.4
+    },
+    {
+     "type": "master",
+     "uraian": "Rangka atap Storage Mushroom (baja ringan)",
+     "ruang": "Storage Mushroom",
+     "lantai": "Lantai 1",
+     "code": "RF4",
+     "sat": "M2",
+     "vol": 13.57
+    },
+    {
+     "type": "master",
+     "uraian": "Penutup atap Storage Mushroom (spandek)",
+     "ruang": "Storage Mushroom",
+     "lantai": "Lantai 1",
+     "code": "R20",
+     "sat": "M2",
+     "vol": 13.57
+    }
+   ]
+  },
+  {
+   "no": "VII",
+   "title": "Pekerjaan Plumbing & Sanitari",
+   "rows": [
+    {
+     "type": "sub",
+     "title": "PLUMBING (estimasi)"
+    },
+    {
+     "type": "master",
+     "uraian": "Instalasi air bersih pipa 3/4\"",
+     "ruang": "Distribusi utama",
+     "lantai": "All Floor",
+     "code": "PL2",
+     "sat": "m1",
+     "vol": 45
+    },
+    {
+     "type": "master",
+     "uraian": "Instalasi air bersih pipa 1/2\"",
+     "ruang": "Cabang ke titik",
+     "lantai": "All Floor",
+     "code": "PL1",
+     "sat": "m1",
+     "vol": 30
+    },
+    {
+     "type": "master",
+     "uraian": "Instalasi air kotor pipa PVC D 4\"",
+     "ruang": "WC Annex > septic tank",
+     "lantai": "All Floor",
+     "code": "PL13",
+     "sat": "m1",
+     "vol": 15
+    },
+    {
+     "type": "master",
+     "uraian": "Instalasi air bekas pipa 2\"",
+     "ruang": "KM, pantry, floor drain",
+     "lantai": "All Floor",
+     "code": "PL6",
+     "sat": "m1",
+     "vol": 25
+    },
+    {
+     "type": "master",
+     "uraian": "Instalasi air hujan pipa 3\"",
+     "ruang": "Talang, dak annex & selasar Lt.2",
+     "lantai": "All Floor",
+     "code": "PL8",
+     "sat": "m1",
+     "vol": 30
+    },
+    {
+     "type": "master",
+     "uraian": "Bak kontrol + tutup beton",
+     "ruang": "Area utilitas",
+     "lantai": "All Floor",
+     "code": "BK1",
+     "sat": "unit",
+     "vol": 4
+    },
+    {
+     "type": "master",
+     "uraian": "Septic tank biofil",
+     "ruang": "Area utilitas",
+     "lantai": "All Floor",
+     "code": "ST1",
+     "sat": "unit",
+     "vol": 1
+    },
+    {
+     "type": "master",
+     "uraian": "Sumur resapan buis beton d60 kedalaman 2 m",
+     "ruang": "Halaman",
+     "lantai": "All Floor",
+     "code": "SU1",
+     "sat": "unit",
+     "vol": 2
+    },
+    {
+     "type": "master",
+     "uraian": "Roof tank / toren 1200 L",
+     "ruang": "Bangunan utama",
+     "lantai": "All Floor",
+     "code": "TO1",
+     "sat": "unit",
+     "vol": 1
+    },
+    {
+     "type": "master",
+     "uraian": "Jet pump",
+     "ruang": "Bangunan utama",
+     "lantai": "All Floor",
+     "code": "PJ",
+     "sat": "unit",
+     "vol": 1
+    },
+    {
+     "type": "master",
+     "uraian": "Roof drain",
+     "ruang": "Dak annex & selasar Lt.2",
+     "lantai": "All Floor",
+     "code": "SR2",
+     "sat": "unit",
+     "vol": 4
+    },
+    {
+     "type": "sub",
+     "title": "SANITARI (estimasi)"
+    },
+    {
+     "type": "master",
+     "uraian": "Kloset duduk",
+     "ruang": "Annex A - WC",
+     "lantai": "Lantai 1",
+     "code": "SC3",
+     "sat": "unit",
+     "vol": 1
+    },
+    {
+     "type": "master",
+     "uraian": "Jet washer",
+     "ruang": "Annex A - WC",
+     "lantai": "Lantai 1",
+     "code": "SJ1",
+     "sat": "unit",
+     "vol": 1
+    },
+    {
+     "type": "master",
+     "uraian": "Wastafel",
+     "ruang": "Annex A - WC",
+     "lantai": "Lantai 1",
+     "code": "SW3",
+     "sat": "unit",
+     "vol": 1
+    },
+    {
+     "type": "master",
+     "uraian": "Shower set",
+     "ruang": "Annex B - KM Outdoor",
+     "lantai": "Lantai 1",
+     "code": "SS3",
+     "sat": "unit",
+     "vol": 1
+    },
+    {
+     "type": "master",
+     "uraian": "Floor drain",
+     "ruang": "Annex A, Annex B, Storage",
+     "lantai": "Lantai 1",
+     "code": "SF1",
+     "sat": "unit",
+     "vol": 3
+    },
+    {
+     "type": "master",
+     "uraian": "Kitchen sink",
+     "ruang": "Pantry (Living)",
+     "lantai": "Lantai 1",
+     "code": "SI1",
+     "sat": "unit",
+     "vol": 1
+    },
+    {
+     "type": "master",
+     "uraian": "Kran air taman",
+     "ruang": "Farm, deck & halaman",
+     "lantai": "Lantai 1",
+     "code": "SK1",
+     "sat": "unit",
+     "vol": 4
+    }
+   ]
+  },
+  {
+   "no": "VIII",
+   "title": "Pekerjaan Listrik & Sistem Pendukung",
+   "rows": [
+    {
+     "type": "sub",
+     "title": "LISTRIK (estimasi - titik belum dimodelkan di SKP)"
+    },
+    {
+     "type": "master",
+     "uraian": "Instalasi titik penerangan",
+     "ruang": "Interior 33 titik + eksterior 26 titik",
+     "lantai": "All Floor",
+     "code": "PE1",
+     "sat": "titik",
+     "vol": 59
+    },
+    {
+     "type": "master",
+     "uraian": "Instalasi titik stopkontak",
+     "ruang": "Seluruh ruang + eksterior",
+     "lantai": "All Floor",
+     "code": "PE2",
+     "sat": "titik",
+     "vol": 30
+    },
+    {
+     "type": "master",
+     "uraian": "Lampu downlight 15W",
+     "ruang": "Interior seluruh ruang",
+     "lantai": "All Floor",
+     "code": "E5",
+     "sat": "titik",
+     "vol": 33
+    },
+    {
+     "type": "master",
+     "uraian": "Lampu dinding outdoor",
+     "ruang": "Deck, selasar & menara tangga",
+     "lantai": "All Floor",
+     "code": "E20",
+     "sat": "titik",
+     "vol": 10
+    },
+    {
+     "type": "master",
+     "uraian": "Lampu sorot taman",
+     "ruang": "Farm & taman",
+     "lantai": "All Floor",
+     "code": "E9",
+     "sat": "titik",
+     "vol": 8
+    },
+    {
+     "type": "master",
+     "uraian": "Lampu downlight outbow",
+     "ruang": "Kanopi carport",
+     "lantai": "All Floor",
+     "code": "E19",
+     "sat": "titik",
+     "vol": 8
+    },
+    {
+     "type": "master",
+     "uraian": "Saklar tunggal",
+     "ruang": "Seluruh ruang",
+     "lantai": "All Floor",
+     "code": "E2",
+     "sat": "titik",
+     "vol": 8
+    },
+    {
+     "type": "master",
+     "uraian": "Saklar ganda",
+     "ruang": "Seluruh ruang",
+     "lantai": "All Floor",
+     "code": "E3",
+     "sat": "titik",
+     "vol": 10
+    },
+    {
+     "type": "master",
+     "uraian": "Stopkontak dinding",
+     "ruang": "Seluruh ruang",
+     "lantai": "All Floor",
+     "code": "E1",
+     "sat": "titik",
+     "vol": 22
+    },
+    {
+     "type": "master",
+     "uraian": "Stopkontak AC",
+     "ruang": "Living, Bedroom 1, Guest, Bedroom 2, 3, Master",
+     "lantai": "All Floor",
+     "code": "E12",
+     "sat": "titik",
+     "vol": 6
+    },
+    {
+     "type": "master",
+     "uraian": "Stopkontak waterproof",
+     "ruang": "Eksterior / farm",
+     "lantai": "All Floor",
+     "code": "E24",
+     "sat": "titik",
+     "vol": 4
+    },
+    {
+     "type": "master",
+     "uraian": "Instalasi panel",
+     "ruang": "Bangunan utama",
+     "lantai": "All Floor",
+     "code": "E13",
+     "sat": "unit",
+     "vol": 1
+    },
+    {
+     "type": "master",
+     "uraian": "Box panel",
+     "ruang": "Bangunan utama",
+     "lantai": "All Floor",
+     "code": "E14",
+     "sat": "unit",
+     "vol": 1
+    },
+    {
+     "type": "master",
+     "uraian": "MCB 10A",
+     "ruang": "Panel",
+     "lantai": "All Floor",
+     "code": "E16",
+     "sat": "unit",
+     "vol": 8
+    }
+   ]
+  },
+  {
+   "no": "IX",
+   "title": "Pekerjaan Finishing Arsitektur",
+   "rows": [
+    {
+     "type": "wall_finish"
+    },
+    {
+     "type": "sub",
+     "title": "FINISHING LANTAI"
+    },
+    {
+     "type": "master",
+     "uraian": "",
+     "ruang": "Living & Pantry Fin. Granit Motif Kayu (di luar panggung tangga)",
+     "lantai": "Lantai 1",
+     "code": "F18",
+     "sat": "M2",
+     "vol": 31.07
+    },
+    {
+     "type": "master",
+     "uraian": "",
+     "ruang": "Panggung tangga (step-up) Living Fin. Granit Motif Kayu",
+     "lantai": "Lantai 1",
+     "code": "F18",
+     "sat": "M2",
+     "vol": 7.72
+    },
+    {
+     "type": "master",
+     "uraian": "",
+     "ruang": "Bedroom 1 Fin. Homogeneous Tile 60x60 Cementous Matt",
+     "lantai": "Lantai 1",
+     "code": "F28",
+     "sat": "M2",
+     "vol": 17.46
+    },
+    {
+     "type": "master",
+     "uraian": "",
+     "ruang": "Guest Bedroom Fin. Homogeneous Tile 60x60 Cementous Matt",
+     "lantai": "Lantai 1",
+     "code": "F28",
+     "sat": "M2",
+     "vol": 14.9
+    },
+    {
+     "type": "master",
+     "uraian": "",
+     "ruang": "Selasar Entrance Fin. Homogeneous Tile 60x60 Cementous Matt",
+     "lantai": "Lantai 1",
+     "code": "F28",
+     "sat": "M2",
+     "vol": 3.12
+    },
+    {
+     "type": "master",
+     "uraian": "",
+     "ruang": "Annex A - WC Fin. Homogeneous Tile 60x60 Cementous Matt",
+     "lantai": "Lantai 1",
+     "code": "F28",
+     "sat": "M2",
+     "vol": 5.3
+    },
+    {
+     "type": "master",
+     "uraian": "",
+     "ruang": "Annex B - KM Outdoor Fin. Homogeneous Tile 60x60 Cementous Matt",
+     "lantai": "Lantai 1",
+     "code": "F28",
+     "sat": "M2",
+     "vol": 7.0
+    },
+    {
+     "type": "master",
+     "uraian": "",
+     "ruang": "Storage Mushroom Fin. Semen Ekspos Heavy Duty",
+     "lantai": "Lantai 1",
+     "code": "F8",
+     "sat": "M2",
+     "vol": 14.16
+    },
+    {
+     "type": "master",
+     "uraian": "",
+     "ruang": "Deck Barat (selasar kayu sepanjang massa utama) Fin. Decking Kayu",
+     "lantai": "Lantai 1",
+     "code": "F66",
+     "sat": "M2",
+     "vol": 26.48
+    },
+    {
+     "type": "master",
+     "uraian": "",
+     "ruang": "Deck Timur Fin. Decking Kayu",
+     "lantai": "Lantai 1",
+     "code": "F66",
+     "sat": "M2",
+     "vol": 20.81
+    },
+    {
+     "type": "master",
+     "uraian": "",
+     "ruang": "Deck Entrance & jalur ke kost Fin. Decking Kayu",
+     "lantai": "Lantai 1",
+     "code": "F66",
+     "sat": "M2",
+     "vol": 10.77
+    },
+    {
+     "type": "master",
+     "uraian": "",
+     "ruang": "Stepping pad kayu jalur carport",
+     "lantai": "Lantai 1",
+     "code": "F66",
+     "sat": "M2",
+     "vol": 4.49
+    },
+    {
+     "type": "master",
+     "uraian": "",
+     "ruang": "Teras Utara Fin. Batu Andesit",
+     "lantai": "Lantai 1",
+     "code": "F73",
+     "sat": "M2",
+     "vol": 27.77
+    },
+    {
+     "type": "master",
+     "uraian": "",
+     "ruang": "Bedroom 2 Fin. Granit Motif Kayu",
+     "lantai": "Lantai 2",
+     "code": "F18",
+     "sat": "M2",
+     "vol": 27.38
+    },
+    {
+     "type": "master",
+     "uraian": "",
+     "ruang": "Bedroom 3 Fin. Granit Motif Kayu",
+     "lantai": "Lantai 2",
+     "code": "F18",
+     "sat": "M2",
+     "vol": 23.11
+    },
+    {
+     "type": "master",
+     "uraian": "",
+     "ruang": "Master Bedroom Fin. Granit Motif Kayu",
+     "lantai": "Lantai 2",
+     "code": "F18",
+     "sat": "M2",
+     "vol": 13.31
+    },
+    {
+     "type": "master",
+     "uraian": "",
+     "ruang": "Ruang AC / Void Fin. Granit Motif Kayu",
+     "lantai": "Lantai 2",
+     "code": "F18",
+     "sat": "M2",
+     "vol": 4.13
+    },
+    {
+     "type": "master",
+     "uraian": "",
+     "ruang": "Selasar / jembatan Lt.2 sisi barat Fin. Batu Andesit",
+     "lantai": "Lantai 2",
+     "code": "F73",
+     "sat": "M2",
+     "vol": 32.28
+    },
+    {
+     "type": "master",
+     "uraian": "",
+     "ruang": "Dak atap Annex Fin. Batu Split Ground Cover",
+     "lantai": "Lantai 2",
+     "code": "F53",
+     "sat": "M2",
+     "vol": 12.63
+    },
+    {
+     "type": "master",
+     "uraian": "",
+     "ruang": "Dak selasar Lt.2 tepi Fin. Batu Split Ground Cover",
+     "lantai": "Lantai 2",
+     "code": "F53",
+     "sat": "M2",
+     "vol": 2.21
+    },
+    {
+     "type": "sub",
+     "title": "FINISHING TANGGA"
+    },
+    {
+     "type": "master",
+     "uraian": "Penutup anak tangga & bordes",
+     "ruang": "Tangga Living (15 trap)",
+     "lantai": "Lantai 1",
+     "code": "F18",
+     "sat": "M2",
+     "vol": 9.1
+    },
+    {
+     "type": "master",
+     "uraian": "Penutup bidang tegak anak tangga",
+     "ruang": "Tangga Living (15 x 1,0 x 0,2)",
+     "lantai": "Lantai 1",
+     "code": "F18",
+     "sat": "M2",
+     "vol": 3.0
+    },
+    {
+     "type": "master",
+     "uraian": "Step nosing tangga",
+     "ruang": "Tangga Living",
+     "lantai": "Lantai 1",
+     "code": "F36",
+     "sat": "m1",
+     "vol": 15.0
+    },
+    {
+     "type": "master",
+     "uraian": "Penutup anak tangga & bordes",
+     "ruang": "Tangga menara roster (luar)",
+     "lantai": "Lantai 1",
+     "code": "F8",
+     "sat": "M2",
+     "vol": 8.02
+    },
+    {
+     "type": "master",
+     "uraian": "Penutup bidang tegak anak tangga",
+     "ruang": "Tangga menara roster (luar)",
+     "lantai": "Lantai 1",
+     "code": "F8",
+     "sat": "M2",
+     "vol": 1.84
+    },
+    {
+     "type": "sub",
+     "title": "PEKERJAAN PLAFON"
+    },
+    {
+     "type": "master",
+     "uraian": "",
+     "ruang": "Plafon Living & Pantry",
+     "lantai": "Lantai 1",
+     "code": "C1",
+     "sat": "M2",
+     "vol": 30.26
+    },
+    {
+     "type": "master",
+     "uraian": "",
+     "ruang": "Plafon Bedroom 1",
+     "lantai": "Lantai 1",
+     "code": "C1",
+     "sat": "M2",
+     "vol": 17.44
+    },
+    {
+     "type": "master",
+     "uraian": "",
+     "ruang": "Plafon Guest Bedroom",
+     "lantai": "Lantai 1",
+     "code": "C1",
+     "sat": "M2",
+     "vol": 15.27
+    },
+    {
+     "type": "master",
+     "uraian": "",
+     "ruang": "Plafon Annex A - WC (GRC)",
+     "lantai": "Lantai 1",
+     "code": "C2",
+     "sat": "M2",
+     "vol": 5.3
+    },
+    {
+     "type": "master",
+     "uraian": "",
+     "ruang": "Plafon Annex B - KM Outdoor (GRC)",
+     "lantai": "Lantai 1",
+     "code": "C2",
+     "sat": "M2",
+     "vol": 7.39
+    },
+    {
+     "type": "master",
+     "uraian": "",
+     "ruang": "Plafon selasar / deck barat - eksterior (GRC)",
+     "lantai": "Lantai 1",
+     "code": "C2",
+     "sat": "M2",
+     "vol": 32.72
+    },
+    {
+     "type": "master",
+     "uraian": "",
+     "ruang": "Plafon Bedroom 2",
+     "lantai": "Lantai 2",
+     "code": "C1",
+     "sat": "M2",
+     "vol": 27.26
+    },
+    {
+     "type": "master",
+     "uraian": "",
+     "ruang": "Plafon Master Bedroom",
+     "lantai": "Lantai 2",
+     "code": "C1",
+     "sat": "M2",
+     "vol": 13.31
+    },
+    {
+     "type": "master",
+     "uraian": "",
+     "ruang": "Plafon Ruang AC",
+     "lantai": "Lantai 2",
+     "code": "C1",
+     "sat": "M2",
+     "vol": 4.13
+    },
+    {
+     "type": "master",
+     "uraian": "",
+     "ruang": "Plafon miring kayu Bedroom 3 & Hall Tangga (mengikuti kemiringan atap)",
+     "lantai": "Lantai 2",
+     "code": "C13",
+     "sat": "M2",
+     "vol": 42.0
+    },
+    {
+     "type": "master",
+     "uraian": "",
+     "ruang": "Plafon miring kayu overstek atap barat di atas selasar Lt.2 (eksterior)",
+     "lantai": "Lantai 2",
+     "code": "C13",
+     "sat": "M2",
+     "vol": 62.0
+    },
+    {
+     "type": "master",
+     "uraian": "Cat plafon",
+     "ruang": "Plafon Living & Pantry",
+     "lantai": "Lantai 1",
+     "code": "C4",
+     "sat": "M2",
+     "vol": 30.26
+    },
+    {
+     "type": "master",
+     "uraian": "",
+     "ruang": "Plafon Bedroom 1",
+     "lantai": "Lantai 1",
+     "code": "C4",
+     "sat": "M2",
+     "vol": 17.44
+    },
+    {
+     "type": "master",
+     "uraian": "",
+     "ruang": "Plafon Guest Bedroom",
+     "lantai": "Lantai 1",
+     "code": "C4",
+     "sat": "M2",
+     "vol": 15.27
+    },
+    {
+     "type": "master",
+     "uraian": "",
+     "ruang": "Plafon Annex A - WC (GRC)",
+     "lantai": "Lantai 1",
+     "code": "C4",
+     "sat": "M2",
+     "vol": 5.3
+    },
+    {
+     "type": "master",
+     "uraian": "",
+     "ruang": "Plafon Annex B - KM Outdoor (GRC)",
+     "lantai": "Lantai 1",
+     "code": "C4",
+     "sat": "M2",
+     "vol": 7.39
+    },
+    {
+     "type": "master",
+     "uraian": "",
+     "ruang": "Plafon selasar / deck barat - eksterior (GRC)",
+     "lantai": "Lantai 1",
+     "code": "C4",
+     "sat": "M2",
+     "vol": 32.72
+    },
+    {
+     "type": "master",
+     "uraian": "",
+     "ruang": "Plafon Bedroom 2",
+     "lantai": "Lantai 2",
+     "code": "C4",
+     "sat": "M2",
+     "vol": 27.26
+    },
+    {
+     "type": "master",
+     "uraian": "",
+     "ruang": "Plafon Master Bedroom",
+     "lantai": "Lantai 2",
+     "code": "C4",
+     "sat": "M2",
+     "vol": 13.31
+    },
+    {
+     "type": "master",
+     "uraian": "",
+     "ruang": "Plafon Ruang AC",
+     "lantai": "Lantai 2",
+     "code": "C4",
+     "sat": "M2",
+     "vol": 4.13
+    },
+    {
+     "type": "sub",
+     "title": "RAILING DAN HANDRAIL"
+    },
+    {
+     "type": "master",
+     "uraian": "Railing kaca tempered",
+     "ruang": "Selasar / jembatan Lt.2 sisi barat",
+     "lantai": "Lantai 2",
+     "code": "L12",
+     "sat": "m1",
+     "vol": 9.0
+    },
+    {
+     "type": "master",
+     "uraian": "Railing kaca tempered",
+     "ruang": "Tepi void hall tangga Lt.2",
+     "lantai": "Lantai 2",
+     "code": "L12",
+     "sat": "m1",
+     "vol": 3.4
+    },
+    {
+     "type": "analisa",
+     "uraian": "Handrail besi",
+     "ruang": "Tangga Living",
+     "lantai": "Lantai 1",
+     "code": "X-13",
+     "sat": "m1",
+     "vol": 4.5
+    },
+    {
+     "type": "analisa",
+     "uraian": "Railing besi",
+     "ruang": "Tangga menara roster",
+     "lantai": "Lantai 1",
+     "code": "X-13",
+     "sat": "m1",
+     "vol": 6.0
+    },
+    {
+     "type": "analisa",
+     "uraian": "Railing besi",
+     "ruang": "Jembatan grating (2 sisi)",
+     "lantai": "Lantai 1",
+     "code": "X-13",
+     "sat": "m1",
+     "vol": 21.6
+    },
+    {
+     "type": "sub",
+     "title": "WATERPROOFING BANGUNAN"
+    },
+    {
+     "type": "master",
+     "uraian": "Waterproofing",
+     "ruang": "Dak atap Annex (incl. naik parapet)",
+     "lantai": "Lantai 2",
+     "code": "WP1",
+     "sat": "M2",
+     "vol": 14.0
+    },
+    {
+     "type": "master",
+     "uraian": "Waterproofing",
+     "ruang": "Dak selasar Lt.2 sisi barat",
+     "lantai": "Lantai 2",
+     "code": "WP1",
+     "sat": "M2",
+     "vol": 34.49
+    },
+    {
+     "type": "master",
+     "uraian": "Waterproofing",
+     "ruang": "Lantai & dinding basah Annex A & B (naik 30 cm)",
+     "lantai": "Lantai 1",
+     "code": "WP1",
+     "sat": "M2",
+     "vol": 15.3
+    }
+   ]
+  },
+  {
+   "no": "X",
+   "title": "Pekerjaan Luar & Lanskap",
+   "rows": [
+    {
+     "type": "sub",
+     "title": "PAGAR / DINDING BATAS PASANGAN (area merah)"
+    },
+    {
+     "type": "master",
+     "uraian": "Pasangan dinding pagar",
+     "ruang": "Dinding batas utara (x 3,5 - 26,7 m)",
+     "lantai": "Lantai 1",
+     "code": "PW1",
+     "sat": "M2",
+     "vol": 89.6
+    },
+    {
+     "type": "master",
+     "uraian": "Pasangan dinding pagar",
+     "ruang": "Dinding batas timur (sisi kolam)",
+     "lantai": "Lantai 1",
+     "code": "PW1",
+     "sat": "M2",
+     "vol": 58.63
+    },
+    {
+     "type": "master",
+     "uraian": "Pasangan dinding pagar",
+     "ruang": "Dinding rendah barat (batas farm)",
+     "lantai": "Lantai 1",
+     "code": "PW1",
+     "sat": "M2",
+     "vol": 12.66
+    },
+    {
+     "type": "master",
+     "uraian": "Pasangan dinding pagar",
+     "ruang": "Dinding rendah selatan (batas carport)",
+     "lantai": "Lantai 1",
+     "code": "PW1",
+     "sat": "M2",
+     "vol": 9.9
+    },
+    {
+     "type": "master",
+     "uraian": "Plester dinding pagar (2 sisi)",
+     "ruang": "Dinding batas utara (x 3,5 - 26,7 m)",
+     "lantai": "Lantai 1",
+     "code": "PD2",
+     "sat": "M2",
+     "vol": 179.2
+    },
+    {
+     "type": "master",
+     "uraian": "Plester dinding pagar (2 sisi)",
+     "ruang": "Dinding batas timur (sisi kolam)",
+     "lantai": "Lantai 1",
+     "code": "PD2",
+     "sat": "M2",
+     "vol": 117.26
+    },
+    {
+     "type": "master",
+     "uraian": "Plester dinding pagar (2 sisi)",
+     "ruang": "Dinding rendah barat (batas farm)",
+     "lantai": "Lantai 1",
+     "code": "PD2",
+     "sat": "M2",
+     "vol": 25.32
+    },
+    {
+     "type": "master",
+     "uraian": "Plester dinding pagar (2 sisi)",
+     "ruang": "Dinding rendah selatan (batas carport)",
+     "lantai": "Lantai 1",
+     "code": "PD2",
+     "sat": "M2",
+     "vol": 19.8
+    },
+    {
+     "type": "master",
+     "uraian": "Acian ekspos dinding pagar (2 sisi)",
+     "ruang": "Dinding batas utara (x 3,5 - 26,7 m)",
+     "lantai": "Lantai 1",
+     "code": "AD2",
+     "sat": "M2",
+     "vol": 179.2
+    },
+    {
+     "type": "master",
+     "uraian": "Acian ekspos dinding pagar (2 sisi)",
+     "ruang": "Dinding batas timur (sisi kolam)",
+     "lantai": "Lantai 1",
+     "code": "AD2",
+     "sat": "M2",
+     "vol": 117.26
+    },
+    {
+     "type": "master",
+     "uraian": "Acian ekspos dinding pagar (2 sisi)",
+     "ruang": "Dinding rendah barat (batas farm)",
+     "lantai": "Lantai 1",
+     "code": "AD2",
+     "sat": "M2",
+     "vol": 25.32
+    },
+    {
+     "type": "master",
+     "uraian": "Acian ekspos dinding pagar (2 sisi)",
+     "ruang": "Dinding rendah selatan (batas carport)",
+     "lantai": "Lantai 1",
+     "code": "AD2",
+     "sat": "M2",
+     "vol": 19.8
+    },
+    {
+     "type": "master",
+     "uraian": "Finishing coating ekspos dinding pagar (2 sisi)",
+     "ruang": "Dinding batas utara (x 3,5 - 26,7 m)",
+     "lantai": "Lantai 1",
+     "code": "W6",
+     "sat": "M2",
+     "vol": 179.2
+    },
+    {
+     "type": "master",
+     "uraian": "Finishing coating ekspos dinding pagar (2 sisi)",
+     "ruang": "Dinding batas timur (sisi kolam)",
+     "lantai": "Lantai 1",
+     "code": "W6",
+     "sat": "M2",
+     "vol": 117.26
+    },
+    {
+     "type": "master",
+     "uraian": "Finishing coating ekspos dinding pagar (2 sisi)",
+     "ruang": "Dinding rendah barat (batas farm)",
+     "lantai": "Lantai 1",
+     "code": "W6",
+     "sat": "M2",
+     "vol": 25.32
+    },
+    {
+     "type": "master",
+     "uraian": "Finishing coating ekspos dinding pagar (2 sisi)",
+     "ruang": "Dinding rendah selatan (batas carport)",
+     "lantai": "Lantai 1",
+     "code": "W6",
+     "sat": "M2",
+     "vol": 19.8
+    },
+    {
+     "type": "sub",
+     "title": "ELEMEN LUAR"
+    },
+    {
+     "type": "analisa",
+     "uraian": "Jembatan grating baja",
+     "ruang": "Jembatan grating sisi barat (1,2 x 10,9 m)",
+     "lantai": "Lantai 1",
+     "code": "X-12",
+     "sat": "m2",
+     "vol": 13.1
+    },
+    {
+     "type": "analisa",
+     "uraian": "Bangku masif",
+     "ruang": "Bangku kayu deck barat",
+     "lantai": "Lantai 1",
+     "code": "X-14",
+     "sat": "m1",
+     "vol": 4.0
+    },
+    {
+     "type": "analisa",
+     "uraian": "Bangku masif",
+     "ruang": "Bangku deck timur / tepi kolam",
+     "lantai": "Lantai 1",
+     "code": "X-14",
+     "sat": "m1",
+     "vol": 4.2
+    },
+    {
+     "type": "sub",
+     "title": "LANDSCAPE"
+    },
+    {
+     "type": "master",
+     "uraian": "Perkerasan carport & jalur masuk",
+     "ruang": "Carport 2 mobil (sisi farm) + carport 4 mobil + jalur masuk",
+     "lantai": "Lantai 1",
+     "code": "F38",
+     "sat": "M2",
+     "vol": 182.84
+    },
+    {
+     "type": "master",
+     "uraian": "Koral sebar halaman",
+     "ruang": "Sekeliling rumah, jalur barat & jalur farm",
+     "lantai": "Lantai 1",
+     "code": "F39",
+     "sat": "M2",
+     "vol": 114.8
+    },
+    {
+     "type": "ahs",
+     "uraian": "Rumput",
+     "ruang": "Jalur rumput sisi farm & taman kecil",
+     "lantai": "Lantai 1",
+     "ahs": "Penanaman 1 m2 Rumput,Rumput Gajah Mini (Axonopus Compressus)",
+     "sat": "m2",
+     "vol": 17.28
+    },
+    {
+     "type": "analisa",
+     "uraian": "Olah lahan farm",
+     "ruang": "Farm zone (± 4,7 x 15,8 m)",
+     "lantai": "Lantai 1",
+     "code": "X-15",
+     "sat": "m2",
+     "vol": 73.6
+    },
+    {
+     "type": "ahs",
+     "uraian": "Pohon peneduh",
+     "ruang": "Inner court, deck timur & halaman",
+     "lantai": "Lantai 1",
+     "ahs": "Penanaman 1 Buah Pohon Sedang Ketapang kencana (Terminalia mantaly), Diameter 3-5 cm, Tinggi 3-4 Meter, Polybag 50 L",
+     "sat": "Buah",
+     "vol": 3
+    },
+    {
+     "type": "ahs",
+     "uraian": "Tanaman semak",
+     "ruang": "Planter selasar & tepi deck",
+     "lantai": "Lantai 1",
+     "ahs": "Penanaman 1 m2 Semak, Kacapiring Wangi/Gardenia (Gardenia Jasminoides), 25 Buah/m2 Polybag 5 L",
+     "sat": "m2",
+     "vol": 6
+    }
+   ]
+  },
+  {
+   "no": "XI",
+   "title": "Pekerjaan Kolam & Sistem Kolam",
+   "rows": [
+    {
+     "type": "analisa",
+     "uraian": "Persiapan & pengukuran (kolam timur 1,54 x 8,50 m, kedalaman air ± 0,45 m)",
+     "ruang": "Kolam timur (reflecting pool)",
+     "lantai": "Lantai 1",
+     "code": "X-K01",
+     "sat": "paket",
+     "vol": 1
+    },
+    {
+     "type": "analisa",
+     "uraian": "Galian tanah kolam (1,84 x 8,80 x 0,75)",
+     "ruang": "Kolam timur (reflecting pool)",
+     "lantai": "Lantai 1",
+     "code": "X-K02",
+     "sat": "m3",
+     "vol": 12.14
+    },
+    {
+     "type": "analisa",
+     "uraian": "Urugan kembali & pemadatan sisi luar",
+     "ruang": "Kolam timur (reflecting pool)",
+     "lantai": "Lantai 1",
+     "code": "X-K03",
+     "sat": "m3",
+     "vol": 3.2
+    },
+    {
+     "type": "analisa",
+     "uraian": "Pembuangan tanah sisa (tanah lepas)",
+     "ruang": "Kolam timur (reflecting pool)",
+     "lantai": "Lantai 1",
+     "code": "X-K04",
+     "sat": "m3",
+     "vol": 11.2
+    },
+    {
+     "type": "analisa",
+     "uraian": "Urugan pasir dasar t = 5 cm",
+     "ruang": "Kolam timur (reflecting pool)",
+     "lantai": "Lantai 1",
+     "code": "X-K05",
+     "sat": "m3",
+     "vol": 0.81
+    },
+    {
+     "type": "analisa",
+     "uraian": "Lantai kerja t = 5 cm",
+     "ruang": "Kolam timur (reflecting pool)",
+     "lantai": "Lantai 1",
+     "code": "X-K06",
+     "sat": "m3",
+     "vol": 0.81
+    },
+    {
+     "type": "analisa",
+     "uraian": "Beton pelat & dinding t = 15 cm (incl. susut 5%)",
+     "ruang": "Kolam timur (reflecting pool)",
+     "lantai": "Lantai 1",
+     "code": "X-K07",
+     "sat": "m3",
+     "vol": 4.5
+    },
+    {
+     "type": "analisa",
+     "uraian": "Pembesian (± 100 kg/m3)",
+     "ruang": "Kolam timur (reflecting pool)",
+     "lantai": "Lantai 1",
+     "code": "X-K08",
+     "sat": "kg",
+     "vol": 450
+    },
+    {
+     "type": "analisa",
+     "uraian": "Bekisting dinding 2 sisi & tepi pelat",
+     "ruang": "Kolam timur (reflecting pool)",
+     "lantai": "Lantai 1",
+     "code": "X-K09",
+     "sat": "m2",
+     "vol": 28.0
+    },
+    {
+     "type": "analisa",
+     "uraian": "Waterstop sambungan pelat-dinding",
+     "ruang": "Kolam timur (reflecting pool)",
+     "lantai": "Lantai 1",
+     "code": "X-K10",
+     "sat": "m1",
+     "vol": 20.7
+    },
+    {
+     "type": "analisa",
+     "uraian": "Perataan lantai & dinding dalam",
+     "ruang": "Kolam timur (reflecting pool)",
+     "lantai": "Lantai 1",
+     "code": "X-K11",
+     "sat": "m2",
+     "vol": 22.1
+    },
+    {
+     "type": "analisa",
+     "uraian": "Sudut lengkung pertemuan lantai-dinding",
+     "ruang": "Kolam timur (reflecting pool)",
+     "lantai": "Lantai 1",
+     "code": "X-K12",
+     "sat": "m1",
+     "vol": 20.1
+    },
+    {
+     "type": "analisa",
+     "uraian": "Finishing bibir kolam",
+     "ruang": "Kolam timur (reflecting pool)",
+     "lantai": "Lantai 1",
+     "code": "X-K13",
+     "sat": "m2",
+     "vol": 3.1
+    },
+    {
+     "type": "analisa",
+     "uraian": "Waterproofing kolam incl. bibir",
+     "ruang": "Kolam timur (reflecting pool)",
+     "lantai": "Lantai 1",
+     "code": "X-K14",
+     "sat": "m2",
+     "vol": 25.2
+    },
+    {
+     "type": "analisa",
+     "uraian": "Bak filter + media filter",
+     "ruang": "Kolam timur (reflecting pool)",
+     "lantai": "Lantai 1",
+     "code": "X-K15",
+     "sat": "set",
+     "vol": 1
+    },
+    {
+     "type": "analisa",
+     "uraian": "Pompa sirkulasi",
+     "ruang": "Kolam timur (reflecting pool)",
+     "lantai": "Lantai 1",
+     "code": "X-K16",
+     "sat": "unit",
+     "vol": 1
+    },
+    {
+     "type": "analisa",
+     "uraian": "Bottom drain",
+     "ruang": "Kolam timur (reflecting pool)",
+     "lantai": "Lantai 1",
+     "code": "X-K17",
+     "sat": "titik",
+     "vol": 2
+    },
+    {
+     "type": "analisa",
+     "uraian": "Instalasi pipa & valve",
+     "ruang": "Kolam timur (reflecting pool)",
+     "lantai": "Lantai 1",
+     "code": "X-K18",
+     "sat": "paket",
+     "vol": 1
+    },
+    {
+     "type": "analisa",
+     "uraian": "Instalasi listrik kolam",
+     "ruang": "Kolam timur (reflecting pool)",
+     "lantai": "Lantai 1",
+     "code": "X-K19",
+     "sat": "set",
+     "vol": 1
+    },
+    {
+     "type": "analisa",
+     "uraian": "Pengujian kolam & sistem",
+     "ruang": "Kolam timur (reflecting pool)",
+     "lantai": "Lantai 1",
+     "code": "X-K20",
+     "sat": "paket",
+     "vol": 1
+    }
+   ]
+  }
+ ]
+}
