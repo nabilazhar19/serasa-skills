@@ -1,0 +1,1459 @@
+{
+ "project": {
+  "title": "RUKO BKL (0113_BENGKULU HOUSE REV1) - Area Ruko 2 Unit (urutan pekerjaan template)",
+  "tab": "ruko bkl 2",
+  "audit_tab": "Audit",
+  "zona": "Kota Bengkulu"
+ },
+ "luasan": {
+  "tanah_label": "Luas Tapak (area merah: ruko 2 unit + teras)",
+  "tanah": 58.9,
+  "lantai": [
+   {
+    "short": "Lt.1",
+    "label": "Luas Lantai 1 (2 toko + teras beratap)",
+    "items": [
+     [
+      "toko 2 unit",
+      47.9
+     ],
+     [
+      "teras bawah kanopi",
+      7.9
+     ]
+    ]
+   },
+   {
+    "short": "Lt.2",
+    "label": "Luas Lantai 2 (2 ruang + balkon beratap)",
+    "items": [
+     [
+      "ruang Lt.2 2 unit",
+      47.9
+     ],
+     [
+      "balkon timur",
+      7.9
+     ]
+    ]
+   }
+  ],
+  "note": "Luas kotor dari model SKP (sisi luar dinding); parkir & area tanpa atap tidak termasuk."
+ },
+ "walls": [
+  {
+   "room": "Toko 1 (Shop 1)",
+   "lantai": "Lantai 1",
+   "interior": true,
+   "parts": {
+    "ekspos": 30.66,
+    "putih": 34.85
+   }
+  },
+  {
+   "room": "Toko 2 (Shop 2)",
+   "lantai": "Lantai 1",
+   "interior": true,
+   "parts": {
+    "ekspos": 46.02,
+    "putih": 4.8
+   }
+  },
+  {
+   "room": "Ruang Lt.2 Unit 1",
+   "lantai": "Lantai 2",
+   "interior": true,
+   "parts": {
+    "ekspos": 17.4,
+    "putih": 38.34
+   }
+  },
+  {
+   "room": "Ruang Lt.2 Unit 2",
+   "lantai": "Lantai 2",
+   "interior": true,
+   "parts": {
+    "ekspos": 14.16,
+    "putih": 35.1
+   }
+  },
+  {
+   "room": "Fasad Barat (sisi parkir motor, Lt.1-2 + parapet)",
+   "lantai": "All Floor",
+   "interior": false,
+   "parts": {
+    "terracotta": 65.24
+   }
+  },
+  {
+   "room": "Fasad Selatan (di balik secondary skin)",
+   "lantai": "All Floor",
+   "interior": false,
+   "parts": {
+    "ekspos": 38.28
+   }
+  },
+  {
+   "room": "Fasad Utara",
+   "lantai": "All Floor",
+   "interior": false,
+   "parts": {
+    "ekspos": 17.4,
+    "putih": 20.3
+   }
+  },
+  {
+   "room": "Fasad Timur (muka toko & balkon Lt.2)",
+   "lantai": "All Floor",
+   "interior": false,
+   "parts": {
+    "ekspos": 29.9,
+    "putih": 8.8
+   }
+  },
+  {
+   "room": "Tonjolan dinding barat & sisi dalam parapet",
+   "lantai": "Atap",
+   "interior": false,
+   "parts": {
+    "ekspos": 11.76
+   }
+  },
+  {
+   "room": "Fascia tepi kanopi & balkon (el. +2,50 s.d. +4,10)",
+   "lantai": "Lantai 1",
+   "interior": false,
+   "parts": {
+    "terracotta": 26.8
+   }
+  },
+  {
+   "room": "Parapet atap (2 sisi)",
+   "lantai": "Atap",
+   "interior": false,
+   "parts": {
+    "terracotta": 40.3
+   }
+  }
+ ],
+ "wall_specs": {
+  "plester": "Pekerjaan Plesteran Tebal 10 mm, Semen Padang / Setara, Pasir Bangka / Setara",
+  "aci": {
+   "ekspos": "Pekerjaan Acian Ekspos, Merek Dunia Mortar / Setara",
+   "putih": "Pekerjaan Acian Tebal 5 mm, Merek Tiga Roda / Setara",
+   "terracotta": "Pekerjaan Acian Tebal 5 mm, Merek Tiga Roda / Setara"
+  },
+  "finish": {
+   "interior": {
+    "ekspos": "Pekerjaan Coating Semen Aci Ekspos, Merek Klirkote",
+    "putih": "Pengecatan Dinding Interior Catylac Interior, Merek Dulux",
+    "terracotta": "Pengecatan Cat Tekstur Terracotta"
+   },
+   "exterior": {
+    "ekspos": "Pekerjaan Coating Semen Aci Ekspos, Merek Klirkote",
+    "putih": "Pengecatan Dinding Eksterior Weathershield, Merek Dulux",
+    "terracotta": "Pengecatan Cat Tekstur Terracotta"
+   }
+  }
+ },
+ "openings": [
+  {
+   "code": "P1",
+   "jenis": "Kusen & daun pintu",
+   "ruang": "Teras > Toko 1",
+   "lantai": "Lantai 1 (+0,50)",
+   "w": 1.04,
+   "h": 2.0,
+   "type": "swing",
+   "spec": "Pintu kaca swing 1 daun, ukuran bukaan 104 x 200 cm. Kusen aluminium 4\" powder coat hitam, daun kaca tempered 10 mm clear tanpa rangka (frameless), patch fitting atas-bawah + floor hinge 1 set, handle tarik stainless/chrome 1 set, kunci lantai 1 set."
+  },
+  {
+   "code": "P1",
+   "jenis": "Kusen & daun pintu",
+   "ruang": "Teras > Toko 2",
+   "lantai": "Lantai 1 (+0,50)",
+   "w": 1.04,
+   "h": 2.0,
+   "type": "swing",
+   "spec": "Pintu kaca swing 1 daun, ukuran bukaan 104 x 200 cm. Kusen aluminium 4\" powder coat hitam, daun kaca tempered 10 mm clear tanpa rangka (frameless), patch fitting atas-bawah + floor hinge 1 set, handle tarik stainless/chrome 1 set, kunci lantai 1 set."
+  },
+  {
+   "code": "J1",
+   "jenis": "Kusen jendela & kaca tetap",
+   "ruang": "Toko 1 > Teras (etalase)",
+   "lantai": "Lantai 1 (+1,10)",
+   "w": 2.65,
+   "h": 1.4,
+   "type": "fix",
+   "spec": "Jendela kaca mati (etalase) di atas dinding rendah h 60 cm, ukuran 265 x 140 cm. Kusen aluminium 4\" powder coat hitam keliling, kaca tempered 8 mm clear 1 panel, sealant silikon hitam, karet kaca."
+  },
+  {
+   "code": "J2",
+   "jenis": "Kusen jendela & kaca tetap",
+   "ruang": "Toko 2 > Teras (etalase)",
+   "lantai": "Lantai 1 (+1,10)",
+   "w": 2.09,
+   "h": 1.4,
+   "type": "fix",
+   "spec": "Jendela kaca mati (etalase) di atas dinding rendah h 60 cm, ukuran 209 x 140 cm. Kusen aluminium 4\" powder coat hitam keliling, kaca tempered 8 mm clear 1 panel, sealant silikon hitam, karet kaca."
+  },
+  {
+   "code": "P2",
+   "jenis": "Kusen & daun pintu",
+   "ruang": "Ruang Lt.2 Unit 1 > Balkon",
+   "lantai": "Lantai 2 (+4,10)",
+   "w": 2.71,
+   "h": 2.44,
+   "type": "swing",
+   "panels": 2,
+   "spec": "Pintu kaca swing 2 daun + kaca mati samping, ukuran kusen 271 x 244 cm (daun 2 x 95 x 230 cm). Kusen & rangka daun aluminium powder coat hitam, kaca tempered 8 mm clear, engsel stainless 3 pcs/daun, handle + body kunci + silinder 1 set, flush bolt 1 set."
+  },
+  {
+   "code": "P3",
+   "jenis": "Kusen & daun pintu",
+   "ruang": "Ruang Lt.2 Unit 2 > Balkon",
+   "lantai": "Lantai 2 (+4,10)",
+   "w": 2.5,
+   "h": 2.44,
+   "type": "swing",
+   "panels": 2,
+   "spec": "Pintu kaca swing 2 daun + kaca mati samping, ukuran kusen 250 x 244 cm (daun 2 x 95 x 230 cm). Kusen & rangka daun aluminium powder coat hitam, kaca tempered 8 mm clear, engsel stainless 3 pcs/daun, handle + body kunci + silinder 1 set, flush bolt 1 set."
+  }
+ ],
+ "audit": [
+  {
+   "code": "AUD-01",
+   "name": "Pembersihan lokasi rutin selama & setelah pekerjaan (per bulan)",
+   "sat": "bln",
+   "note": "PP3 lama tidak ada di AHS baru",
+   "components": [
+    {
+     "name": "Pekerja kebersihan (26 HOK)",
+     "sat": "OH",
+     "koef": 26,
+     "price": 90000
+    },
+    {
+     "name": "Alat kebersihan & kantong sampah",
+     "sat": "ls",
+     "koef": 1,
+     "price": 150000
+    },
+    {
+     "name": "Angkut buang sampah/puing (1 rit)",
+     "sat": "rit",
+     "koef": 1,
+     "price": 300000
+    }
+   ]
+  },
+  {
+   "code": "OPK",
+   "name": "Plester aci openingan kusen (sponneng bukaan lebar 15 cm) termasuk tali air",
+   "sat": "m1",
+   "note": "volume = keliling bukaan (pintu 2T+L, jendela 2(L+T))",
+   "components": [
+    {
+     "name": "Plester tebal 5 mm lebar 15 cm",
+     "sat": "m2",
+     "koef": 0.15,
+     "price": "AHS:Pekerjaan Plesteran Tebal 5 mm, Semen Padang / Setara, Pasir Ayak / Setara",
+     "src": "AHS PD2"
+    },
+    {
+     "name": "Acian lebar 15 cm",
+     "sat": "m2",
+     "koef": 0.15,
+     "price": "AHS:Pekerjaan Acian Tebal 5 mm, Merek Tiga Roda / Setara",
+     "src": "AHS AD1"
+    },
+    {
+     "name": "Upah tali air, profil sudut & perapihan",
+     "sat": "m1",
+     "koef": 1,
+     "price": 18000
+    }
+   ]
+  },
+  {
+   "code": "P1",
+   "group": "kusen",
+   "name": "Pintu kaca swing 1 daun frameless 104 x 200 cm (Toko 1 & 2)",
+   "sat": "unit",
+   "note": "SKP: komponen 'Single Leaf 2106 x 900mm', bbox 104x200 cm, patch & handle chrome",
+   "components": [
+    {
+     "name": "Kusen aluminium 4\" powder coat hitam (2x2,00 + 1,04)",
+     "sat": "m1",
+     "koef": 5.04,
+     "price": 175000
+    },
+    {
+     "name": "Kaca tempered 10 mm clear (daun 0,90 x 1,95)",
+     "sat": "m2",
+     "koef": 1.76,
+     "price": 850000
+    },
+    {
+     "name": "Floor hinge",
+     "sat": "set",
+     "koef": 1,
+     "price": 1250000
+    },
+    {
+     "name": "Patch fitting atas-bawah",
+     "sat": "set",
+     "koef": 1,
+     "price": 650000
+    },
+    {
+     "name": "Handle tarik stainless 60 cm",
+     "sat": "set",
+     "koef": 1,
+     "price": 350000
+    },
+    {
+     "name": "Kunci lantai kaca",
+     "sat": "set",
+     "koef": 1,
+     "price": 250000
+    },
+    {
+     "name": "Sealant & aksesori",
+     "sat": "ls",
+     "koef": 1,
+     "price": 75000
+    },
+    {
+     "name": "Upah pasang kusen & daun kaca",
+     "sat": "m2",
+     "koef": 2.08,
+     "price": 200000
+    }
+   ]
+  },
+  {
+   "code": "J1",
+   "group": "kusen",
+   "name": "Jendela kaca mati etalase 265 x 140 cm (Toko 1)",
+   "sat": "unit",
+   "note": "SKP: Group#792, 265 x 140 cm, z +1,10..+2,50",
+   "components": [
+    {
+     "name": "Kusen aluminium 4\" powder coat hitam keliling 2x(2,65+1,40)",
+     "sat": "m1",
+     "koef": 8.1,
+     "price": 165000
+    },
+    {
+     "name": "Kaca tempered 8 mm clear",
+     "sat": "m2",
+     "koef": 3.71,
+     "price": 650000
+    },
+    {
+     "name": "Sealant silikon & karet kaca",
+     "sat": "ls",
+     "koef": 1,
+     "price": 100000
+    },
+    {
+     "name": "Upah pasang",
+     "sat": "m2",
+     "koef": 3.71,
+     "price": 125000
+    }
+   ]
+  },
+  {
+   "code": "J2",
+   "group": "kusen",
+   "name": "Jendela kaca mati etalase 209 x 140 cm (Toko 2)",
+   "sat": "unit",
+   "note": "SKP: Group#791, 209 x 140 cm",
+   "components": [
+    {
+     "name": "Kusen aluminium 4\" powder coat hitam keliling 2x(2,09+1,40)",
+     "sat": "m1",
+     "koef": 6.98,
+     "price": 165000
+    },
+    {
+     "name": "Kaca tempered 8 mm clear",
+     "sat": "m2",
+     "koef": 2.93,
+     "price": 650000
+    },
+    {
+     "name": "Sealant silikon & karet kaca",
+     "sat": "ls",
+     "koef": 1,
+     "price": 100000
+    },
+    {
+     "name": "Upah pasang",
+     "sat": "m2",
+     "koef": 2.93,
+     "price": 125000
+    }
+   ]
+  },
+  {
+   "code": "P2",
+   "group": "kusen",
+   "name": "Pintu kaca swing 2 daun + kaca mati samping 271 x 244 cm (balkon Unit 1)",
+   "sat": "unit",
+   "note": "SKP: Group#647, kusen 271x244, 2 daun kaca 95x230",
+   "components": [
+    {
+     "name": "Kusen aluminium 4\" powder coat hitam (2x2,44 + 2,71)",
+     "sat": "m1",
+     "koef": 7.59,
+     "price": 175000
+    },
+    {
+     "name": "Rangka daun aluminium hitam 2 daun x 2(0,95+2,30)",
+     "sat": "m1",
+     "koef": 13.0,
+     "price": 120000
+    },
+    {
+     "name": "Kaca tempered 8 mm clear (daun 4,37 + kaca mati 1,50)",
+     "sat": "m2",
+     "koef": 5.87,
+     "price": 650000
+    },
+    {
+     "name": "Engsel stainless 4\" (3 x 2 daun)",
+     "sat": "bh",
+     "koef": 6,
+     "price": 85000
+    },
+    {
+     "name": "Handle + body kunci + silinder",
+     "sat": "set",
+     "koef": 1,
+     "price": 550000
+    },
+    {
+     "name": "Flush bolt atas-bawah",
+     "sat": "set",
+     "koef": 1,
+     "price": 150000
+    },
+    {
+     "name": "Sealant & aksesori",
+     "sat": "ls",
+     "koef": 1,
+     "price": 100000
+    },
+    {
+     "name": "Upah pasang",
+     "sat": "m2",
+     "koef": 6.61,
+     "price": 175000
+    }
+   ]
+  },
+  {
+   "code": "P3",
+   "group": "kusen",
+   "name": "Pintu kaca swing 2 daun + kaca mati samping 250 x 244 cm (balkon Unit 2)",
+   "sat": "unit",
+   "note": "SKP: Group#325, kusen 250x244, 2 daun kaca 95x230",
+   "components": [
+    {
+     "name": "Kusen aluminium 4\" powder coat hitam (2x2,44 + 2,50)",
+     "sat": "m1",
+     "koef": 7.38,
+     "price": 175000
+    },
+    {
+     "name": "Rangka daun aluminium hitam 2 daun x 2(0,95+2,30)",
+     "sat": "m1",
+     "koef": 13.0,
+     "price": 120000
+    },
+    {
+     "name": "Kaca tempered 8 mm clear (daun 4,37 + kaca mati 1,02)",
+     "sat": "m2",
+     "koef": 5.39,
+     "price": 650000
+    },
+    {
+     "name": "Engsel stainless 4\" (3 x 2 daun)",
+     "sat": "bh",
+     "koef": 6,
+     "price": 85000
+    },
+    {
+     "name": "Handle + body kunci + silinder",
+     "sat": "set",
+     "koef": 1,
+     "price": 550000
+    },
+    {
+     "name": "Flush bolt atas-bawah",
+     "sat": "set",
+     "koef": 1,
+     "price": 150000
+    },
+    {
+     "name": "Sealant & aksesori",
+     "sat": "ls",
+     "koef": 1,
+     "price": 100000
+    },
+    {
+     "name": "Upah pasang",
+     "sat": "m2",
+     "koef": 6.1,
+     "price": 175000
+    }
+   ]
+  }
+ ],
+ "bab": [
+  {
+   "no": "I",
+   "title": "Pekerjaan Persiapan",
+   "rows": [
+    {
+     "type": "ahs",
+     "uraian": "Pembersihan lahan",
+     "ruang": "Area merah ± 58,9 m2",
+     "lantai": "All Floor",
+     "spec": "(c) 1 m2 Pembersihan dan Pengupasan Permukaan Tanah (Striping ) s.d. Tanaman Ø 2cm",
+     "vol": 58.9
+    },
+    {
+     "type": "ahs",
+     "uraian": "Pengukuran dan pemasangan bouwplank",
+     "ruang": "Ruko 2 unit (keliling massa 27,9 m1)",
+     "lantai": "All Floor",
+     "spec": "Pekerjaan Persiapan, Pengukuran, dan Bouwplank",
+     "vol": 1
+    },
+    {
+     "type": "pending",
+     "uraian": "Mobilisasi dan demobilisasi",
+     "ruang": "Seluruh area",
+     "lantai": "All Floor",
+     "reason": "menunggu metode pelaksanaan / penawaran kontraktor"
+    },
+    {
+     "type": "pending",
+     "uraian": "Fasilitas sementara proyek",
+     "ruang": "Seluruh area",
+     "lantai": "All Floor",
+     "reason": "menunggu metode pelaksanaan / penawaran kontraktor"
+    },
+    {
+     "type": "ahs",
+     "uraian": "Listrik dan air kerja",
+     "ruang": "Seluruh area, ± 4 bulan (ls per bulan)",
+     "lantai": "All Floor",
+     "spec": "Penyediaan Listrik Kerja (Token Listrik selama Pekerjaan Berlangsung)",
+     "vol": 4
+    },
+    {
+     "type": "pending",
+     "uraian": "Pengamanan dan perlindungan area proyek",
+     "ruang": "Seluruh area",
+     "lantai": "All Floor",
+     "reason": "menunggu metode pelaksanaan / penawaran kontraktor"
+    },
+    {
+     "type": "audit",
+     "uraian": "Pembersihan akhir proyek",
+     "ruang": "Seluruh area, rutin ± 4 bulan + akhir",
+     "lantai": "All Floor",
+     "code": "AUD-01",
+     "vol": 4
+    }
+   ]
+  },
+  {
+   "no": "II",
+   "title": "Pekerjaan Tanah, Galian & Urugan",
+   "rows": [
+    {
+     "type": "pending",
+     "uraian": "Galian tanah pondasi",
+     "ruang": "Ruko 2 unit",
+     "lantai": "All Floor",
+     "reason": "menunggu data struktur (belum ada di SKP)"
+    },
+    {
+     "type": "pending",
+     "uraian": "Pembuangan tanah sisa",
+     "ruang": "Seluruh area",
+     "lantai": "All Floor",
+     "reason": "menunggu data struktur (belum ada di SKP)"
+    },
+    {
+     "type": "ahs",
+     "uraian": "Urugan pasir",
+     "ruang": "Bawah lantai Toko 1 & 2, t = 5 cm (± 47,3 m2)",
+     "lantai": "Lantai 1",
+     "spec": "1 m3 urukan pasir uruk untuk volume s.d 200 m3 tanpa pemadatan secara manual",
+     "vol": 2.37
+    },
+    {
+     "type": "pending",
+     "uraian": "Urugan kembali",
+     "ruang": "Ruko 2 unit",
+     "lantai": "All Floor",
+     "reason": "menunggu data struktur (belum ada di SKP)"
+    },
+    {
+     "type": "ahs",
+     "uraian": "Pemadatan tanah",
+     "ruang": "Pemadatan urugan pasir Toko 1 & 2",
+     "lantai": "Lantai 1",
+     "spec": "(a) 1 m3 Pemadatan pasir setebal 15 cm menggunakan mesin Stamper Kodok secara semi mekanis",
+     "vol": 2.37
+    }
+   ]
+  },
+  {
+   "no": "III",
+   "title": "Pekerjaan Struktur",
+   "rows": [
+    {
+     "type": "ahs",
+     "uraian": "Lantai kerja",
+     "ruang": "Bawah lantai Toko 1 & 2",
+     "lantai": "Lantai 1",
+     "spec": "Pekerjaan Lantai Kerja (Plur)",
+     "vol": 47.3
+    },
+    {
+     "type": "pending",
+     "uraian": "Pondasi beton bertulang - Bekisting",
+     "ruang": "Ruko 2 unit",
+     "lantai": "All Floor",
+     "reason": "menunggu data struktur (belum ada di SKP)"
+    },
+    {
+     "type": "pending",
+     "uraian": "Pondasi beton bertulang - Besi Ulir",
+     "ruang": "Ruko 2 unit",
+     "lantai": "All Floor",
+     "reason": "menunggu data struktur (belum ada di SKP)"
+    },
+    {
+     "type": "pending",
+     "uraian": "Pondasi beton bertulang - Besi Polos",
+     "ruang": "Ruko 2 unit",
+     "lantai": "All Floor",
+     "reason": "menunggu data struktur (belum ada di SKP)"
+    },
+    {
+     "type": "pending",
+     "uraian": "Pondasi beton bertulang - Beton",
+     "ruang": "Ruko 2 unit",
+     "lantai": "All Floor",
+     "reason": "menunggu data struktur (belum ada di SKP)"
+    },
+    {
+     "type": "pending",
+     "uraian": "Sloof - Bekisting",
+     "ruang": "Ruko 2 unit",
+     "lantai": "All Floor",
+     "reason": "menunggu data struktur (belum ada di SKP)"
+    },
+    {
+     "type": "pending",
+     "uraian": "Sloof - Besi Ulir",
+     "ruang": "Ruko 2 unit",
+     "lantai": "All Floor",
+     "reason": "menunggu data struktur (belum ada di SKP)"
+    },
+    {
+     "type": "pending",
+     "uraian": "Sloof - Besi Polos",
+     "ruang": "Ruko 2 unit",
+     "lantai": "All Floor",
+     "reason": "menunggu data struktur (belum ada di SKP)"
+    },
+    {
+     "type": "pending",
+     "uraian": "Sloof - Beton",
+     "ruang": "Ruko 2 unit",
+     "lantai": "All Floor",
+     "reason": "menunggu data struktur (belum ada di SKP)"
+    },
+    {
+     "type": "pending",
+     "uraian": "Kolom - Bekisting",
+     "ruang": "Ruko 2 unit (Lt.1-2)",
+     "lantai": "All Floor",
+     "reason": "menunggu data struktur (belum ada di SKP)"
+    },
+    {
+     "type": "pending",
+     "uraian": "Kolom - Besi Ulir",
+     "ruang": "Ruko 2 unit (Lt.1-2)",
+     "lantai": "All Floor",
+     "reason": "menunggu data struktur (belum ada di SKP)"
+    },
+    {
+     "type": "pending",
+     "uraian": "Kolom - Besi Polos",
+     "ruang": "Ruko 2 unit (Lt.1-2)",
+     "lantai": "All Floor",
+     "reason": "menunggu data struktur (belum ada di SKP)"
+    },
+    {
+     "type": "pending",
+     "uraian": "Kolom - Beton",
+     "ruang": "Ruko 2 unit (Lt.1-2)",
+     "lantai": "All Floor",
+     "reason": "menunggu data struktur (belum ada di SKP)"
+    },
+    {
+     "type": "pending",
+     "uraian": "Balok - Bekisting",
+     "ruang": "Ruko 2 unit (Lt.1-2, ring balk)",
+     "lantai": "All Floor",
+     "reason": "menunggu data struktur (belum ada di SKP)"
+    },
+    {
+     "type": "pending",
+     "uraian": "Balok - Besi Ulir",
+     "ruang": "Ruko 2 unit (Lt.1-2, ring balk)",
+     "lantai": "All Floor",
+     "reason": "menunggu data struktur (belum ada di SKP)"
+    },
+    {
+     "type": "pending",
+     "uraian": "Balok - Besi Polos",
+     "ruang": "Ruko 2 unit (Lt.1-2, ring balk)",
+     "lantai": "All Floor",
+     "reason": "menunggu data struktur (belum ada di SKP)"
+    },
+    {
+     "type": "pending",
+     "uraian": "Balok - Beton",
+     "ruang": "Ruko 2 unit (Lt.1-2, ring balk)",
+     "lantai": "All Floor",
+     "reason": "menunggu data struktur (belum ada di SKP)"
+    },
+    {
+     "type": "pending",
+     "uraian": "Pelat lantai - Bekisting",
+     "ruang": "Pelat Lt.2 & balkon timur",
+     "lantai": "All Floor",
+     "reason": "menunggu data struktur (belum ada di SKP)"
+    },
+    {
+     "type": "pending",
+     "uraian": "Pelat lantai - Besi Ulir",
+     "ruang": "Pelat Lt.2 & balkon timur",
+     "lantai": "All Floor",
+     "reason": "menunggu data struktur (belum ada di SKP)"
+    },
+    {
+     "type": "pending",
+     "uraian": "Pelat lantai - Besi Polos",
+     "ruang": "Pelat Lt.2 & balkon timur",
+     "lantai": "All Floor",
+     "reason": "menunggu data struktur (belum ada di SKP)"
+    },
+    {
+     "type": "pending",
+     "uraian": "Pelat lantai - Beton",
+     "ruang": "Pelat Lt.2 & balkon timur",
+     "lantai": "All Floor",
+     "reason": "menunggu data struktur (belum ada di SKP)"
+    },
+    {
+     "type": "pending",
+     "uraian": "Tangga beton - Bekisting",
+     "ruang": "Tangga Toko 1 & 2",
+     "lantai": "All Floor",
+     "reason": "menunggu data struktur (belum ada di SKP)"
+    },
+    {
+     "type": "pending",
+     "uraian": "Tangga beton - Besi Ulir",
+     "ruang": "Tangga Toko 1 & 2",
+     "lantai": "All Floor",
+     "reason": "menunggu data struktur (belum ada di SKP)"
+    },
+    {
+     "type": "pending",
+     "uraian": "Tangga beton - Besi Polos",
+     "ruang": "Tangga Toko 1 & 2",
+     "lantai": "All Floor",
+     "reason": "menunggu data struktur (belum ada di SKP)"
+    },
+    {
+     "type": "pending",
+     "uraian": "Tangga beton - Beton",
+     "ruang": "Tangga Toko 1 & 2",
+     "lantai": "All Floor",
+     "reason": "menunggu data struktur (belum ada di SKP)"
+    },
+    {
+     "type": "pending",
+     "uraian": "Dak beton - Bekisting",
+     "ruang": "Kanopi teras depan (beton)",
+     "lantai": "All Floor",
+     "reason": "menunggu data struktur (belum ada di SKP)"
+    },
+    {
+     "type": "pending",
+     "uraian": "Dak beton - Besi Ulir",
+     "ruang": "Kanopi teras depan (beton)",
+     "lantai": "All Floor",
+     "reason": "menunggu data struktur (belum ada di SKP)"
+    },
+    {
+     "type": "pending",
+     "uraian": "Dak beton - Besi Polos",
+     "ruang": "Kanopi teras depan (beton)",
+     "lantai": "All Floor",
+     "reason": "menunggu data struktur (belum ada di SKP)"
+    },
+    {
+     "type": "pending",
+     "uraian": "Dak beton - Beton",
+     "ruang": "Kanopi teras depan (beton)",
+     "lantai": "All Floor",
+     "reason": "menunggu data struktur (belum ada di SKP)"
+    }
+   ]
+  },
+  {
+   "no": "IV",
+   "title": "Pekerjaan Dinding, Plester & Acian",
+   "rows": [
+    {
+     "type": "ahs",
+     "uraian": "Pasangan bata atau bata ringan",
+     "ruang": "Toko 1 & 2 (keliling, sekat antar unit, muka toko, dinding rendah & sirip)",
+     "lantai": "Lantai 1",
+     "spec": "Pemasangan Dinding Bata Ringan AAC Tebal 10 cm dengan Mortar Instan",
+     "vol": 104.33
+    },
+    {
+     "type": "ahs",
+     "uraian": "Pasangan bata atau bata ringan",
+     "ruang": "Ruang Lt.2 Unit 1 & 2 (keliling + sekat)",
+     "lantai": "Lantai 2",
+     "spec": "Pemasangan Dinding Bata Ringan AAC Tebal 10 cm dengan Mortar Instan",
+     "vol": 90.89
+    },
+    {
+     "type": "ahs",
+     "uraian": "Pasangan bata atau bata ringan",
+     "ruang": "Parapet atap (h ± 0,7-1,35 m)",
+     "lantai": "Atap",
+     "spec": "Pemasangan Dinding Bata Ringan AAC Tebal 10 cm dengan Mortar Instan",
+     "vol": 31.12
+    },
+    {
+     "type": "ahs",
+     "uraian": "Pasangan bata atau bata ringan",
+     "ruang": "Fascia tepi kanopi & balkon (el. +2,50 s.d. +4,10)",
+     "lantai": "Lantai 1",
+     "spec": "Pemasangan Dinding Bata Ringan AAC Tebal 10 cm dengan Mortar Instan",
+     "vol": 23.85
+    },
+    {
+     "type": "wall_plaster",
+     "uraian": "Plester dinding"
+    },
+    {
+     "type": "wall_aci",
+     "uraian": "Acian dinding"
+    },
+    {
+     "type": "openingan",
+     "code": "OPK",
+     "uraian": "Openingan kusen / perapihan bukaan pintu dan jendela"
+    }
+   ]
+  },
+  {
+   "no": "V",
+   "title": "Pekerjaan Kusen, Pintu & Jendela",
+   "rows": [
+    {
+     "type": "openings"
+    }
+   ]
+  },
+  {
+   "no": "VI",
+   "title": "Pekerjaan Atap & Kanopi",
+   "rows": [
+    {
+     "type": "ahs",
+     "uraian": "Rangka atap",
+     "ruang": "Atap datar di balik parapet (6,6 x 7,8 m)",
+     "lantai": "Atap",
+     "spec": "Pemasangan Rangka Atap Baja Ringan C75, Merek Taso / Setara",
+     "vol": 50.61
+    },
+    {
+     "type": "ahs",
+     "uraian": "Penutup atap",
+     "ruang": "Atap datar di balik parapet",
+     "lantai": "Atap",
+     "spec": "Pemasangan Atap Spandek Metal Pasir Tebal 3 mm",
+     "vol": 50.61
+    },
+    {
+     "type": "ahs",
+     "uraian": "Insulasi atap",
+     "ruang": "Atap datar di balik parapet",
+     "lantai": "Atap",
+     "spec": "Pemasangan Insulasi Atap Bubble Aluminium Foil 4 mm",
+     "vol": 50.61
+    },
+    {
+     "type": "ahs",
+     "uraian": "Talang atap",
+     "ruang": "Sisi rendah atap, sepanjang parapet",
+     "lantai": "Atap",
+     "spec": "Pemasangan Talang Galvalume",
+     "vol": 7.8
+    }
+   ]
+  },
+  {
+   "no": "VII",
+   "title": "Pekerjaan Plumbing & Sanitari",
+   "rows": [
+    {
+     "type": "sub",
+     "title": "PLUMBING (estimasi - WC tiap unit sesuai denah, belum dimodelkan di SKP)"
+    },
+    {
+     "type": "ahs",
+     "uraian": "Instalasi air bersih",
+     "ruang": "Distribusi utama 2 unit (3/4\")",
+     "lantai": "All Floor",
+     "spec": "Pemasangan Pipa PVC AW 3/4 inch, Merek Wavin / Rucika",
+     "vol": 20
+    },
+    {
+     "type": "ahs",
+     "uraian": "Instalasi air bersih",
+     "ruang": "Cabang ke titik (1/2\")",
+     "lantai": "All Floor",
+     "spec": "Pemasangan Pipa PVC AW 1/2 inch, Merek Wavin / Rucika",
+     "vol": 12
+    },
+    {
+     "type": "ahs",
+     "uraian": "Instalasi air kotor",
+     "ruang": "WC > septic tank",
+     "lantai": "Lantai 1",
+     "spec": "Pemasangan Pipa PVC D 4 inch, Merek Wavin / Rucika",
+     "vol": 12
+    },
+    {
+     "type": "ahs",
+     "uraian": "Instalasi air bekas",
+     "ruang": "Wastafel & floor drain",
+     "lantai": "Lantai 1",
+     "spec": "Pemasangan Pipa PVC AW 2 inch, Merek Wavin / Rucika",
+     "vol": 12
+    },
+    {
+     "type": "ahs",
+     "uraian": "Instalasi pembuangan air hujan",
+     "ruang": "Talang atap & balkon > saluran",
+     "lantai": "All Floor",
+     "spec": "Pemasangan Pipa PVC AW 3 inch, Merek Wavin / Rucika",
+     "vol": 18
+    },
+    {
+     "type": "ahs",
+     "uraian": "Bak kontrol - unit siap pasang",
+     "ruang": "Depan ruko",
+     "lantai": "Lantai 1",
+     "spec": "Pembuatan Bak Kontrol dengan Tutup Beton",
+     "vol": 2
+    },
+    {
+     "type": "ahs",
+     "uraian": "Septic tank - unit siap pasang",
+     "ruang": "1 per unit",
+     "lantai": "Lantai 1",
+     "spec": "Pemasangan Bio Septictank BioRich BSR",
+     "vol": 2
+    },
+    {
+     "type": "ahs",
+     "uraian": "Roof tank / toren air",
+     "ruang": "Atap, 1 per unit",
+     "lantai": "Atap",
+     "spec": "Pemasangan Tangki Air Penguin Kapasitas 1200 Liter",
+     "vol": 2
+    },
+    {
+     "type": "ahs",
+     "uraian": "Pompa transfer / distribusi air",
+     "ruang": "1 per unit",
+     "lantai": "All Floor",
+     "spec": "Pemasangan Jet Pump, Merek Nasional / Setara",
+     "vol": 2
+    },
+    {
+     "type": "sub",
+     "title": "SANITARI (estimasi)"
+    },
+    {
+     "type": "ahs",
+     "uraian": "Kloset",
+     "ruang": "WC bawah tangga Toko 1 & 2",
+     "lantai": "Lantai 1",
+     "spec": "Pemasangan Kloset Duduk CW422J Dual Flush, Merek Toto",
+     "vol": 2
+    },
+    {
+     "type": "ahs",
+     "uraian": "Jet washer",
+     "ruang": "WC Toko 1 & 2",
+     "lantai": "Lantai 1",
+     "spec": "Pemasangan Jet Washer TX403SB, Merek Toto",
+     "vol": 2
+    },
+    {
+     "type": "ahs",
+     "uraian": "Wastafel dan aksesori",
+     "ruang": "WC Toko 1 & 2",
+     "lantai": "Lantai 1",
+     "spec": "Pemasangan Wastafel LW211CJ, Merek Toto",
+     "vol": 2
+    },
+    {
+     "type": "ahs",
+     "uraian": "Keran air",
+     "ruang": "Teras depan",
+     "lantai": "Lantai 1",
+     "spec": "Pemasangan Kran CLS, Merek Onda",
+     "vol": 2
+    },
+    {
+     "type": "ahs",
+     "uraian": "Floor drain",
+     "ruang": "WC Toko 1 & 2",
+     "lantai": "Lantai 1",
+     "spec": "Pemasangan Floor Drain Eco E2FD, Merek Toto",
+     "vol": 2
+    },
+    {
+     "type": "ahs",
+     "uraian": "Roof drain",
+     "ruang": "Balkon Lt.2",
+     "lantai": "Lantai 2",
+     "spec": "Pemasangan Roof Drain, Merek Onda / Setara",
+     "vol": 2
+    }
+   ]
+  },
+  {
+   "no": "VIII",
+   "title": "Pekerjaan Listrik & Sistem Pendukung",
+   "rows": [
+    {
+     "type": "sub",
+     "title": "LISTRIK (estimasi - titik belum dimodelkan di SKP)"
+    },
+    {
+     "type": "ahs",
+     "uraian": "Panel listrik dan perangkat proteksi",
+     "ruang": "Instalasi panel, 1 per unit",
+     "lantai": "Lantai 1",
+     "spec": "Pemasangan Instalasi Panel",
+     "vol": 2
+    },
+    {
+     "type": "ahs",
+     "uraian": "Panel listrik dan perangkat proteksi",
+     "ruang": "Box panel, 1 per unit",
+     "lantai": "Lantai 1",
+     "spec": "Pemasangan Box Panel",
+     "vol": 2
+    },
+    {
+     "type": "ahs",
+     "uraian": "Panel listrik dan perangkat proteksi",
+     "ruang": "MCB 10A, 4 per unit",
+     "lantai": "Lantai 1",
+     "spec": "Pemasangan MCB 10A, Merek Schneider",
+     "vol": 8
+    },
+    {
+     "type": "ahs",
+     "uraian": "Instalasi titik penerangan",
+     "ruang": "2 unit x (6 Lt.1 + 6 Lt.2 + 1 WC + 2 teras/balkon)",
+     "lantai": "All Floor",
+     "spec": "Pemasangan dan Material Instalasi Penerangan",
+     "vol": 30
+    },
+    {
+     "type": "ahs",
+     "uraian": "Instalasi titik stopkontak",
+     "ruang": "2 unit x 8 titik",
+     "lantai": "All Floor",
+     "spec": "Pemasangan dan Material Instalasi Stop Kontak",
+     "vol": 16
+    },
+    {
+     "type": "ahs",
+     "uraian": "Armatur dan lampu",
+     "ruang": "Downlight 15W - toko, ruang Lt.2 & WC",
+     "lantai": "All Floor",
+     "spec": "Pemasangan Lampu Downlight 15W Cool White, Merek Philips",
+     "vol": 26
+    },
+    {
+     "type": "ahs",
+     "uraian": "Armatur dan lampu",
+     "ruang": "Downlight outbow - teras bawah kanopi & balkon Lt.2",
+     "lantai": "All Floor",
+     "spec": "Pemasangan Lampu Downlight Outbow Putih 15W Cool White, Merek Tidy / Setara",
+     "vol": 4
+    },
+    {
+     "type": "ahs",
+     "uraian": "Saklar dan stopkontak",
+     "ruang": "Saklar tunggal",
+     "lantai": "All Floor",
+     "spec": "Pemasangan Saklar Tunggal Leona White, Merek Schneider",
+     "vol": 6
+    },
+    {
+     "type": "ahs",
+     "uraian": "Saklar dan stopkontak",
+     "ruang": "Saklar ganda",
+     "lantai": "All Floor",
+     "spec": "Pemasangan Saklar Ganda Leona White, Merek Schneider",
+     "vol": 6
+    },
+    {
+     "type": "ahs",
+     "uraian": "Saklar dan stopkontak",
+     "ruang": "Stopkontak dinding",
+     "lantai": "All Floor",
+     "spec": "Pemasangan Stop Kontak Dinding Leona White, Merek Schneider",
+     "vol": 16
+    },
+    {
+     "type": "ahs",
+     "uraian": "Saklar dan stopkontak",
+     "ruang": "Stopkontak AC - Toko 1 & 2, Ruang Lt.2 Unit 1 & 2",
+     "lantai": "All Floor",
+     "spec": "Pemasangan Stop Kontak AC Plano White, Merek Broco",
+     "vol": 4
+    }
+   ]
+  },
+  {
+   "no": "IX",
+   "title": "Pekerjaan Finishing Arsitektur",
+   "rows": [
+    {
+     "type": "sub",
+     "title": "FINISHING DINDING"
+    },
+    {
+     "type": "wall_finish",
+     "uraian": "Pengecatan dinding",
+     "only": [
+      "putih",
+      "terracotta"
+     ]
+    },
+    {
+     "type": "ahs",
+     "uraian": "Panel dekoratif dinding",
+     "ruang": "Cladding WPC dinding rendah & sirip muka toko (dalam + luar)",
+     "lantai": "Lantai 1",
+     "spec": "Pemasangan WPC Modern SW 50, Merek Duma",
+     "vol": 13.1
+    },
+    {
+     "type": "wall_finish",
+     "uraian": "Finishing semen ekspos dan coating",
+     "only": [
+      "ekspos"
+     ]
+    },
+    {
+     "type": "sub",
+     "title": "FINISHING LANTAI"
+    },
+    {
+     "type": "ahs",
+     "uraian": "Penutup lantai keramik atau homogeneous tile",
+     "ruang": "Toko 1 Fin. Keramik 60x60 Grey",
+     "lantai": "Lantai 1",
+     "spec": "Pemasangan Keramik 60x60 Grey / Setara, Merek Niro Granite",
+     "vol": 22.52
+    },
+    {
+     "type": "ahs",
+     "uraian": "Penutup lantai keramik atau homogeneous tile",
+     "ruang": "Toko 2 Fin. Keramik 60x60 Grey",
+     "lantai": "Lantai 1",
+     "spec": "Pemasangan Keramik 60x60 Grey / Setara, Merek Niro Granite",
+     "vol": 19.28
+    },
+    {
+     "type": "ahs",
+     "uraian": "Penutup lantai keramik atau homogeneous tile",
+     "ruang": "Ruang Lt.2 Unit 1 Fin. Keramik 60x60 Grey (di luar void tangga)",
+     "lantai": "Lantai 2",
+     "spec": "Pemasangan Keramik 60x60 Grey / Setara, Merek Niro Granite",
+     "vol": 19.52
+    },
+    {
+     "type": "ahs",
+     "uraian": "Penutup lantai keramik atau homogeneous tile",
+     "ruang": "Ruang Lt.2 Unit 2 Fin. Keramik 60x60 Grey (di luar void tangga)",
+     "lantai": "Lantai 2",
+     "spec": "Pemasangan Keramik 60x60 Grey / Setara, Merek Niro Granite",
+     "vol": 16.28
+    },
+    {
+     "type": "ahs",
+     "uraian": "Penutup lantai SPC, vinyl, atau parket",
+     "ruang": "Teras depan Fin. Decking Kayu Conwood",
+     "lantai": "Lantai 1",
+     "spec": "Pemasangan Decking Kayu Conwood / Setara",
+     "vol": 7.88
+    },
+    {
+     "type": "ahs",
+     "uraian": "Finishing lantai semen ekspos",
+     "ruang": "Balkon timur Lt.2",
+     "lantai": "Lantai 2",
+     "spec": "Pekerjaan Lantai Semen Ekspos Heavy Duty",
+     "vol": 7.88
+    },
+    {
+     "type": "sub",
+     "title": "FINISHING TANGGA DAN BORDES"
+    },
+    {
+     "type": "ahs",
+     "uraian": "Penutup permukaan anak tangga",
+     "ruang": "Tangga Toko 1 & 2 (2 x 17 trap x 1,0 x 0,3) Fin. Semen Ekspos",
+     "lantai": "Lantai 1",
+     "spec": "Pekerjaan Lantai Semen Ekspos Heavy Duty",
+     "vol": 10.2
+    },
+    {
+     "type": "ahs",
+     "uraian": "Penutup bidang tegak anak tangga",
+     "ruang": "Tangga Toko 1 & 2 (2 x 18 x 1,0 x 0,2) Fin. Semen Ekspos",
+     "lantai": "Lantai 1",
+     "spec": "Pekerjaan Lantai Semen Ekspos Heavy Duty",
+     "vol": 7.2
+    },
+    {
+     "type": "ahs",
+     "uraian": "Penutup lantai bordes",
+     "ruang": "Bordes tangga Toko 1 & 2 (2 x 1,0 x 1,0) Fin. Semen Ekspos",
+     "lantai": "Lantai 1",
+     "spec": "Pekerjaan Lantai Semen Ekspos Heavy Duty",
+     "vol": 2.0
+    },
+    {
+     "type": "ahs",
+     "uraian": "Step nosing / profil tepi anak tangga",
+     "ruang": "Tangga Toko 1 & 2",
+     "lantai": "Lantai 1",
+     "spec": "Pemasangan Stepnosing Tangga HPL Woodgrain Eco P046, Merek Taco",
+     "vol": 34
+    },
+    {
+     "type": "sub",
+     "title": "PEKERJAAN PLAFON"
+    },
+    {
+     "type": "ahs",
+     "uraian": "Penutup plafon",
+     "ruang": "Plafon Toko 1 Fin. Gypsum Board (di luar void tangga)",
+     "lantai": "Lantai 1",
+     "spec": "Pemasangan Plafon Gypsum Board dengan Compound 9 x 1200 x 2400 mm, Merek Aplus",
+     "vol": 19.52
+    },
+    {
+     "type": "ahs",
+     "uraian": "Penutup plafon",
+     "ruang": "Plafon Toko 2 Fin. Gypsum Board (di luar void tangga)",
+     "lantai": "Lantai 1",
+     "spec": "Pemasangan Plafon Gypsum Board dengan Compound 9 x 1200 x 2400 mm, Merek Aplus",
+     "vol": 16.28
+    },
+    {
+     "type": "ahs",
+     "uraian": "Penutup plafon",
+     "ruang": "Plafon Ruang Lt.2 Unit 1 Fin. Gypsum Board (asumsi, plafon Lt.2 tidak dimodelkan)",
+     "lantai": "Lantai 2",
+     "spec": "Pemasangan Plafon Gypsum Board dengan Compound 9 x 1200 x 2400 mm, Merek Aplus",
+     "vol": 22.52
+    },
+    {
+     "type": "ahs",
+     "uraian": "Penutup plafon",
+     "ruang": "Plafon Ruang Lt.2 Unit 2 Fin. Gypsum Board (asumsi)",
+     "lantai": "Lantai 2",
+     "spec": "Pemasangan Plafon Gypsum Board dengan Compound 9 x 1200 x 2400 mm, Merek Aplus",
+     "vol": 19.28
+    },
+    {
+     "type": "ahs",
+     "uraian": "Penutup plafon",
+     "ruang": "Plafon balkon timur Lt.2 Fin. GRC (eksterior)",
+     "lantai": "Lantai 2",
+     "spec": "Pemasangan Plafon GRC (Glass Reinforced Cement) dengan Compound 9 x 1200 x 2400 mm, Merek Aplus",
+     "vol": 7.0
+    },
+    {
+     "type": "ahs",
+     "uraian": "Penutup plafon",
+     "ruang": "Sisi bawah & tepi kanopi beton teras - plester",
+     "lantai": "Lantai 1",
+     "spec": "Pekerjaan Plesteran Tebal 5 mm, Semen Padang / Setara, Pasir Ayak / Setara",
+     "vol": 19.53
+    },
+    {
+     "type": "ahs",
+     "uraian": "Penutup plafon",
+     "ruang": "Sisi bawah & tepi kanopi beton teras - aci ekspos",
+     "lantai": "Lantai 1",
+     "spec": "Pekerjaan Acian Ekspos, Merek Dunia Mortar / Setara",
+     "vol": 19.53
+    },
+    {
+     "type": "ahs",
+     "uraian": "Penutup plafon",
+     "ruang": "Sisi bawah & tepi kanopi beton teras - coating",
+     "lantai": "Lantai 1",
+     "spec": "Pekerjaan Coating Semen Aci Ekspos, Merek Klirkote",
+     "vol": 19.53
+    },
+    {
+     "type": "ahs",
+     "uraian": "Pengecatan plafon",
+     "ruang": "Plafon Toko 1",
+     "lantai": "Lantai 1",
+     "spec": "Pengecatan Plafon, Merek Dulux / Setara",
+     "vol": 19.52
+    },
+    {
+     "type": "ahs",
+     "uraian": "Pengecatan plafon",
+     "ruang": "Plafon Toko 2",
+     "lantai": "Lantai 1",
+     "spec": "Pengecatan Plafon, Merek Dulux / Setara",
+     "vol": 16.28
+    },
+    {
+     "type": "ahs",
+     "uraian": "Pengecatan plafon",
+     "ruang": "Plafon Ruang Lt.2 Unit 1",
+     "lantai": "Lantai 2",
+     "spec": "Pengecatan Plafon, Merek Dulux / Setara",
+     "vol": 22.52
+    },
+    {
+     "type": "ahs",
+     "uraian": "Pengecatan plafon",
+     "ruang": "Plafon Ruang Lt.2 Unit 2",
+     "lantai": "Lantai 2",
+     "spec": "Pengecatan Plafon, Merek Dulux / Setara",
+     "vol": 19.28
+    },
+    {
+     "type": "ahs",
+     "uraian": "Pengecatan plafon",
+     "ruang": "Plafon balkon timur Lt.2 (GRC)",
+     "lantai": "Lantai 2",
+     "spec": "Pengecatan Plafon, Merek Dulux / Setara",
+     "vol": 7.0
+    },
+    {
+     "type": "sub",
+     "title": "RAILING DAN HANDRAIL"
+    },
+    {
+     "type": "ahs",
+     "uraian": "Railing tangga",
+     "ruang": "Tangga Toko 1 & 2 (2 x 4,5 m)",
+     "lantai": "Lantai 1",
+     "spec": "Pemasangan Railing Metal (Handle Saja)",
+     "vol": 9
+    },
+    {
+     "type": "sub",
+     "title": "SECONDARY SKIN DAN KISI-KISI FASAD"
+    },
+    {
+     "type": "ahs",
+     "uraian": "Panel atau kisi-kisi",
+     "ruang": "Secondary skin metal fasad selatan & timur Lt.2 (termasuk rangka penyangga), el. +2,90 s.d. +7,10",
+     "lantai": "Lantai 2",
+     "spec": "Pemasangan Secondary Skin Metal Cutting",
+     "vol": 64.9
+    },
+    {
+     "type": "sub",
+     "title": "WATERPROOFING BANGUNAN"
+    },
+    {
+     "type": "ahs",
+     "uraian": "Waterproofing kamar mandi dan area basah",
+     "ruang": "Lantai & dinding basah WC Toko 1 & 2 (estimasi)",
+     "lantai": "Lantai 1",
+     "spec": "Pekerjaan Seal Waterproofing, Merek SIKA 107",
+     "vol": 6
+    },
+    {
+     "type": "ahs",
+     "uraian": "Waterproofing balkon",
+     "ruang": "Lantai balkon timur Lt.2 (incl. naik 15 cm)",
+     "lantai": "Lantai 2",
+     "spec": "Pekerjaan Seal Waterproofing, Merek SIKA 107",
+     "vol": 9.1
+    },
+    {
+     "type": "ahs",
+     "uraian": "Waterproofing dak",
+     "ruang": "Permukaan atas kanopi beton teras (incl. naik 15 cm)",
+     "lantai": "Lantai 1",
+     "spec": "Pekerjaan Seal Waterproofing, Merek SIKA 107",
+     "vol": 16.7
+    }
+   ]
+  },
+  {
+   "no": "X",
+   "title": "Pekerjaan Luar & Lanskap",
+   "rows": [
+    {
+     "type": "sub",
+     "title": "LANDSCAPE"
+    },
+    {
+     "type": "ahs",
+     "uraian": "Batu dekoratif dan elemen taman",
+     "ruang": "Koral sebar jalur sisi selatan ruko (7,15 x 0,35 m)",
+     "lantai": "Lantai 1",
+     "spec": "Pemasangan Batu Koral Sebar 3-5 cm",
+     "vol": 2.5
+    }
+   ]
+  }
+ ]
+}

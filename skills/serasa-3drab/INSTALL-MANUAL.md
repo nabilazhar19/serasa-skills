@@ -9,9 +9,9 @@ Format mengikuti standar Agent Skills (`SKILL.md` + `scripts/` + `references/`),
 - `scripts/install_sketchup_plugin.sh` — pasang `skp_extract.rb` ke folder Plugins SketchUp (macOS) agar termuat otomatis
 - `scripts/build_rab.py` — membangun & menulis sheet dari input JSON; `--push` via service account (mode `--prepare template` / `clone:<tab>`), atau file siap kirim untuk connector
 - `references/` — metode take-off, pemetaan material → kode MASTER AHS, format input, format & jebakan Google Sheets
-- `examples/mini_input.json` — contoh ringkas semua tipe baris (baca ini dulu)
-- `examples/ruko_bkl_input.json` — tab baru di file proyek yang sudah ada (Ruko BKL)
-- `examples/bku_input.json` — input lengkap proyek 0113 Bengkulu House
+- `examples/mini_input.json` — contoh ringkas format template Nov 2026 (baca ini dulu)
+- `examples/ruko_rev1_input.json` — contoh lengkap: Ruko BKL di file 0113_BENGKULU HOUSE REV1
+- `examples/legacy/`, `scripts/legacy/` — format lama (MASTER AHS), hanya untuk file lama
 
 ## Instalasi
 **Claude Code / Claude (desktop)**: salin folder ke `~/.claude/skills/serasa-3drab/` (personal) atau `<repo>/.claude/skills/serasa-3drab/` (per proyek).
@@ -34,5 +34,5 @@ Untuk membuat RAB format Serasa, ikuti ~/.codex/skills/serasa-3drab/SKILL.md
 
 ## Uji cepat
 ```
-python3 scripts/build_rab.py examples/mini_input.json --out out
+python3 scripts/build_rab.py examples/mini_input.json --ahs <ekspor tab AHS (.csv/.json)> --out out
 ```

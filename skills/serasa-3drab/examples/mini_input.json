@@ -1,61 +1,338 @@
 {
- "project": {"title": "RUKO BKL (0113_BENGKULU HOUSE) - Area Ruko 2 Unit", "tab": "Ruko BKL", "analisa_tab": "Analisa BKU", "zona": "Kota Bengkulu", "basis": "Kota Bogor"},
- "luasan": {
-  "tanah_label": "Luas Tapak (area merah: ruko 2 unit + teras)", "tanah": 58.9,
-  "lantai": [
-   {"short": "Lt.1", "label": "Luas Lantai 1 (2 toko + teras beratap)", "items": [["toko 2 unit", 47.9], ["teras bawah kanopi", 7.9]]},
-   {"short": "Lt.2", "label": "Luas Lantai 2 (2 ruang + balkon beratap)", "items": [["ruang Lt.2", 47.9], ["balkon timur", 7.9]]}
-  ],
-  "note": "Luas kotor dari model SKP (sisi luar dinding). Area tanpa atap tidak termasuk."
+ "project": {
+  "title": "CONTOH (mini) - format template Nov 2026",
+  "tab": "Ruko BKL",
+  "audit_tab": "Audit",
+  "zona": "Kota Bengkulu"
  },
- "opening_codes": {"openingan": "RKO-01", "swing": "RKO-02", "swing_hw": "RKO-03", "glass": "RKO-02", "slide_hw": "RKO-03", "fixed": "RKO-06", "louvre": "RKO-06"},
- "analisa": [
-  {"code": "RKO-01", "name": "Openingan kusen - plester & aci sponneng bukaan (lebar 15 cm), termasuk tali air", "sat": "m1",
-   "components": [
-    {"name": "Plester 5mm (PD2) lebar 15 cm", "sat": "m2", "koef": 0.15, "price": "MASTER:PD2", "src": "MASTER PD2"},
-    {"name": "Aci 5mm (AD1) lebar 15 cm", "sat": "m2", "koef": 0.15, "price": "MASTER:AD1", "src": "MASTER AD1"},
-    {"name": "Upah tali air & perapihan", "sat": "m1", "koef": 1, "price": 18000}]},
-  {"code": "RKO-02", "name": "Pintu kaca swing tempered 10 mm + kusen aluminium hitam", "sat": "m2",
-   "components": [
-    {"name": "Kusen aluminium 4\" powder coat", "sat": "m1", "koef": 2.6, "price": 175000},
-    {"name": "Kaca tempered 10 mm", "sat": "m2", "koef": 1, "price": 850000},
-    {"name": "Upah pasang", "sat": "m2", "koef": 1, "price": 175000}]},
-  {"code": "RKO-03", "name": "Hardware pintu kaca per daun (patch fitting/engsel, handle, kunci)", "sat": "daun",
-   "components": [{"name": "Patch fitting + handle + kunci", "sat": "set", "koef": 1, "price": 1250000}, {"name": "Upah setel", "sat": "daun", "koef": 1, "price": 150000}]},
-  {"code": "RKO-06", "name": "Jendela kaca mati rangka aluminium hitam, kaca 6 mm", "sat": "m2",
-   "components": [{"name": "Kusen aluminium", "sat": "m1", "koef": 3.5, "price": 165000}, {"name": "Kaca 6 mm", "sat": "m2", "koef": 1, "price": 350000}, {"name": "Upah pasang", "sat": "m2", "koef": 1, "price": 125000}]}
- ],
+ "luasan": {
+  "tanah_label": "Luas Tapak",
+  "tanah": 58.9,
+  "lantai": [
+   {
+    "short": "Lt.1",
+    "label": "Luas Lantai 1",
+    "items": [
+     [
+      "toko",
+      47.9
+     ],
+     [
+      "teras",
+      7.9
+     ]
+    ]
+   }
+  ]
+ },
  "walls": [
-  {"room": "Toko 1", "lantai": "Lantai 1", "interior": true, "parts": {"ekspos": 30.66, "putih": 34.85}},
-  {"room": "Fasad Barat (Lt.1-2 + parapet)", "lantai": "All Floor", "interior": false, "parts": {"terracotta": 65.24}},
-  {"room": "Fasad Utara", "lantai": "All Floor", "interior": false, "parts": {"ekspos": 17.4, "putih": 20.3}, "finish_code": {"putih": "W20"}}
+  {
+   "room": "Toko 1 (Shop 1)",
+   "lantai": "Lantai 1",
+   "interior": true,
+   "parts": {
+    "ekspos": 30.66,
+    "putih": 34.85
+   }
+  },
+  {
+   "room": "Fasad Barat (sisi parkir motor, Lt.1-2 + parapet)",
+   "lantai": "All Floor",
+   "interior": false,
+   "parts": {
+    "terracotta": 65.24
+   }
+  }
  ],
+ "wall_specs": {
+  "plester": "Pekerjaan Plesteran Tebal 10 mm, Semen Padang / Setara, Pasir Bangka / Setara",
+  "aci": {
+   "ekspos": "Pekerjaan Acian Ekspos, Merek Dunia Mortar / Setara",
+   "putih": "Pekerjaan Acian Tebal 5 mm, Merek Tiga Roda / Setara",
+   "terracotta": "Pekerjaan Acian Tebal 5 mm, Merek Tiga Roda / Setara"
+  },
+  "finish": {
+   "interior": {
+    "ekspos": "Pekerjaan Coating Semen Aci Ekspos, Merek Klirkote",
+    "putih": "Pengecatan Dinding Interior Catylac Interior, Merek Dulux",
+    "terracotta": "Pengecatan Cat Tekstur Terracotta"
+   },
+   "exterior": {
+    "ekspos": "Pekerjaan Coating Semen Aci Ekspos, Merek Klirkote",
+    "putih": "Pengecatan Dinding Eksterior Weathershield, Merek Dulux",
+    "terracotta": "Pengecatan Cat Tekstur Terracotta"
+   }
+  }
+ },
  "openings": [
-  {"uraian": "Teras > Toko 1 / Pintu kaca swing 1 daun", "lantai": "Lantai 1", "w": 1.04, "h": 2.0, "type": "swing", "panels": 1},
-  {"uraian": "Toko 1 > Teras / Jendela kaca mati", "lantai": "Lantai 1", "w": 2.65, "h": 1.4, "type": "fix"},
-  {"uraian": "Ruang Lt.2 > Balkon / Pintu kaca swing 2 daun", "lantai": "Lantai 2", "w": 2.71, "h": 2.44, "type": "swing", "panels": 2},
-  {"uraian": "Storage > Depan / Pintu besi plat (AHS, per m2)", "lantai": "Lantai 1", "w": 2.7, "h": 2.4, "type": "ahs_m2",
-   "ahs": "Pembuatan dan pemasangan 1 m2 pintu besi pelat baja tebal 2 mm rangkap, rangka baja siku1,967,200.00"}
+  {
+   "code": "P1",
+   "jenis": "Pintu",
+   "ruang": "Teras > Toko 1",
+   "lantai": "Lantai 1 (+0,50)",
+   "w": 1.04,
+   "h": 2.0,
+   "type": "swing",
+   "spec": "Pintu kaca swing 1 daun, ukuran bukaan 104 x 200 cm. Kusen aluminium 4\" powder coat hitam, daun kaca tempered 10 mm clear tanpa rangka (frameless), patch fitting atas-bawah + floor hinge 1 set, handle tarik stainless/chrome 1 set, kunci lantai 1 set."
+  },
+  {
+   "code": "J1",
+   "jenis": "Jendela",
+   "ruang": "Toko 1 > Teras (etalase)",
+   "lantai": "Lantai 1 (+1,10)",
+   "w": 2.65,
+   "h": 1.4,
+   "type": "fix",
+   "spec": "Jendela kaca mati (etalase) di atas dinding rendah h 60 cm, ukuran 265 x 140 cm. Kusen aluminium 4\" powder coat hitam keliling, kaca tempered 8 mm clear 1 panel, sealant silikon hitam, karet kaca."
+  }
+ ],
+ "audit": [
+  {
+   "code": "AUD-01",
+   "name": "Pembersihan lokasi rutin selama & setelah pekerjaan (per bulan)",
+   "sat": "bln",
+   "note": "PP3 lama tidak ada di AHS baru",
+   "components": [
+    {
+     "name": "Pekerja kebersihan (26 HOK)",
+     "sat": "OH",
+     "koef": 26,
+     "price": 90000
+    },
+    {
+     "name": "Alat kebersihan & kantong sampah",
+     "sat": "ls",
+     "koef": 1,
+     "price": 150000
+    },
+    {
+     "name": "Angkut buang sampah/puing (1 rit)",
+     "sat": "rit",
+     "koef": 1,
+     "price": 300000
+    }
+   ]
+  },
+  {
+   "code": "OPK",
+   "name": "Plester aci openingan kusen (sponneng bukaan lebar 15 cm) termasuk tali air",
+   "sat": "m1",
+   "note": "volume = keliling bukaan (pintu 2T+L, jendela 2(L+T))",
+   "components": [
+    {
+     "name": "Plester tebal 5 mm lebar 15 cm",
+     "sat": "m2",
+     "koef": 0.15,
+     "price": "AHS:Pekerjaan Plesteran Tebal 5 mm, Semen Padang / Setara, Pasir Ayak / Setara",
+     "src": "AHS PD2"
+    },
+    {
+     "name": "Acian lebar 15 cm",
+     "sat": "m2",
+     "koef": 0.15,
+     "price": "AHS:Pekerjaan Acian Tebal 5 mm, Merek Tiga Roda / Setara",
+     "src": "AHS AD1"
+    },
+    {
+     "name": "Upah tali air, profil sudut & perapihan",
+     "sat": "m1",
+     "koef": 1,
+     "price": 18000
+    }
+   ]
+  },
+  {
+   "code": "P1",
+   "group": "kusen",
+   "name": "Pintu kaca swing 1 daun frameless 104 x 200 cm (Toko 1 & 2)",
+   "sat": "unit",
+   "note": "SKP: komponen 'Single Leaf 2106 x 900mm', bbox 104x200 cm, patch & handle chrome",
+   "components": [
+    {
+     "name": "Kusen aluminium 4\" powder coat hitam (2x2,00 + 1,04)",
+     "sat": "m1",
+     "koef": 5.04,
+     "price": 175000
+    },
+    {
+     "name": "Kaca tempered 10 mm clear (daun 0,90 x 1,95)",
+     "sat": "m2",
+     "koef": 1.76,
+     "price": 850000
+    },
+    {
+     "name": "Floor hinge",
+     "sat": "set",
+     "koef": 1,
+     "price": 1250000
+    },
+    {
+     "name": "Patch fitting atas-bawah",
+     "sat": "set",
+     "koef": 1,
+     "price": 650000
+    },
+    {
+     "name": "Handle tarik stainless 60 cm",
+     "sat": "set",
+     "koef": 1,
+     "price": 350000
+    },
+    {
+     "name": "Kunci lantai kaca",
+     "sat": "set",
+     "koef": 1,
+     "price": 250000
+    },
+    {
+     "name": "Sealant & aksesori",
+     "sat": "ls",
+     "koef": 1,
+     "price": 75000
+    },
+    {
+     "name": "Upah pasang kusen & daun kaca",
+     "sat": "m2",
+     "koef": 2.08,
+     "price": 200000
+    }
+   ]
+  },
+  {
+   "code": "J1",
+   "group": "kusen",
+   "name": "Jendela kaca mati etalase 265 x 140 cm (Toko 1)",
+   "sat": "unit",
+   "note": "SKP: Group#792, 265 x 140 cm, z +1,10..+2,50",
+   "components": [
+    {
+     "name": "Kusen aluminium 4\" powder coat hitam keliling 2x(2,65+1,40)",
+     "sat": "m1",
+     "koef": 8.1,
+     "price": 165000
+    },
+    {
+     "name": "Kaca tempered 8 mm clear",
+     "sat": "m2",
+     "koef": 3.71,
+     "price": 650000
+    },
+    {
+     "name": "Sealant silikon & karet kaca",
+     "sat": "ls",
+     "koef": 1,
+     "price": 100000
+    },
+    {
+     "name": "Upah pasang",
+     "sat": "m2",
+     "koef": 3.71,
+     "price": 125000
+    }
+   ]
+  }
  ],
  "bab": [
-  {"no": "I", "title": "Pekerjaan Persiapan", "rows": [
-   {"type": "master", "uraian": "Pembersihan lokasi", "ruang": "Area merah", "lantai": "All Floor", "code": "PP3", "sat": "bln", "vol": 4, "spec": "Pembersihan lokasi rutin (PP3, harga per bulan)"},
-   {"type": "ahs", "uraian": "Bouwplank", "ruang": "Keliling massa", "lantai": "All Floor", "ahs": "Pasangan 1 m' bouwplank", "sat": "m1", "vol": 27.9}
-  ]},
-  {"no": "III", "title": "Pekerjaan Struktur", "rows": [
-   {"type": "note", "uraian": "Tidak dihitung - model struktur belum tersedia", "spec": "Menyusul setelah desain struktur"}
-  ]},
-  {"no": "IV", "title": "Pekerjaan Dinding, Plester & Acian", "rows": [
-   {"type": "sub", "title": "Pasangan dinding"},
-   {"type": "master", "uraian": "Pasangan dinding bata ringan", "ruang": "Toko 1 & 2", "lantai": "Lantai 1", "code": "PW1", "sat": "M2", "vol": 104.33},
-   {"type": "wall_plaster_aci"}
-  ]},
-  {"no": "V", "title": "Pekerjaan Kusen, Pintu & Jendela", "rows": [{"type": "openings"}]},
-  {"no": "IX", "title": "Pekerjaan Finishing Arsitektur", "rows": [
-   {"type": "wall_finish"},
-   {"type": "sub", "title": "FINISHING LANTAI"},
-   {"type": "master", "uraian": "", "ruang": "Toko 1 Fin. Keramik 60x60 Grey", "lantai": "Lantai 1", "code": "F20", "sat": "M2", "vol": 22.52},
-   {"type": "analisa", "uraian": "Openingan bukaan roster (contoh baris analisa)", "ruang": "Dinding roster Toko 1", "lantai": "Lantai 1", "code": "RKO-01", "sat": "m1", "vol": 4.5}
-  ]}
+  {
+   "no": "I",
+   "title": "Pekerjaan Persiapan",
+   "rows": [
+    {
+     "type": "ahs",
+     "uraian": "Persiapan, pengukuran & bouwplank",
+     "ruang": "Area ruko (keliling massa 27,9 m1)",
+     "lantai": "All Floor",
+     "spec": "Pekerjaan Persiapan, Pengukuran, dan Bouwplank",
+     "vol": 1
+    },
+    {
+     "type": "ahs",
+     "uraian": "Pembersihan lahan",
+     "ruang": "Area merah ± 58,9 m2",
+     "lantai": "All Floor",
+     "spec": "(c) 1 m2 Pembersihan dan Pengupasan Permukaan Tanah (Striping ) s.d. Tanaman Ø 2cm",
+     "vol": 58.9
+    },
+    {
+     "type": "audit",
+     "uraian": "Pembersihan lokasi rutin",
+     "ruang": "Selama pelaksanaan ± 4 bulan",
+     "lantai": "All Floor",
+     "code": "AUD-01",
+     "vol": 4
+    }
+   ]
+  },
+  {
+   "no": "II",
+   "title": "Pekerjaan Galian & Urugan",
+   "rows": [
+    {
+     "type": "note",
+     "uraian": "Struktur (pondasi, sloof, kolom, balok, pelat Lt.2, kanopi beton, tangga beton) belum dihitung - model & perhitungan struktur belum ada",
+     "spec": "Menyusul setelah desain struktur"
+    }
+   ]
+  },
+  {
+   "no": "III",
+   "title": "Pekerjaan Dinding",
+   "rows": [
+    {
+     "type": "ahs",
+     "uraian": "Pasangan Dinding (Per ruangan)",
+     "ruang": "Toko 1 & 2 (keliling, sekat antar unit, muka toko, dinding rendah & sirip)",
+     "lantai": "Lantai 1",
+     "spec": "Pemasangan Dinding Bata Ringan AAC Tebal 10 cm dengan Mortar Instan",
+     "vol": 104.33
+    },
+    {
+     "type": "wall_plaster"
+    },
+    {
+     "type": "wall_aci"
+    }
+   ]
+  },
+  {
+   "no": "IV",
+   "title": "Openingan Kusen",
+   "rows": [
+    {
+     "type": "openingan",
+     "code": "OPK"
+    }
+   ]
+  },
+  {
+   "no": "V",
+   "title": "Pekerjaan Kusen Jendela, Kusen Pintu, dan Daun Pintu",
+   "rows": [
+    {
+     "type": "openings"
+    }
+   ]
+  },
+  {
+   "no": "VIII",
+   "title": "Pekerjaan Finishing",
+   "rows": [
+    {
+     "type": "wall_finish"
+    },
+    {
+     "type": "sub",
+     "title": "Lantai"
+    },
+    {
+     "type": "ahs",
+     "uraian": "Lantai",
+     "ruang": "Toko 1 Fin. Keramik 60x60 Grey",
+     "lantai": "Lantai 1",
+     "spec": "Pemasangan Keramik 60x60 Grey / Setara, Merek Niro Granite",
+     "vol": 22.52
+    }
+   ]
+  }
  ]
 }

@@ -1,123 +1,165 @@
 #!/usr/bin/env python3
 """
-build_rab.py v2 - Serasa RAB builder.
+build_rab.py v3 - Serasa RAB builder untuk Template RAB format baru (Nov 2026).
 
-Input JSON (references/input-format.md) -> isi tab RAB format Serasa + baris analisa.
+Format template (tab "Serasa Template"):
+  A Bab | B Uraian (judul singkat, hanya di baris pertama grup) | C Ruang | D Lantai | E Kode Specs | F Spec |
+  G Satuan | H Volume | I Harga Satuan | J Total Harga | K subtotal bab.  Header kolom baris 12, data mulai 13.
+  - F = teks dropdown (data validation ONE_OF_RANGE AHS!$A$2:$A$2159, strict) -> uraian AHS PERSIS.
+  - E = VLOOKUP(F; AHS!A:E;5;FALSE), G = VLOOKUP(F;AHS!A:D;3;FALSE), I = VLOOKUP(F; AHS!A:D;4;FALSE), J = I*H.
+  - Tab AHS = IMPORTRANGE dari "Rekap AHS" (A Uraian, B Kategori, C Satuan, D Harga, E Kode). Tidak ada MASTER AHS/IKK.
+  Pengecualian:
+  - Bab kusen/pintu/jendela: E = kode tipe (P1, J1, PJ1 ...), F = spesifikasi lengkap + ukuran (teks bebas),
+    G = unit, H = 1, I = harga hasil analisa (rujukan ke tab Audit).
+  - Pekerjaan yang tidak ada di AHS: tetap diisi; E = kode analisa, F = uraian analisa (tanpa dropdown),
+    I = rujukan ke harga analisa di tab Audit.
+  Tab "Audit": (A) pekerjaan tidak ada di AHS + analisanya, (B) analisa kusen/pintu/jendela, (C) AHS yang terpakai.
 
-Dua cara menulis ke Google Sheets:
-  A) --push (disarankan, hemat token): script menulis langsung lewat service account.
-     pip install google-api-python-client google-auth
-     python3 build_rab.py input.json --push --creds key.json --spreadsheet <ID> --prepare template
-     python3 build_rab.py input.json --push --creds key.json --spreadsheet <ID> --prepare clone:"BKU House" --analisa-start auto
-     Script mencetak ringkasan pendek saja (subtotal per bab, total, jumlah error) -> agen tidak perlu
-     membaca ulang sheet.
-  B) Tanpa kredensial (connector Sheets): script menulis 3 file siap kirim + 1 file cek:
-     analisa.json (update_formulas), values_AH.json (update_values A:H polos), connector_batch.json
-     (SATU update_spreadsheet: header, rumus universal via repeatCell, override, format), check_cell.json.
-     Agen menyalin isi file apa adanya - tidak menyusun ulang baris, tidak mencetak data ke chat.
-
---prepare:
-  template        tab "Serasa Template" di file salinan template -> duplikat, unmerge, kosongkan, sisip 6
-                  baris luasan, kembalikan blok IKK ke E1:F5, buat tab Analisa, named range MAH/ANL.
-  clone:<tab>     sheet proyek yang sudah ada -> duplikat tab proyek <tab> (sudah siap: IKK, logo),
-                  kosongkan blok luasan & baris >= header. Analisa ditambahkan ke tab analisa yang
-                  sudah dipakai named range ANL (mulai --analisa-start, 'auto' = 3 baris setelah baris terakhir).
-  none            tab sudah siap; hanya tulis.
-
-Locale spreadsheet Indonesia: pemisah argumen ';' dan desimal ','.
+Pemakaian:
+  python3 build_rab.py input.json --ahs ahs.json --out out                  # cek + file siap kirim (connector)
+  python3 build_rab.py input.json --push --creds key.json --spreadsheet ID --prepare template
+  python3 build_rab.py input.json --push --creds key.json --spreadsheet ID --prepare clone:"<tab RAB lain>"
+--ahs (mode offline): JSON [{"u":uraian,"s":satuan,"h":harga,"c":kode}] atau CSV ekspor tab AHS. Mode push membaca AHS live.
+Locale Indonesia: argumen ';' dan desimal ','.
 """
-import argparse, json, os, re, sys
+import argparse, csv, io, json, os, re, sys
 
-COLS = ["Bab", "Uraian Pekerjaan", "Ruang / Area", "Lantai", "Kode Specs", "Spec", "Satuan", "Volume", "Harga Satuan", "Total Harga"]
+HR = 12                       # baris header kolom
+DS = HR + 1                   # baris data pertama
+COLS = ["Bab", "Uraian", "Ruang", "Lantai", "Kode Specs", "Spec", "Satuan", "Volume", "Harga Satuan", "Total Harga"]
+AHS_DV = "=AHS!$A$2:$A$2159"
+RP = '[$Rp-421]#,##0'
+PEND_BG = {"red": 1, "green": 0.949, "blue": 0.8}      # kuning muda (sama dengan template)
 FIN_LABEL = {"ekspos": "Aci Ekspos + Coating", "putih": "Cat Putih", "terracotta": "Cat Tekstur Terracotta", "pola": "Aci Ekspos Pola Blok"}
-FIN_CODES = {"ekspos": ("AD2", "W6", "W6"), "putih": ("AD1", "W1", "W2"), "terracotta": ("AD1", "W76", "W76"), "pola": (None, "W7", "W7")}
-DEFAULT_OPEN = {"openingan": "X-01", "swing": "X-02", "swing_hw": "X-03", "glass": "X-04", "slide_hw": "X-05", "fixed": "X-06", "louvre": "X-07"}
 
 
 def num_id(x):
-    return ("%.4f" % x).rstrip("0").rstrip(".").replace(".", ",")
+    return ("%.4f" % float(x)).rstrip("0").rstrip(".").replace(".", ",")
 
-def F_univ(r): return f'=IF($E{r}="";"";IFERROR(VLOOKUP($E{r};MAH;2;0);IFERROR(VLOOKUP($E{r};ANL;2;0);"")))'
-def I_univ(r): return (f'=IF($E{r}="";"";IFERROR(VLOOKUP($E{r};MAH;6;0)*1,001;IFERROR(VLOOKUP($F{r};AHS!$A:$D;4;0);'
-                       f'IFERROR(VLOOKUP($E{r};ANL;8;0);0)))*$F$5)')
-def J_univ(r): return f'=IF($H{r}="";"";$H{r}*$I{r})'
+def q(s):  # string literal di dalam rumus
+    return '"' + str(s).replace('"', '""') + '"'
 
 
+# ---------------------------------------------------------------- AHS
+def load_ahs(path):
+    if path.endswith(".json"):
+        return json.load(open(path, encoding="utf-8"))
+    t = open(path, encoding="utf-8").read()
+    if "## Sheet name: AHS" in t:
+        t = t.split("## Sheet name: AHS\n", 1)[1].split("## Sheet name:", 1)[0]
+    rows = list(csv.reader(io.StringIO(t)))[1:]
+    return [{"u": r[0], "s": r[2], "h": r[3], "c": r[4] if len(r) > 4 else ""} for r in rows if r and r[0]]
+
+
+class Ahs:
+    def __init__(self, items):
+        self.by = {}
+        for a in items:
+            self.by.setdefault(a["u"], a)            # VLOOKUP mengambil baris pertama
+        self.dups = {u for u in self.by if sum(1 for a in items if a["u"] == u) > 1}
+
+    def check(self, u):
+        return u in self.by
+
+
+# ---------------------------------------------------------------- builder
 class Builder:
-    def __init__(self, spec, data_start):
-        self.spec, self.ds = spec, data_start
-        self.rows, self.over, self.bab_rows, self.sub_rows, self.subtotals = [], {}, [], [], []
+    def __init__(self, spec, ahs):
+        self.spec, self.ahs = spec, ahs
+        self.rows = []          # list of dict(cells=[A..K], kind)
+        self.bab_rows, self.sub_rows, self.subtotals = [], [], []
+        self.errors, self.used = [], {}
         self._s = None
-        self.oc = {**DEFAULT_OPEN, **spec.get("opening_codes", {})}
+        self.audit = {a["code"]: a for a in spec.get("audit", [])}
+        self.audit_used = {}
+        self.pend = []
 
-    def r(self): return self.ds + len(self.rows)
+    def r(self): return DS + len(self.rows)
 
+    def _push(self, cells, kind="data", dv=False):
+        cells = cells + [""] * (11 - len(cells))
+        self.rows.append({"c": cells, "k": kind, "dv": dv})
+
+    # -- struktur
     def bab(self, no, title):
         if self._s is not None: self.close()
-        self.bab_rows.append(self.r()); self.rows.append([no, title] + [""] * 6); self._s = self.r()
+        self.bab_rows.append(self.r()); self._push([no, title], "bab"); self._s = self.r(); self._last_ur = None
 
     def close(self):
         s, e = self._s, self.r() - 1
         if e >= s:
-            self.over[f"K{e}"] = f"=SUM(J{s}:J{e})"; self.subtotals.append((self.rows[s - 1 - self.ds][0], e))
-        self.rows.append([""] * 8); self._s = None
+            self.rows[-1]["c"][10] = f"=SUM(J{s}:J{e})"; self.subtotals.append((self.rows[s - 1 - DS]["c"][0], e))
+        self._push([], "blank"); self._s = None
 
     def sub(self, title):
-        self.sub_rows.append(self.r()); self.rows.append(["", title] + [""] * 6)
+        self.sub_rows.append(self.r()); self._push(["", title], "sub"); self._last_ur = None
 
-    def line(self, uraian, ruang, lantai, code, sat, vol, spec=""):
-        r = self.r(); self.rows.append(["", uraian, ruang, lantai, code, "", sat, vol])
-        if spec: self.over[f"F{r}"] = spec
+    def _ur(self, ur):
+        """uraian hanya ditulis di baris pertama grup berurutan"""
+        if ur and ur == getattr(self, "_last_ur", None): return ""
+        self._last_ur = ur or self._last_ur
+        return ur
 
-    def opening(self, o):
-        r = self.r(); w, h = float(o["w"]), float(o["h"]); a = round(w * h, 3)
-        pn = int(o.get("panels", 1)); t = o["type"]; c = self.oc
-        if t == "swing":
-            code = f'{c["swing"]}/{c["swing_hw"]}'
-            price = f'=({num_id(a)}*VLOOKUP("{c["swing"]}";ANL;8;0)+{pn}*VLOOKUP("{c["swing_hw"]}";ANL;8;0))*$F$5'
-        elif t == "slide":
-            code = f'{c["glass"]}/{c["slide_hw"]}'
-            price = f'=({num_id(a)}*VLOOKUP("{c["glass"]}";ANL;8;0)+{max(pn - 1, 1)}*VLOOKUP("{c["slide_hw"]}";ANL;8;0))*$F$5'
-        elif t in ("fix", "louvre"):
-            code = c["fixed"] if t == "fix" else c["louvre"]
-            price = f'={num_id(a)}*VLOOKUP("{code}";ANL;8;0)*$F$5'
-        elif t == "ahs_m2":
-            r0 = self.r(); self.rows.append(["", o["uraian"], f'{round(w*100)}x{round(h*100)}', o["lantai"], "AHS", "", "m2", round(a, 2)])
-            self.over[f"F{r0}"] = o["ahs"]; return
-        else:
-            raise ValueError("opening type tidak dikenal: " + t)
-        spec = ("Luas bukaan %.2f m2" % a).replace(".", ",") + (f"; {pn} daun" if pn > 1 else "")
-        self.rows.append(["", o["uraian"], f'{round(w*100)}x{round(h*100)}', o["lantai"], code, "", "unit", 1])
-        self.over[f"F{r}"] = spec; self.over[f"I{r}"] = price
+    def ahs_row(self, ur, ruang, lantai, spec, vol):
+        r = self.r()
+        if not self.ahs.check(spec):
+            self.errors.append(f"baris {r}: spec tidak ada di AHS -> '{spec}' (pakai tipe 'audit')")
+        self.used.setdefault(spec, []).append(r)
+        self._push(["", self._ur(ur), ruang, lantai,
+                    f"=VLOOKUP(F{r};AHS!A:E;5;FALSE)", spec, f"=VLOOKUP(F{r};AHS!A:D;3;FALSE)", vol,
+                    f"=VLOOKUP(F{r};AHS!A:D;4;FALSE)", f"=I{r}*H{r}"], "ahs", dv=True)
 
+    def audit_row(self, ur, ruang, lantai, code, vol, spec=None, sat=None):
+        r = self.r(); a = self.audit.get(code)
+        if not a: self.errors.append(f"baris {r}: kode audit '{code}' tidak ada di input 'audit'"); a = {"name": code, "sat": ""}
+        self.audit_used.setdefault(code, []).append(r)
+        self._push(["", self._ur(ur), ruang, lantai, code, spec or a["name"], sat or a["sat"], vol,
+                    ("AUDIT", code), f"=I{r}*H{r}"], "audit")
+
+    def note(self, ur, spec=""):
+        self._push(["", ur, "", "", "-", spec], "note")
+
+    def pending(self, ur, ruang, lantai, reason):
+        """pekerjaan yang ada di urutan pekerjaan tapi datanya belum ada di SKP -> baris kuning tanpa volume/harga"""
+        r = self.r(); self.pend.append((r, ur, ruang, reason))
+        self._push(["", self._ur(ur), ruang, lantai, "-", "PENDING - " + reason], "pending")
+
+    # -- blok otomatis
     def _lab(self, w, t):
         return f'Dinding {"Interior" if w.get("interior", True) else "Eksterior"} {w["room"]} Fin. {FIN_LABEL.get(t, t)}'
 
-    def _wall_rows(self, title, code_of):
-        first = True
+    def walls(self, which, title=None, only=None):
+        ws = self.spec["wall_specs"]
+        title = title or {"plester": "Plester (Per ruangan)", "aci": "Aci (Per ruangan)", "finish": "Dinding (Per ruangan)"}[which]
         for w in self.spec["walls"]:
             for t, a in w["parts"].items():
-                code = code_of(w, t)
-                if not code: continue
-                if first: self.sub_rows.append(self.r())
-                self.rows.append(["", title if first else "", self._lab(w, t), w["lantai"], code, "", "M2", a]); first = False
+                if only and t not in only: continue
+                if which == "plester": sp = ws["plester"]
+                elif which == "aci": sp = ws["aci"].get(t)
+                else:
+                    sp = (w.get("finish_spec", {}).get(t)
+                          or ws["finish"]["interior" if w.get("interior", True) else "exterior"].get(t))
+                if not sp: continue
+                self.ahs_row(title, self._lab(w, t), w["lantai"], sp, a)
 
-    def wall_block(self):
-        self._wall_rows("Plester (per ruang)", lambda w, t: "PD2")
-        self._wall_rows("Aci (per ruang)", lambda w, t: FIN_CODES.get(t, ("AD1",))[0])
+    def openingan(self, code, ur="Openingan Kusen"):
         per = {}
         for o in self.spec.get("openings", []):
             w, h = float(o["w"]), float(o["h"])
-            k = 2 * (w + h) if o["type"] in ("fix", "louvre") else 2 * h + w
-            p = per.setdefault(o["lantai"], [0, 0]); p[0] += k; p[1] += 1
+            k = 2 * (w + h) if o.get("type") in ("fix", "louvre") else 2 * h + w
+            lt = o["lantai"].split(" (")[0]          # 'Lantai 1 (+0,50)' -> 'Lantai 1'
+            p = per.setdefault(lt, [0, 0]); p[0] += k; p[1] += 1
         for lt, (m1, n) in per.items():
-            self.line("Openingan kusen (sponneng bukaan pintu & jendela)", f"{n} bukaan (lihat Bab V)", lt, self.oc["openingan"], "m1", round(m1, 2))
+            self.audit_row(ur, f"{n} bukaan (lihat bab kusen)", lt, code, round(m1, 2))
 
-    def finish_block(self):
-        def code(w, t):
-            cs = FIN_CODES.get(t, ("AD1", "W1", "W2"))
-            return w.get("finish_code", {}).get(t) or (cs[1] if w.get("interior", True) else cs[2])
-        self._wall_rows("FINISHING DINDING", code)
+    def openings(self):
+        for o in self.spec.get("openings", []):
+            r = self.r(); code = o["code"]
+            if code not in self.audit: self.errors.append(f"baris {r}: analisa kusen '{code}' tidak ada di 'audit'")
+            self.audit_used.setdefault(code, []).append(r)
+            self._push(["", o["jenis"], o["ruang"], o["lantai"], code, o["spec"], o.get("sat", "unit"), o.get("vol", 1),
+                        ("AUDIT", code), f"=I{r}*H{r}"], "kusen")
+            self._last_ur = None
 
     def build(self):
         for b in self.spec["bab"]:
@@ -125,218 +167,242 @@ class Builder:
             for it in b.get("rows", []):
                 t = it["type"]
                 if t == "sub": self.sub(it["title"])
-                elif t in ("master", "analisa"): self.line(it["uraian"], it.get("ruang", ""), it.get("lantai", ""), it["code"], it["sat"], it["vol"], it.get("spec", ""))
-                elif t == "ahs": self.line(it["uraian"], it.get("ruang", ""), it.get("lantai", ""), "AHS", it["sat"], it["vol"], it["ahs"])
-                elif t == "note":
-                    r = self.r(); self.rows.append(["", it["uraian"], "", "", "-", "", "", ""])
-                    if it.get("spec"): self.over[f"F{r}"] = it["spec"]
-                elif t == "wall_plaster_aci": self.wall_block()
-                elif t == "wall_finish": self.finish_block()
-                elif t == "openings":
-                    for o in self.spec.get("openings", []): self.opening(o)
+                elif t == "ahs": self.ahs_row(it.get("uraian", ""), it.get("ruang", ""), it.get("lantai", ""), it["spec"], it["vol"])
+                elif t == "audit": self.audit_row(it.get("uraian", ""), it.get("ruang", ""), it.get("lantai", ""), it["code"], it["vol"])
+                elif t == "note": self.note(it["uraian"], it.get("spec", ""))
+                elif t in ("wall_plaster", "wall_aci", "wall_finish"):
+                    self.walls({"wall_plaster": "plester", "wall_aci": "aci", "wall_finish": "finish"}[t], it.get("uraian"), it.get("only"))
+                elif t == "openingan": self.openingan(it.get("code", "OPK"), it.get("uraian", "Openingan Kusen"))
+                elif t == "pending": self.pending(it["uraian"], it.get("ruang", ""), it.get("lantai", ""), it.get("reason", "menunggu data (belum ada di SKP)"))
+                elif t == "openings": self.openings()
                 else: raise ValueError("row type tidak dikenal: " + t)
         self.close()
-        self.total_row = self.r(); self.rows.append(["Total"] + [""] * 7); self.bab_rows.append(self.total_row)
-        self.over[f"I{self.total_row}"] = f"=SUM(K{self.ds}:K{self.total_row - 1})"
-        self.over[f"J{self.total_row}"] = ""; self.over[f"F{self.total_row}"] = ""
+        self.total_row = self.r(); self._push(["Total", "", "", "", "", "", "", "", f"=SUM(K{DS}:K{self.total_row - 1})"], "total")
+        for d in sorted(set(self.used) & self.ahs.dups):
+            self.errors.append(f"PERINGATAN: uraian AHS ganda (VLOOKUP ambil yang pertama): {d}")
         return self
 
 
-def build_analisa(spec, start, with_header):
-    rows = []
-    if with_header:
-        rows += [["ANALISA HARGA SATUAN - " + spec["project"]["title"]],
-                 ["Harga di sheet ini = harga basis. Di sheet RAB dikali koefisien IKK (F5). MASTER/AHS diambil langsung; lainnya asumsi harga pasar."],
-                 ["Kode", "Uraian / Komponen", "Satuan", "Koef", "Harga Komponen", "Jumlah", "Sumber", "Harga Satuan", "Catatan"]]
-    else:
-        rows += [["ANALISA HARGA SATUAN - " + spec["project"]["title"]]]
-    for it in spec.get("analisa", []):
-        r0 = start + len(rows)
-        rows.append([it["code"], it["name"], it["sat"], "", "", "", "", None, it.get("note", "")])
-        for c in it["components"]:
-            r = start + len(rows); p = c["price"]
-            if isinstance(p, str) and p.startswith("MASTER:"): p = f'=VLOOKUP("{p[7:]}";\'MASTER AHS\'!$B$1:$G$400;6;0)'
-            elif isinstance(p, str) and p.startswith("AHS:"): p = f'=VLOOKUP("{p[4:]}";AHS!$A:$D;4;0)'
-            rows.append(["", "   " + c["name"], c["sat"], c["koef"], p, f"=D{r}*E{r}", c.get("src", "asumsi"), "", ""])
-        rows[r0 - start][7] = f"=SUM(F{r0 + 1}:F{start + len(rows) - 1})"
-        rows.append([""])
-    return [x + [""] * (9 - len(x)) for x in rows]
+# ---------------------------------------------------------------- tab Audit
+def build_audit(spec, b, tab, start=1):
+    """mengembalikan (rows, harga_cell{code:'H12'}, info) ; kolom A..I"""
+    T = f"'{tab}'"
+    rows = [[f"AUDIT RAB - {spec['project']['title']}"],
+            ["Dibuat otomatis oleh serasa-3drab. Harga analisa = asumsi harga pasar; komponen 'AHS:' mengambil harga live dari tab AHS."],
+            [""]]
+    price = {}
+
+    def block(title, items, note):
+        rows.append([title]); rows.append([note])
+        rows.append(["Kode", "Uraian / Komponen", "Satuan", "Koef", "Harga Komponen", "Jumlah", "Sumber", "Harga Satuan", "Dipakai di RAB"])
+        for it in items:
+            r0 = start + len(rows)
+            used = b.audit_used.get(it["code"], [])
+            rows.append([it["code"], it["name"], it["sat"], "", "", "", "", None,
+                         (", ".join(f"{tab}!{x}" for x in [f'F{u}' for u in used]) or "-") + (f" | {it['note']}" if it.get("note") else "")])
+            for c in it["components"]:
+                r = start + len(rows); p = c["price"]
+                if isinstance(p, str) and p.startswith("AHS:"):
+                    p = f"=VLOOKUP({q(p[4:])};AHS!$A:$D;4;FALSE)"
+                rows.append(["", "   " + c["name"], c["sat"], c["koef"], p, f"=D{r}*E{r}", c.get("src", "asumsi"), "", ""])
+            r1 = start + len(rows) - 1
+            rows[r0 - start][7] = f"=SUM(F{r0 + 1}:F{r1})"; price[it["code"]] = f"H{r0}"
+            rows.append([""])
+
+    kusen = [a for a in spec.get("audit", []) if a.get("group") == "kusen"]
+    other = [a for a in spec.get("audit", []) if a.get("group") != "kusen"]
+    block("A. PEKERJAAN YANG TIDAK ADA DI TAB AHS (harga dianalisa, perlu ditambahkan ke Rekap AHS)", other,
+          "Di RAB: Spec ditulis sebagai teks (tanpa dropdown), Harga Satuan merujuk ke kolom H tabel ini.")
+    block("B. ANALISA HARGA KUSEN, PINTU & JENDELA (dari model SKP)", kusen,
+          "Kode tipe & spesifikasi ditulis di bab kusen; harga per unit = jumlah komponen di bawah.")
+    rows.append(["C. ITEM AHS YANG TERPAKAI DI RAB"])
+    rows.append(["Volume & jumlah dihitung live dari tab RAB (SUMIF kolom Spec)."])
+    rows.append(["Kode", "Uraian AHS (Spec)", "Satuan", "Jml baris", "Harga Satuan", "Volume total", "Kategori", "Total Harga", "Baris RAB"])
+    for u in sorted(b.used, key=lambda x: (b.ahs.by.get(x, {}).get("c", "zz"), x)):
+        r = start + len(rows)
+        rows.append([f"=IFERROR(VLOOKUP(B{r};AHS!$A:$E;5;FALSE);\"TIDAK ADA\")", u, f"=IFERROR(VLOOKUP(B{r};AHS!$A:$C;3;FALSE);\"\")",
+                     f"=COUNTIF({T}!$F:$F;B{r})", f"=IFERROR(VLOOKUP(B{r};AHS!$A:$D;4;FALSE);0)",
+                     f"=SUMIF({T}!$F:$F;B{r};{T}!$H:$H)", f"=IFERROR(VLOOKUP(B{r};AHS!$A:$B;2;FALSE);\"\")",
+                     f"=SUMIF({T}!$F:$F;B{r};{T}!$J:$J)", ", ".join(str(x) for x in b.used[u])])
+    rows.append([""]); r = start + len(rows)
+    nC = len(b.used)
+    rows.append(["", f"Jumlah item AHS terpakai: {nC}", "", "", "", "", "", f"=SUM(H{r - nC - 1}:H{r - 2})", ""])
+    if b.pend:
+        rows += [[""], ["D. PEKERJAAN PENDING (data belum ada di SKP, dilanjutkan nanti)"],
+                 ["Baris di tab RAB berwarna kuning, tanpa volume & harga."],
+                 ["Baris", "Uraian", "Ruang", "", "", "", "", "", "Alasan"]]
+        for rr, ur, ruang, reason in b.pend:
+            rows.append([f"F{rr}", ur, ruang, "", "", "", "", "", reason])
+    return [x + [""] * (9 - len(x)) for x in rows], price
 
 
-def build_header(spec):
-    p, L = spec["project"], spec["luasan"]; lt = L["lantai"]
-    assert 1 <= len(lt) <= 3, "blok luasan mendukung 1-3 lantai"
-    rows = [["Rencana Anggaran Biaya", "", ""], [p["title"], "", ""], [L.get("tanah_label", "Luas Tanah"), "", L["tanah"]],
-            ["Luas Bangunan Total (" + " + ".join(x["short"] for x in lt) + ")", "", "=" + "+".join(f"C{5 + i}" for i in range(len(lt)))]]
-    rows += [[x["label"], "", "=" + "+".join(num_id(v) for _, v in x["items"])] for x in lt]
-    notes = [x["short"] + " = " + " + ".join(f"{n} {num_id(v)}" for n, v in x["items"]) + " m²." for x in lt]
-    notes.append(L.get("note", "Luas kotor dari model SKP (sisi luar dinding); area tanpa atap & carport tidak termasuk."))
-    free = 8 - len(rows)
-    if len(notes) > free: notes = notes[:free - 1] + [" ".join(notes[free - 1:])]
-    rows += [[n, "", ""] for n in notes]; rows += [["", "", ""]] * (8 - len(rows))
-    return rows
-
-
-# ---------- request builders (dipakai push & connector batch)
+# ---------------------------------------------------------------- requests
 def _rng(sid, r0, r1, c0, c1): return {"sheetId": sid, "startRowIndex": r0, "endRowIndex": r1, "startColumnIndex": c0, "endColumnIndex": c1}
 
-def _cell(v):
+def _val(v):
     if isinstance(v, bool): return {"boolValue": v}
     if isinstance(v, (int, float)): return {"numberValue": v}
     v = "" if v is None else str(v)
     return {"formulaValue": v} if v.startswith("=") else {"stringValue": v}
 
-def _rows_req(sid, r0, c0, rows):
-    w = max(len(r) for r in rows)
-    return {"updateCells": {"range": _rng(sid, r0, r0 + len(rows), c0, c0 + w),
-                            "rows": [{"values": [{"userEnteredValue": _cell(v)} for v in r + [""] * (w - len(r))]} for r in rows],
-                            "fields": "userEnteredValue"}}
+def _fmt(bold=False, italic=False, size=9, h=None, num=None, wrap=None, bg=None):
+    f = {"textFormat": {"fontFamily": "Calibri", "fontSize": size, "bold": bold, "italic": italic}, "verticalAlignment": "MIDDLE"}
+    if h: f["horizontalAlignment"] = h
+    if num: f["numberFormat"] = {"type": "NUMBER", "pattern": num}
+    if wrap: f["wrapStrategy"] = wrap
+    if bg: f["backgroundColor"] = bg
+    return f
 
-def data_requests(sid, b, header, hr, with_values=True):
-    ds, last = b.ds, b.total_row
-    req = [_rows_req(sid, 0, 0, header), _rows_req(sid, hr - 1, 0, [COLS])]
-    if with_values: req.append(_rows_req(sid, ds - 1, 0, b.rows))
-    for col, f in ((5, F_univ), (8, I_univ), (9, J_univ)):
-        req.append({"repeatCell": {"range": _rng(sid, ds - 1, last, col, col + 1), "cell": {"userEnteredValue": {"formulaValue": f(ds)}}, "fields": "userEnteredValue"}})
-    for k, v in b.over.items():
-        c, r = "ABCDEFGHIJK".index(k[0]), int(k[1:])
-        req.append(_rows_req(sid, r - 1, c, [[v]]))
-    return req
+COLF = [dict(h="RIGHT"), dict(wrap="OVERFLOW_CELL"), dict(h="LEFT", wrap="WRAP"), dict(h="CENTER"), dict(h="CENTER"),
+        dict(h="LEFT", wrap="WRAP"), dict(h="CENTER"), dict(h="CENTER", num="#,##0.00"), dict(h="CENTER", num=RP),
+        dict(h="CENTER", num=RP), dict(h="CENTER", num=RP, bold=True)]
 
-def format_requests(sid, b, hr, n_lantai):
-    last, hdr = b.total_row, b.ds - 1; nl = 3 + n_lantai
-    TF = "userEnteredFormat.textFormat"
-    req = [
-        {"repeatCell": {"range": _rng(sid, hdr, last, 0, 11), "cell": {"userEnteredFormat": {"textFormat": {"fontFamily": "Arial", "fontSize": 9, "bold": False}, "verticalAlignment": "MIDDLE", "wrapStrategy": "WRAP"}}, "fields": TF + ",userEnteredFormat.verticalAlignment,userEnteredFormat.wrapStrategy"}},
-        {"repeatCell": {"range": _rng(sid, hdr, last, 7, 8), "cell": {"userEnteredFormat": {"numberFormat": {"type": "NUMBER", "pattern": "#,##0.00"}, "horizontalAlignment": "RIGHT"}}, "fields": "userEnteredFormat.numberFormat,userEnteredFormat.horizontalAlignment"}},
-        {"repeatCell": {"range": _rng(sid, hdr, last, 8, 11), "cell": {"userEnteredFormat": {"numberFormat": {"type": "CURRENCY", "pattern": "\"Rp\"#,##0"}, "horizontalAlignment": "RIGHT"}}, "fields": "userEnteredFormat.numberFormat,userEnteredFormat.horizontalAlignment"}},
-        {"repeatCell": {"range": _rng(sid, hdr, last, 10, 11), "cell": {"userEnteredFormat": {"textFormat": {"bold": True, "fontSize": 9}}}, "fields": TF}},
-        {"repeatCell": {"range": _rng(sid, hr - 1, hr, 0, 11), "cell": {"userEnteredFormat": {"textFormat": {"bold": True, "fontSize": 10}, "backgroundColor": {"red": 0.85, "green": 0.85, "blue": 0.85}, "horizontalAlignment": "CENTER", "verticalAlignment": "MIDDLE", "wrapStrategy": "WRAP"}}, "fields": TF + ",userEnteredFormat.backgroundColor,userEnteredFormat.horizontalAlignment,userEnteredFormat.verticalAlignment,userEnteredFormat.wrapStrategy"}},
-        {"updateBorders": {"range": _rng(sid, hr - 1, last, 0, 11), "innerHorizontal": {"style": "SOLID", "color": {"red": 0.85, "green": 0.85, "blue": 0.85}}, "bottom": {"style": "SOLID"}, "top": {"style": "SOLID"}}},
-        {"updateSheetProperties": {"properties": {"sheetId": sid, "gridProperties": {"frozenRowCount": hr}}, "fields": "gridProperties.frozenRowCount"}},
-        {"repeatCell": {"range": _rng(sid, 2, nl, 2, 3), "cell": {"userEnteredFormat": {"numberFormat": {"type": "NUMBER", "pattern": "#,##0.0 \"m²\""}, "textFormat": {"fontFamily": "Calibri", "fontSize": 10, "bold": True}, "horizontalAlignment": "LEFT"}}, "fields": "userEnteredFormat.numberFormat," + TF + ",userEnteredFormat.horizontalAlignment"}},
-        {"repeatCell": {"range": _rng(sid, 2, nl, 0, 1), "cell": {"userEnteredFormat": {"textFormat": {"fontFamily": "Calibri", "fontSize": 10}, "wrapStrategy": "OVERFLOW_CELL"}}, "fields": TF + ",userEnteredFormat.wrapStrategy"}},
-        {"repeatCell": {"range": _rng(sid, nl, 8, 0, 1), "cell": {"userEnteredFormat": {"textFormat": {"fontFamily": "Calibri", "fontSize": 8, "italic": True, "foregroundColor": {"red": 0.4, "green": 0.4, "blue": 0.4}}, "wrapStrategy": "OVERFLOW_CELL"}}, "fields": TF + ",userEnteredFormat.wrapStrategy"}},
-        {"updateSheetProperties": {"properties": {"sheetId": sid, "gridProperties": {"rowCount": last + 15}}, "fields": "gridProperties.rowCount"}},
-    ]
-    for r in b.bab_rows:
-        req.append({"repeatCell": {"range": _rng(sid, r - 1, r, 0, 11), "cell": {"userEnteredFormat": {"textFormat": {"bold": True, "fontSize": 10}, "backgroundColor": {"red": 0.93, "green": 0.89, "blue": 0.82}}}, "fields": TF + ",userEnteredFormat.backgroundColor"}})
-    for r in b.sub_rows:
-        req.append({"repeatCell": {"range": _rng(sid, r - 1, r, 1, 2), "cell": {"userEnteredFormat": {"textFormat": {"bold": True, "italic": True, "fontSize": 9}}}, "fields": TF}})
-    for c, w in [(0, 40), (1, 280), (2, 280), (3, 75), (4, 75), (5, 300), (6, 65), (7, 65), (8, 120), (9, 120), (10, 120)]:
-        req.append({"updateDimensionProperties": {"range": {"sheetId": sid, "dimension": "COLUMNS", "startIndex": c, "endIndex": c + 1}, "properties": {"pixelSize": w}, "fields": "pixelSize"}})
-    return req
+def rab_requests(sid, b, header, audit_tab, price):
+    reqs = [{"updateCells": {"range": _rng(sid, 0, len(header), 0, 3), "rows": [{"values": [{"userEnteredValue": _val(v)} for v in r]} for r in header], "fields": "userEnteredValue"}},
+            {"updateCells": {"range": _rng(sid, HR - 1, HR, 0, 10), "rows": [{"values": [{"userEnteredValue": _val(v)} for v in COLS]}], "fields": "userEnteredValue"}}]
+    out = []
+    for row in b.rows:
+        vals = []
+        for j, v in enumerate(row["c"]):
+            if isinstance(v, tuple): v = f"='{audit_tab}'!{price.get(v[1], 'H1')}"
+            kw = dict(COLF[j])
+            if row["k"] in ("bab", "total") and j <= 1: kw["bold"] = True; kw["size"] = 10
+            if row["k"] == "sub" and j == 1: kw["bold"] = True; kw["italic"] = True
+            if row["k"] in ("ahs", "data") and j == 1: kw["bold"] = True
+            if row["k"] == "total" and j == 8: kw["bold"] = True
+            if row["k"] == "pending": kw["bg"] = PEND_BG; kw["italic"] = j == 5
+            cell = {"userEnteredValue": _val(v), "userEnteredFormat": _fmt(**kw)}
+            if j == 5 and row["dv"]:
+                cell["dataValidation"] = {"condition": {"type": "ONE_OF_RANGE", "values": [{"userEnteredValue": AHS_DV}]}, "strict": True}
+            vals.append(cell)
+        out.append({"values": vals})
+    reqs.append({"updateCells": {"range": _rng(sid, DS - 1, DS - 1 + len(out), 0, 11), "rows": out,
+                                 "fields": "userEnteredValue,userEnteredFormat,dataValidation"}})
+    reqs.append({"updateSheetProperties": {"properties": {"sheetId": sid, "gridProperties": {"frozenRowCount": HR}}, "fields": "gridProperties.frozenRowCount"}})
+    return reqs
+
+def audit_requests(asid, rows):
+    out = []; secC = False
+    for r in rows:
+        if isinstance(r[0], str) and r[0].startswith("C. "): secC = True
+        title = isinstance(r[0], str) and re.match(r"^[ABCD]\. |^AUDIT", r[0] or "")
+        hdr = r[0] in ("Kode", "Baris")
+        if isinstance(r[0], str) and r[0].startswith("D. "): secC = True
+        code_row = bool(r[0]) and not title and not hdr and not str(r[0]).startswith("=") and not secC
+        vals = []
+        for j, v in enumerate(r):
+            kw = dict(size=10 if title else 9, bold=bool(title or hdr or code_row or (j == 7 and code_row)))
+            if j in (4, 5, 7): kw["num"] = RP
+            if j == 3: kw["num"] = "#,##0.00"
+            if secC and j == 3: kw["num"] = "0"
+            if secC and j == 5: kw["num"] = "#,##0.00"
+            if hdr: kw["bg"] = {"red": 0.937, "green": 0.937, "blue": 0.937}
+            vals.append({"userEnteredValue": _val(v), "userEnteredFormat": _fmt(**kw)})
+        out.append({"values": vals})
+    reqs = [{"updateCells": {"range": _rng(asid, 0, len(out), 0, 9), "rows": out, "fields": "userEnteredValue,userEnteredFormat"}}]
+    for c, w in [(0, 70), (1, 520), (2, 60), (3, 70), (4, 110), (5, 110), (6, 110), (7, 120), (8, 260)]:
+        reqs.append({"updateDimensionProperties": {"range": {"sheetId": asid, "dimension": "COLUMNS", "startIndex": c, "endIndex": c + 1}, "properties": {"pixelSize": w}, "fields": "pixelSize"}})
+    return reqs
+
+def build_header(spec):
+    p, L = spec["project"], spec["luasan"]; lt = L["lantai"]
+    rows = [["Rencana Anggaran Biaya", "", ""], [p["title"], "", ""], ["", "", ""],
+            [L.get("tanah_label", "Luas Tapak"), "", L["tanah"]],
+            ["Luas Bangunan Total (" + " + ".join(x["short"] for x in lt) + ")", "", "=" + "+".join(f"C{6 + i}" for i in range(len(lt)))]]
+    rows += [[x["label"], "", "=" + "+".join(num_id(v) for _, v in x["items"])] for x in lt]
+    note = " | ".join(x["short"] + " = " + " + ".join(f"{n} {num_id(v)}" for n, v in x["items"]) + " m²" for x in lt)
+    if L.get("note"): note += ". " + L["note"]
+    rows.append([note, "", ""])
+    return rows[:8]
 
 def check_formula(b):
-    ds, tr = b.ds, b.total_row
-    return (f'=SUMPRODUCT(--ISERROR(F{ds}:K{tr}))&"|"&COUNTIFS(E{ds}:E{tr};"<>";E{ds}:E{tr};"<>-";I{ds}:I{tr};0)'
-            f'&"|"&TEXT(I{tr};"#,##0")&"|"&TEXTJOIN(";";TRUE;' + ";".join(f'TEXT(K{e};"0")' for _, e in b.subtotals) + ")")
+    tr = b.total_row
+    return (f'=SUMPRODUCT(--ISERROR(E{DS}:K{tr}))&"|"&COUNTIFS(F{DS}:F{tr};"<>";E{DS}:E{tr};"<>-";I{DS}:I{tr};0)'
+            f'&"|"&TEXT(I{tr};"0")&"|"&TEXTJOIN(";";TRUE;' + ";".join(f'TEXT(K{e};"0")' for _, e in b.subtotals) + ")")
 
 
-# ---------- push (service account)
-def push(a, spec, b, header, analisa_fn):
+# ---------------------------------------------------------------- push
+def push(a, spec, ahs_items_cb):
     from google.oauth2 import service_account
     from googleapiclient.discovery import build as gbuild
     creds = service_account.Credentials.from_service_account_file(a.creds, scopes=["https://www.googleapis.com/auth/spreadsheets"])
-    S = gbuild("sheets", "v4", credentials=creds, cache_discovery=False).spreadsheets(); sid_ = a.spreadsheet
-    def batch(reqs):
-        return S.batchUpdate(spreadsheetId=sid_, body={"requests": reqs}).execute() if reqs else None
-    def vals(rng):
-        return S.values().get(spreadsheetId=sid_, range=rng, valueRenderOption="FORMULA").execute().get("values", [])
-    meta = S.get(spreadsheetId=sid_, fields="sheets(properties(sheetId,title,gridProperties),merges),namedRanges").execute()
-    sheets = {s["properties"]["title"]: s for s in meta["sheets"]}
-    named = {n["name"]: n for n in meta.get("namedRanges", [])}
-    tab, atab = spec["project"]["tab"], spec["project"].get("analisa_tab", "Analisa " + spec["project"]["tab"])
-    if tab in sheets and a.prepare != "none":
-        sys.exit(f"Tab '{tab}' sudah ada - ganti nama tab di input atau pakai --prepare none")
-    mode = a.prepare
-    if mode == "template":
-        src = sheets["Serasa Template"]["properties"]
-        r = batch([{"duplicateSheet": {"sourceSheetId": src["sheetId"], "insertSheetIndex": 1, "newSheetName": tab}}])
+    S = gbuild("sheets", "v4", credentials=creds, cache_discovery=False).spreadsheets(); ID = a.spreadsheet
+    batch = lambda reqs: S.batchUpdate(spreadsheetId=ID, body={"requests": reqs}).execute() if reqs else {}
+    vals = S.values().get(spreadsheetId=ID, range="AHS!A1:E3000").execute().get("values", [])[1:]
+    ahs = Ahs([{"u": r[0], "s": r[2] if len(r) > 2 else "", "h": r[3] if len(r) > 3 else "", "c": r[4] if len(r) > 4 else ""} for r in vals if r and r[0]])
+    b = Builder(spec, ahs).build()
+    errs = [e for e in b.errors if not e.startswith("PERINGATAN")]
+    for e in b.errors: print(e)
+    if errs: sys.exit("BERHENTI: perbaiki error di atas dulu")
+    meta = S.get(spreadsheetId=ID, fields="sheets(properties(sheetId,title,index,gridProperties),merges)").execute()
+    sh = {s["properties"]["title"]: s for s in meta["sheets"]}
+    tab = spec["project"]["tab"]
+    atab = spec["project"].get("audit_tab", "Audit")
+    if a.prepare == "template":
+        src = sh["Serasa Template"]; sid = src["properties"]["sheetId"]; end = src["properties"]["gridProperties"]["rowCount"]
+        reqs = [{"updateSheetProperties": {"properties": {"sheetId": sid, "title": tab}, "fields": "title"}}]
+        reqs += [{"unmergeCells": {"range": m}} for m in src.get("merges", []) if m["startRowIndex"] >= HR]
+        reqs.append({"updateCells": {"range": _rng(sid, HR, end, 0, 11), "fields": "userEnteredValue,userEnteredFormat,dataValidation"}})
+        if spec["project"].get("zona"):
+            reqs.append({"updateCells": {"range": _rng(sid, 0, 1, 5, 6), "rows": [{"values": [{"userEnteredValue": _val(spec["project"]["zona"])}]}], "fields": "userEnteredValue"}})
+        batch(reqs)
+    elif a.prepare.startswith("clone:"):
+        src = sh[a.prepare[6:]]; end = src["properties"]["gridProperties"]["rowCount"]
+        r = batch([{"duplicateSheet": {"sourceSheetId": src["properties"]["sheetId"], "insertSheetIndex": src["properties"]["index"] + 1, "newSheetName": tab}}])
         sid = r["replies"][0]["duplicateSheet"]["properties"]["sheetId"]
-        end = src["gridProperties"]["rowCount"]
-        reqs = [{"unmergeCells": {"range": _rng(sid, 9, end, 0, 11)}},
-                {"updateCells": {"range": _rng(sid, 9, end, 0, 11), "fields": "userEnteredValue,userEnteredFormat"}},
-                {"insertDimension": {"range": {"sheetId": sid, "dimension": "ROWS", "startIndex": 2, "endIndex": 8}, "inheritFromBefore": True}},
-                {"cutPaste": {"source": _rng(sid, 8, 11, 4, 6), "destination": {"sheetId": sid, "rowIndex": 2, "columnIndex": 4}, "pasteType": "PASTE_NORMAL"}}]
-        if atab not in sheets:
-            reqs.append({"addSheet": {"properties": {"title": atab, "gridProperties": {"rowCount": 300, "columnCount": 10}}}})
-        rep = batch(reqs) or {}
-        added = [x["addSheet"]["properties"]["sheetId"] for x in rep.get("replies", []) if x and "addSheet" in x]
-        asid = added[0] if added else sheets[atab]["properties"]["sheetId"]
-        mah = sheets["MASTER AHS"]["properties"]["sheetId"]
-        nr = []
-        for name, rg in (("MAH", _rng(mah, 0, 400, 1, 7)), ("ANL", _rng(asid, 0, 300, 0, 8))):
-            if name in named: nr.append({"updateNamedRange": {"namedRange": {"namedRangeId": named[name]["namedRangeId"], "name": name, "range": rg}, "fields": "range"}})
-            else: nr.append({"addNamedRange": {"namedRange": {"name": name, "range": rg}}})
-        batch(nr)
-        S.values().update(spreadsheetId=sid_, range=f"'{tab}'!F1:F2", valueInputOption="USER_ENTERED",
-                          body={"values": [[spec["project"]["zona"]], [spec["project"].get("basis", "Kota Bogor")]]}).execute()
-        astart = 1
-    elif mode.startswith("clone:"):
-        srcname = mode[6:]; src = sheets[srcname]["properties"]
-        r = batch([{"duplicateSheet": {"sourceSheetId": src["sheetId"], "insertSheetIndex": src.get("index", 0) + 1, "newSheetName": tab}}])
-        sid = r["replies"][0]["duplicateSheet"]["properties"]["sheetId"]; end = src["gridProperties"]["rowCount"]
-        batch([{"updateCells": {"range": _rng(sid, a.header_row - 1, end, 0, 11), "fields": "userEnteredValue,userEnteredFormat"}},
-               {"updateCells": {"range": _rng(sid, 0, 8, 0, 3), "fields": "userEnteredValue"}}])
-        anl = named["ANL"]["range"]; asid = anl["sheetId"]
-        atab = [t for t, s in sheets.items() if s["properties"]["sheetId"] == asid][0]
-        if a.analisa_start == "auto":
-            colA = vals(f"'{atab}'!A1:B{anl.get('endRowIndex', 300)}")
-            astart = max([i + 1 for i, row in enumerate(colA) if any(str(x).strip() for x in row)] + [0]) + 3
-        else:
-            astart = int(a.analisa_start)
+        batch([{"updateCells": {"range": _rng(sid, HR, end, 0, 11), "fields": "userEnteredValue,userEnteredFormat,dataValidation"}}])
+        if atab in sh: atab = f"Audit {tab}"
+    else:   # none = tulis ulang tab yang sudah ada (revisi): kosongkan baris data & tab audit
+        src = sh[tab]; sid = src["properties"]["sheetId"]; end = src["properties"]["gridProperties"]["rowCount"]
+        reqs = [{"unmergeCells": {"range": m}} for m in src.get("merges", []) if m["startRowIndex"] >= HR]
+        reqs.append({"updateCells": {"range": _rng(sid, HR, end, 0, 11), "fields": "userEnteredValue,userEnteredFormat,dataValidation"}})
+        if atab in sh:
+            reqs.append({"updateCells": {"range": _rng(sh[atab]["properties"]["sheetId"], 0, sh[atab]["properties"]["gridProperties"]["rowCount"], 0, 9), "fields": "userEnteredValue,userEnteredFormat"}})
+        batch(reqs)
+    if atab in sh and a.prepare != "none":
+        sys.exit(f"Tab '{atab}' sudah ada")
+    if atab not in sh:
+        r = batch([{"addSheet": {"properties": {"title": atab, "gridProperties": {"rowCount": 400, "columnCount": 9, "frozenRowCount": 2}}}}])
+        asid = r["replies"][0]["addSheet"]["properties"]["sheetId"]
     else:
-        sid = sheets[tab]["properties"]["sheetId"]; astart = int(a.analisa_start) if a.analisa_start != "auto" else 1
-        asid = named["ANL"]["range"]["sheetId"]; atab = [t for t, s in sheets.items() if s["properties"]["sheetId"] == asid][0]
-    analisa = analisa_fn(astart, astart == 1)
-    if astart + len(analisa) > 300: sys.exit("Analisa melewati baris 300 (batas named range ANL) - perbesar ANL dulu")
-    batch([_rows_req(asid, astart - 1, 0, analisa)])
-    batch(data_requests(sid, b, header, a.header_row) + format_requests(sid, b, a.header_row, len(spec["luasan"]["lantai"])))
-    # verifikasi singkat (tanpa membaca seluruh sheet)
-    S.values().update(spreadsheetId=sid_, range=f"'{tab}'!A{b.total_row + 3}", valueInputOption="USER_ENTERED", body={"values": [[check_formula(b)]]}).execute()
-    chk = S.values().get(spreadsheetId=sid_, range=f"'{tab}'!A{b.total_row + 3}").execute()["values"][0][0]
-    S.values().clear(spreadsheetId=sid_, range=f"'{tab}'!A{b.total_row + 3}").execute()
+        asid = sh[atab]["properties"]["sheetId"]
+    arows, price = build_audit(spec, b, tab)
+    need = b.total_row + 15
+    batch([{"updateSheetProperties": {"properties": {"sheetId": sid, "gridProperties": {"rowCount": max(need, 50)}}, "fields": "gridProperties.rowCount"}}]
+          + audit_requests(asid, arows) + rab_requests(sid, b, build_header(spec), atab, price))
+    cell = f"'{tab}'!A{b.total_row + 3}"
+    S.values().update(spreadsheetId=ID, range=cell, valueInputOption="USER_ENTERED", body={"values": [[check_formula(b)]]}).execute()
+    chk = S.values().get(spreadsheetId=ID, range=cell).execute()["values"][0][0]
+    S.values().clear(spreadsheetId=ID, range=cell).execute()
     err, zero, total, subs = (chk.split("|") + ["", "", "", ""])[:4]
-    print(f"PUSHED tab '{tab}' (sheetId {sid}); analisa '{atab}' baris {astart}..{astart + len(analisa) - 1}")
-    print(f"error={err} harga0={zero} total=Rp{total}")  # harga0 = baris berkode dengan harga 0
+    print(f"PUSHED tab '{tab}' (sheetId {sid}), audit '{atab}' (sheetId {asid}); baris data {DS}..{b.total_row}")
+    print(f"error={err} harga0={zero} total=Rp{int(float(total or 0)):,}".replace(",", "."))
     for (no, _), v in zip(b.subtotals, subs.split(";")): print(f"  Bab {no}: Rp{int(float(v or 0)):,}".replace(",", "."))
+    print(f"AHS terpakai: {len(b.used)} item; non-AHS/analisa: {len(b.audit_used)} kode; pending: {len(b.pend)} baris")
 
 
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("input"); ap.add_argument("--out", default="out")
-    ap.add_argument("--header-row", type=int, default=16, help="baris header kolom (template baru: 16; tab hasil clone mengikuti sumber, mis. BKU House = 15)")
-    ap.add_argument("--analisa-start", default="1", help="baris awal analisa; 'auto' untuk clone (setelah baris terakhir)")
-    ap.add_argument("--sheet-id", type=int, default=0, help="sheetId tab RAB (mode connector)")
-    ap.add_argument("--analisa-sheet-id", type=int, default=0, help="sheetId tab analisa (mode connector)")
+    ap.add_argument("input"); ap.add_argument("--out", default="out"); ap.add_argument("--ahs")
     ap.add_argument("--push", action="store_true"); ap.add_argument("--creds"); ap.add_argument("--spreadsheet")
-    ap.add_argument("--prepare", default="none", help="template | clone:<nama tab> | none")
+    ap.add_argument("--prepare", default="template", help="template | clone:<tab> | none (tulis ulang tab yang sudah ada)")
+    ap.add_argument("--sheet-id", type=int, default=0); ap.add_argument("--audit-sheet-id", type=int, default=1)
     a = ap.parse_args()
     spec = json.load(open(a.input, encoding="utf-8"))
-    b = Builder(spec, a.header_row + 1).build(); header = build_header(spec)
-    analisa_fn = lambda start, hdr: build_analisa(spec, start, hdr)
-    print(f"Baris data {b.ds}..{b.total_row}; bab di {b.bab_rows}; {len(b.rows)} baris")
     if a.push:
         if not (a.creds and a.spreadsheet): sys.exit("--push butuh --creds dan --spreadsheet")
-        return push(a, spec, b, header, analisa_fn)
+        return push(a, spec, None)
+    if not a.ahs: sys.exit("mode offline butuh --ahs (ekspor tab AHS) untuk validasi spec")
+    b = Builder(spec, Ahs(load_ahs(a.ahs))).build()
+    for e in b.errors: print(e)
     os.makedirs(a.out, exist_ok=True)
-    astart = 1 if a.analisa_start == "auto" else int(a.analisa_start)
-    analisa = analisa_fn(astart, astart == 1)
-    # 1) nilai A:H polos -> update_values (format paling ringkas); 2) analisa -> update_formulas;
-    # 3) sisanya (header, rumus universal, override, format) -> satu update_spreadsheet
-    dump = lambda n, o: json.dump(o, open(os.path.join(a.out, n), "w", encoding="utf-8"), ensure_ascii=False, separators=(",", ":"))
-    dump("values_AH.json", {"range": f"A{b.ds}:H{b.total_row}", "values": b.rows})
-    dump("analisa.json", {"range": f"A{astart}:I{astart + len(analisa) - 1}", "values": analisa})
-    batch = data_requests(a.sheet_id, b, header, a.header_row, with_values=False) + format_requests(a.sheet_id, b, a.header_row, len(spec["luasan"]["lantai"]))
-    dump("connector_batch.json", batch)
-    json.dump({"cell": f"A{b.total_row + 3}", "formula": check_formula(b), "baca": "error|harga0|total|subtotal per bab (;) - tulis rumus, baca 1 sel, lalu kosongkan sel itu",
-               "bab": [no for no, _ in b.subtotals]}, open(os.path.join(a.out, "check_cell.json"), "w", encoding="utf-8"), ensure_ascii=False)
-    n = os.path.getsize(os.path.join(a.out, "connector_batch.json"))
-    sz = lambda f: os.path.getsize(os.path.join(a.out, f)) // 1024
-    print(f"Urutan kirim (connector): analisa.json -> update_formulas tab analisa ({sz('analisa.json')} KB, baris {astart}..{astart + len(analisa) - 1}); "
-          f"values_AH.json -> update_values tab RAB ({sz('values_AH.json')} KB); connector_batch.json -> update_spreadsheet ({len(batch)} request, {n // 1024} KB); "
-          f"lalu check_cell.json")
+    atab = spec["project"].get("audit_tab", "Audit")
+    arows, price = build_audit(spec, b, spec["project"]["tab"])
+    reqs = audit_requests(a.audit_sheet_id, arows) + rab_requests(a.sheet_id, b, build_header(spec), atab, price)
+    json.dump(reqs, open(os.path.join(a.out, "connector_batch.json"), "w", encoding="utf-8"), ensure_ascii=False, separators=(",", ":"))
+    json.dump({"cell": f"A{b.total_row + 3}", "formula": check_formula(b)}, open(os.path.join(a.out, "check_cell.json"), "w", encoding="utf-8"), ensure_ascii=False)
+    print(f"Baris data {DS}..{b.total_row}; bab {b.bab_rows}; AHS terpakai {len(b.used)}; analisa {len(b.audit_used)}; "
+          f"connector_batch.json {os.path.getsize(os.path.join(a.out, 'connector_batch.json')) // 1024} KB")
 
 
 if __name__ == "__main__":
