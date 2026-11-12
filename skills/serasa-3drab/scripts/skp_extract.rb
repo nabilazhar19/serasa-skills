@@ -1,31 +1,136 @@
-# skp_extract.rb - Serasa RAB: ekstraksi kuantitas dari model SketchUp (v2)
+# skp_extract.rb - Serasa RAB: ekstraksi kuantitas dari model SketchUp + jembatan ke Viewport RAB (v2.4)
 #
-# Pemasangan (sekali per komputer, paling hemat token):
+# Pemasangan (sekali per komputer; Mac & Windows, semua versi SketchUp):
 #   load "<folder skill>/scripts/skp_extract.rb"; SerasaRAB.install_plugin
-#   -> menyalin file ini ke folder Plugins SketchUp (Mac/Windows) sehingga termuat otomatis.
+#   -> menjalankan scripts/setup.py (plugin ke SEMUA versi SketchUp + viewport + library Python).
+#   Tanpa Python: plugin tetap terpasang di versi SketchUp ini, viewport menyusul setelah Python ada.
 #   Agen cukup cek:  defined?(SerasaRAB) ? SerasaRAB::VERSION : 'belum'
-#   Kalau belum / versi lebih lama: load ulang dari folder skill lalu install_plugin (jangan tempel isi file).
+# Menu: Extensions > Serasa RAB > Buka Viewport RAB / Hentikan Viewport / Pasang ulang.
 #
 # Satuan mm / m2. region = [xmin, xmax, ymin, ymax] (mm, koordinat dunia).
 # bands = [["Lt1", z0, z1], ["Lt2", z1, z2], ["Parapet", z2, 99999]] (mm, elevasi absolut).
 # rooms = [{name:, type:'uv'|'xy', rect:[u0,u1,v0,v1] | poly:[[x,y],..], z:[z0,z1]}]
-# Semua fungsi mengembalikan string JSON.
+# Semua fungsi take-off mengembalikan string JSON.
 require 'json'
 require 'fileutils'
+require 'open3'
 
 module SerasaRAB
-  VERSION = '2.1'
+  VERSION = '2.4'
   SRC = File.expand_path(__FILE__) rescue nil
+  WIN = (Sketchup.platform == :platform_win rescue RUBY_PLATFORM =~ /mswin|mingw/)
   module_function
 
-  # Pasang diri sendiri ke folder Plugins SketchUp (Mac & Windows) -> termuat otomatis tiap SketchUp dibuka.
-  # Panggil sekali setelah `load "<folder skill>/scripts/skp_extract.rb"`.
+  # ---------- instalasi & lingkungan ----------
+  # folder bersama (viewport + builder + env.json), sama untuk semua versi SketchUp & semua agen
+  def home_shared
+    WIN ? File.join(ENV['APPDATA'].to_s.tr('\\', '/'), 'SerasaRAB') : File.expand_path('~/Library/Application Support/SerasaRAB')
+  end
+
+  # folder skill bila file ini dimuat dari <skill>/scripts/
+  def skill_dir
+    d = File.expand_path('..', File.dirname(SRC.to_s))
+    File.file?(File.join(d, 'viewport', 'tools.py')) ? d : nil
+  end
+
+  def home
+    File.file?(File.join(home_shared, 'viewport', 'tools.py')) ? home_shared : skill_dir
+  end
+
+  def env
+    JSON.parse(File.read(File.join(home_shared, 'env.json'))) rescue {}
+  end
+
+  def py_ok?(exe)
+    return false unless exe && File.file?(exe)
+    out, st = Open3.capture2e(exe, '-c', 'import sys; print(sys.version_info >= (3, 8))')
+    st.success? && out.include?('True')
+  rescue StandardError
+    false
+  end
+
+  # Python untuk viewport: env.json (dicatat setup.py) -> lokasi umum. Path absolut supaya tidak bergantung PATH.
+  def python
+    c = [env['python']]
+    if WIN
+      la = ENV['LOCALAPPDATA'].to_s.tr('\\', '/')
+      c += Dir.glob("#{la}/Programs/Python/Python3*/python.exe").sort.reverse
+      c += Dir.glob('C:/Program Files/Python3*/python.exe').sort.reverse + Dir.glob('C:/Python3*/python.exe').sort.reverse
+      c += ENV['PATH'].to_s.split(';').map { |d| File.join(d.tr('\\', '/'), 'python.exe') }.reject { |p| p =~ /WindowsApps/i }
+    else
+      c += %w[/opt/homebrew/bin/python3 /usr/local/bin/python3 /Library/Frameworks/Python.framework/Versions/Current/bin/python3]
+      c << '/usr/bin/python3' if File.directory?('/Library/Developer/CommandLineTools') || File.directory?('/Applications/Xcode.app')
+    end
+    c.compact.uniq.find { |p| py_ok?(p) }
+  end
+
+  # python tanpa jendela konsol (Windows)
+  def python_bg
+    py = python or return nil
+    w = File.join(File.dirname(py), 'pythonw.exe')
+    WIN && File.file?(w) ? w : py
+  end
+
+  # Pasang/perbarui: setup.py (semua versi SketchUp, viewport, library Python). Fallback: salin plugin ke versi ini.
   def install_plugin
     return 'gagal: script tidak dimuat dari file (pakai load "<path>")' unless SRC && File.file?(SRC)
+    setup = [skill_dir, home_shared].compact.map { |d| File.join(d, 'scripts', 'setup.py') }.find { |f| File.file?(f) }
+    py = python
+    if setup && py
+      out, st = Open3.capture2e(py, setup)
+      return "Serasa RAB #{VERSION}: #{st.success? ? 'terpasang' : 'sebagian gagal'}\n#{out}"
+    end
     dir = Sketchup.find_support_file('Plugins')
     dest = File.join(dir, 'serasa_skp_extract.rb')
     FileUtils.cp(SRC, dest) unless File.expand_path(dest) == SRC
-    "terpasang #{VERSION}: #{dest}"
+    msg = "plugin terpasang #{VERSION}: #{dest}"
+    msg += py ? '' : ' · Python 3 belum ada -> viewport belum bisa jalan. ' +
+                     (WIN ? 'Klik dua kali setup.bat di folder skill (memasang Python lewat winget).' : 'Klik dua kali setup.command di folder skill.')
+    msg
+  end
+
+  # ---------- viewport ----------
+  def tools_py
+    h = home or return nil
+    f = File.join(h, 'viewport', 'tools.py'); File.file?(f) ? f : nil
+  end
+
+  def project_dir(m = Sketchup.active_model)
+    m && !m.path.to_s.empty? ? File.dirname(m.path) : nil
+  end
+
+  def run_tools(args, wait: false)
+    t = tools_py or return 'viewport belum terpasang -> SerasaRAB.install_plugin'
+    py = wait ? python : python_bg
+    return 'Python 3 belum ada -> jalankan setup' + (WIN ? '.bat' : '.command') + ' di folder skill' unless py
+    if wait
+      out, = Open3.capture2e(py, t, *args); return out.strip
+    end
+    log = File.join(File.dirname(t), 'server.log')
+    opt = { [:out, :err] => [log, 'a'], in: (WIN ? 'NUL' : '/dev/null') }
+    if WIN then opt[:new_pgroup] = true else opt[:pgroup] = true end
+    Process.detach(Process.spawn(py, t, *args, opt)); 'ok'
+  rescue StandardError => e
+    "gagal menjalankan viewport: #{e}"
+  end
+
+  # Buka viewport untuk model aktif (proyek = folder file .skp). Belum ada viewport.json -> dibuat (judul = nama model).
+  def viewport(dir = nil)
+    dir ||= project_dir
+    if dir && !File.file?(File.join(dir, '_serasa_tools', 'viewport.json'))
+      run_tools(['init', '--project', dir, '--title', File.basename(Sketchup.active_model.path.to_s, '.skp')], wait: true)
+    end
+    run_tools(dir ? ['open', '--project', dir] : ['open'])
+  end
+
+  # dipanggil saat model dibuka: nyalakan server di belakang layar (tanpa browser) bila proyek punya viewport.json
+  def ensure_viewport(m)
+    dir = project_dir(m); return unless dir && File.file?(File.join(dir, '_serasa_tools', 'viewport.json'))
+    run_tools(['ensure', '--project', dir])
+  end
+
+  def stop_viewport
+    run_tools(['stop'], wait: true)
   end
 
   SKIP_LAYERS = /KONTUR|PLAN|STREET|VEGET|CAR BIKE|AMBIENCE/i
@@ -313,6 +418,149 @@ module SerasaRAB
       openings: JSON.parse(glazing(region)) }.to_json
   end
 
+  # 11) EXPORT 3D untuk viewport (v2.3): geometri root di region -> JSON (segitiga, mm dunia) + luas per tag.
+  #   objects: [{pid, name, layer, bbox, qty: {tag: mm2}, parts: [{c: [r,g,b,a], t: tags, p: [x,y,z, ...]}]}]
+  #   tag muka (sampel 400 mm, logika sama dengan walls_sampled):
+  #     dinding  "R|<ruang>|<tipe>" (menghadap ruang) · "E|<arah>|<tipe>" (muka luar)
+  #     lantai   "F|<ruang>|<tipe>" (muka atas di dalam ruang) · plafon "C|<ruang>|<tipe>" (muka bawah)
+  #   qty = luas muka (mm², setelah transformasi) dibagi ke tiap tag sesuai porsi sampel -> dipakai viewport
+  #   untuk menghitung ulang volume RAB tiap model disimpan. rooms/bands/angle = sama seperti takeoff.
+  def sample_tags(f, t, inv, rooms, angle, walllike, step = 400)
+    n = f.normal.transform(t); return {} if n.length == 0
+    n.normalize!
+    mt = f.material || f.back_material; g = fin_guess(mt); return {} if g == 'kaca'
+    fpts = f.vertices.map { |v| v.position.transform(t) }
+    out = Hash.new(0)
+    if n.z.abs > 0.9                      # bidang datar -> lantai / plafon per ruang
+      xs = fpts.map { |p| mm(p.x) }; ys = fpts.map { |p| mm(p.y) }; z = mm(fpts[0].z)
+      sx = [(xs.max - xs.min) / 2.0, step / 2.0].min; sy = [(ys.max - ys.min) / 2.0, step / 2.0].min
+      x = xs.min + sx
+      while x < xs.max
+        y = ys.min + sy
+        while y < ys.max
+          wp = Geom::Point3d.new(x.mm, y.mm, z.mm)
+          c = f.classify_point(wp.transform(inv))
+          if c == Sketchup::Face::PointInside || c == Sketchup::Face::PointOnEdge
+            r = room_of(x, y, z + (n.z > 0 ? 50 : -50), rooms, angle)
+            out[r ? "#{n.z > 0 ? 'F' : 'C'}|#{r}|#{g}" : ''] += 1
+          end
+          y += step
+        end
+        x += step
+      end
+      return out
+    end
+    return {} if !walllike || n.z.abs > 0.2
+    h = Geom::Vector3d.new(-n.y, n.x, 0); h.normalize!
+    ref = fpts[0]; rs = mm(ref.x) * h.x + mm(ref.y) * h.y
+    s = fpts.map { |p| mm(p.x) * h.x + mm(p.y) * h.y }; fz = fpts.map { |p| mm(p.z) }
+    d = ARAH[((Math.atan2(n.y, n.x) * 180 / Math::PI + 45) % 360 / 90).floor]
+    su = [(s.max - s.min) / 2.0, step / 2.0].min; sz = [(fz.max - fz.min) / 2.0, step / 2.0].min
+    u = s.min + su
+    while u < s.max
+      z = fz.min + sz
+      while z < fz.max
+        dd = u - rs
+        wp = Geom::Point3d.new(ref.x + (h.x * dd).mm, ref.y + (h.y * dd).mm, z.mm)
+        c = f.classify_point(wp.transform(inv))
+        if c == Sketchup::Face::PointInside || c == Sketchup::Face::PointOnEdge
+          r = room_of(mm(wp.x) + n.x * 200, mm(wp.y) + n.y * 200, z, rooms, angle)
+          out[r ? "R|#{r}|#{g}" : "E|#{d}|#{g}"] += 1
+        end
+        z += step
+      end
+      u += step
+    end
+    out
+  end
+
+  def export_mesh(region, path, rooms_json = '[]', bands = [], angle = 0, model = nil)
+    rooms = rooms_json.is_a?(String) ? JSON.parse(rooms_json) : JSON.parse(rooms_json.to_json)
+    m = model || Sketchup.active_model; tri = 0; t0 = Time.now
+    out = { model: m.path, exported: Time.now.strftime('%Y-%m-%d %H:%M:%S'), region: region, bands: bands,
+            rooms: rooms, angle: angle, objects: [] }
+    roots(region, include_huge: true).each { |r|
+      parts = Hash.new { |hh, k| hh[k] = [] }; qty = Hash.new(0.0); bb = Geom::BoundingBox.new
+      leaves(r).each { |_, t, fs|
+        pts = fs.flat_map { |f| f.vertices.map { |v| v.position.transform(t) } }
+        next if pts.empty?
+        pts.each { |p| bb.add(p) }
+        xs = pts.map { |p| mm(p.x) }; ys = pts.map { |p| mm(p.y) }; zs = pts.map { |p| mm(p.z) }
+        q = pts.map { |p| uv(mm(p.x), mm(p.y), angle) }
+        thk = [[xs.max - xs.min, ys.max - ys.min].min, [q.map(&:first).max - q.map(&:first).min, q.map(&:last).max - q.map(&:last).min].min].min
+        walllike = thk >= 80 && (zs.max - zs.min) >= 250
+        inv = t.inverse
+        fs.each { |f|
+          mt = f.material || f.back_material
+          col = mt ? [mt.color.red, mt.color.green, mt.color.blue, (mt.alpha * 255).round] : [238, 236, 230, 255]
+          cnt = sample_tags(f, t, inv, rooms, angle, walllike)
+          tags = cnt.keys.reject(&:empty?).sort
+          me = f.mesh(0); arr = parts[[col, tags.join(';')]]; area = 0.0
+          me.polygons.each { |poly|
+            a = poly.map { |i| me.point_at(i.abs).transform(t) }
+            a.each { |p| arr << mm(p.x).round << mm(p.y).round << mm(p.z).round }
+            if a.size == 3
+              v1 = a[1] - a[0]; v2 = a[2] - a[0]; area += (v1 * v2).length.to_mm.to_f * 1.0
+            end
+            tri += 1
+          }
+          # luas segitiga: |v1 x v2| (inch^2 -> mm^2), lalu dibagi 2
+          area = area * 25.4 / 2.0
+          tot = cnt.values.sum
+          if tot > 0 then cnt.each { |k, c| qty[k] += area * c / tot } else qty[''] += area end
+        }
+      }
+      out[:objects] << { pid: r.persistent_id, name: r.definition.name, layer: r.layer.name,
+                         bbox: [mm(bb.min.x).round, mm(bb.min.y).round, mm(bb.min.z).round, mm(bb.max.x).round, mm(bb.max.y).round, mm(bb.max.z).round],
+                         qty: qty.transform_values { |v| v.round }, parts: parts.map { |(c, tg), p| { c: c, t: tg, p: p } } }
+    }
+    tmp = path + '.tmp'; File.write(tmp, JSON.generate(out)); File.rename(tmp, path)  # atomik
+    "ok #{out[:objects].size} objek, #{tri} segitiga, #{(Time.now - t0).round(1)} dtk -> #{path}"
+  end
+
+  # Ekspor ulang otomatis setiap model disimpan (Cmd+S). Setelan disimpan di <folder model>/_serasa_tools/serasa_watch.json,
+  # jadi tetap aktif setelah SketchUp ditutup-buka (plugin memasang ulang observer saat model dibuka).
+  class ExportOnSave < Sketchup::ModelObserver
+    def initialize(args) @args = args end
+    def onPostSaveModel(m)
+      SerasaRAB.export_mesh(*@args, m)
+    rescue => e
+      puts "SerasaRAB export gagal: #{e}"
+    end
+  end
+
+  class AutoWatch < Sketchup::AppObserver
+    def onOpenModel(m) SerasaRAB.attach_watch(m); SerasaRAB.ensure_viewport(m) end
+    def onActivateModel(m) SerasaRAB.attach_watch(m) end
+  end
+
+  def watch_file(m) m.path.to_s.empty? ? nil : File.join(File.dirname(m.path), '_serasa_tools', 'serasa_watch.json') end
+
+  def attach_watch(m)
+    f = watch_file(m); return nil unless f && File.file?(f)
+    cfg = JSON.parse(File.read(f))
+    return nil unless cfg['model'] == File.basename(m.path)
+    $serasa_obs ||= {}
+    return 'sudah aktif' if $serasa_obs[m.guid]
+    o = ExportOnSave.new([cfg['region'], cfg['path'], cfg['rooms'].to_json, cfg['bands'], cfg['angle'] || 0])
+    m.add_observer(o); $serasa_obs[m.guid] = o
+    'aktif'
+  rescue => e
+    puts "SerasaRAB watch gagal: #{e}"; nil
+  end
+
+  def watch_export(region, path, rooms_json = '[]', bands = [], angle = 0)
+    m = Sketchup.active_model
+    rooms = rooms_json.is_a?(String) ? JSON.parse(rooms_json) : JSON.parse(rooms_json.to_json)
+    f = watch_file(m) or return 'simpan model dulu (belum punya path)'
+    FileUtils.mkdir_p(File.dirname(f))
+    File.write(f, JSON.pretty_generate({ model: File.basename(m.path), region: region, path: path, rooms: rooms, bands: bands, angle: angle }))
+    $serasa_obs ||= {}
+    m.remove_observer($serasa_obs.delete(m.guid)) if $serasa_obs[m.guid]
+    attach_watch(m)
+    export_mesh(region, path, rooms, bands, angle, m) + ' · ekspor ulang otomatis tiap model disimpan (tetap aktif setelah SketchUp dibuka ulang)'
+  end
+
   # 10) bantu visual
   def save_camera
     m = Sketchup.active_model; c = m.active_view.camera
@@ -352,4 +600,29 @@ module SerasaRAB
     "restored; section planes tersisa: #{m.entities.grep(Sketchup::SectionPlane).length}"
   end
 end
+
+# saat plugin dimuat (SketchUp start / load): pantau model yang dibuka, dan model yang sedang terbuka
+unless $serasa_app_obs
+  $serasa_app_obs = SerasaRAB::AutoWatch.new
+  Sketchup.add_observer($serasa_app_obs)
+end
+SerasaRAB.attach_watch(Sketchup.active_model) if Sketchup.active_model
+
+# menu Extensions > Serasa RAB (sekali per sesi SketchUp)
+unless $serasa_menu
+  $serasa_menu = true
+  sub = UI.menu(Sketchup.version.to_i >= 16 ? 'Extensions' : 'Plugins').add_submenu('Serasa RAB')
+  sub.add_item('Buka Viewport RAB') {
+    r = SerasaRAB.viewport
+    UI.messagebox(r) unless r == 'ok'
+  }
+  sub.add_item('Hentikan Viewport') { UI.messagebox(SerasaRAB.stop_viewport) }
+  sub.add_separator
+  sub.add_item('Pasang ulang / perbarui') { UI.messagebox(SerasaRAB.install_plugin) }
+  sub.add_item("Tentang (v#{SerasaRAB::VERSION})") {
+    UI.messagebox("Serasa RAB #{SerasaRAB::VERSION}\nviewport: #{SerasaRAB.home || '-'}\nPython: #{SerasaRAB.python || 'belum ada'}")
+  }
+end
+SerasaRAB.ensure_viewport(Sketchup.active_model) if Sketchup.active_model && !$serasa_vp_started
+$serasa_vp_started = true
 'SerasaRAB ' + SerasaRAB::VERSION + ' loaded'

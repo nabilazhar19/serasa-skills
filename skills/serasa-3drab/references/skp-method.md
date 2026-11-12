@@ -1,16 +1,17 @@
 # Metode take-off dari SKP (v2)
 
-Fungsi ada di `scripts/skp_extract.rb` (modul `SerasaRAB`, VERSION 2.1). Satuan mm / m². Semua output JSON ringkas.
+Fungsi ada di `scripts/skp_extract.rb` (modul `SerasaRAB`, VERSION 2.4). Satuan mm / m². Semua output JSON ringkas.
 
 ## 0. Muat script (hemat token)
-1. `defined?(SerasaRAB) ? SerasaRAB::VERSION : 'belum'` — kalau `2.1`+, langsung pakai (plugin sudah terpasang).
+1. `defined?(SerasaRAB) ? SerasaRAB::VERSION : 'belum'` — kalau `2.4`+, langsung pakai (plugin sudah terpasang).
 2. Kalau belum / versi lama: `load "<folder skill>/scripts/skp_extract.rb"; SerasaRAB.install_plugin`.
-   `install_plugin` menyalin file ke folder Plugins SketchUp (`Sketchup.find_support_file('Plugins')`, Mac & Windows)
-   sebagai `serasa_skp_extract.rb` → termuat otomatis di sesi berikutnya. `npx skills add` tidak memasang plugin;
-   langkah ini yang memasangnya, sekali per komputer (atau `scripts/install_sketchup_plugin.sh` di macOS).
-   Agen cloud (folder skill tidak ada di komputer user): tulis file ke folder proyek yang terhubung
-   (`_serasa_tools/skp_extract.rb`, device_commit_files dengan **staged path bernama unik tiap versi**), lalu
-   `load` + `install_plugin`. **Jangan menempel isi script ke eval_ruby.**
+   `install_plugin` menjalankan `scripts/setup.py` dengan Python yang ditemukan: plugin `serasa_skp_extract.rb` ke folder
+   Plugins **semua versi SketchUp** (Mac & Windows), viewport + builder ke folder bersama, library Python, `env.json`.
+   Tanpa Python: plugin tetap disalin untuk versi SketchUp ini dan pesan memberi tahu cara memasang Python (`setup.bat` / `setup.command`).
+   `npx skills add` tidak memasang plugin; langkah ini yang memasangnya, sekali per komputer.
+   Agen cloud (folder skill tidak ada di komputer user): salin folder skill ke folder proyek yang terhubung
+   (mis. `_serasa_tools/serasa-3drab-<versi>/`, **nama unik tiap versi**), lalu `load` + `install_plugin` dari path itu.
+   **Jangan menempel isi script ke eval_ruby.**
 3. `SerasaRAB.save_camera` sebelum mengubah tampilan; `SerasaRAB.restore` di akhir. Jangan edit geometri.
 
 ## 1. Kenali area & ruang (±4 panggilan)
@@ -58,3 +59,11 @@ Sampling 100 mm per pita z membantu membagi dinding menerus, tetapi melewatkan d
 - Dua pelat bertumpuk (mis. +2,98 dan +3,98) → yang bawah biasanya plafon Lt.1, yang atas lantai Lt.2.
 - Tangga terpotong: hitung bagian yang dapat diukur; lanjutan pending kecuali estimasi terpisah sudah diizinkan. Jangan mengarang bentuk lanjutan atau mengabaikan konflik sekat/void.
 - Mobil dan furnitur dekoratif bukan pekerjaan konstruksi. Signage/vegetasi hanya dihitung bila termasuk lingkup yang diminta; jangan mengambil lanskap bersama di luar batas area.
+
+## Ekspor 3D untuk Viewport RAB
+- `SerasaRAB.watch_export(region, "<proyek>/_serasa_tools/<nama>_model3d.json", rooms, bands, angle)` — sekali setelah ruang & pita
+  ditetapkan (argumen sama dengan `takeoff`). Mengekspor mesh + luas per tag (`R|ruang|tipe`, `E|arah|tipe`, `F|…`, `C|…`) dan
+  mengekspor ulang otomatis setiap model disimpan (tetap aktif setelah SketchUp dibuka ulang). Butuh model yang sudah punya path.
+- `SerasaRAB.viewport` — buka viewport untuk folder model aktif (juga lewat menu Extensions › Serasa RAB).
+  `SerasaRAB.run_tools([...], wait: true)` menjalankan perintah `tools.py` di komputer pengguna (untuk agen tanpa shell lokal).
+- Plugin menyalakan server viewport di belakang layar saat model yang punya `_serasa_tools/viewport.json` dibuka.

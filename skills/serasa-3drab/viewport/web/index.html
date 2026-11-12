@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Viewport RAB</title>
+<link rel="stylesheet" href="/style.css">
+<script type="importmap">{ "imports": { "three": "/vendor/three.module.min.js" } }</script>
+</head>
+<body>
+<header class="topbar">
+  <div class="title">
+    <div class="eyebrow">Serasa · Viewport RAB</div>
+    <h1 id="p-title">Memuat…</h1>
+    <div class="sub" id="p-sub"></div>
+    <div class="agent" id="agent" hidden></div>
+  </div>
+  <div class="top-right">
+    <div class="top-actions">
+      <a id="sheet" class="pill-btn" target="_blank" rel="noopener" hidden title="Buka tab RAB di Google Sheet">
+        <svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><rect x="4" y="3" width="16" height="18" rx="2.5" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M4 9h16M4 15h16M10 9v12" stroke="currentColor" stroke-width="1.7"/></svg>Buka Sheet</a>
+      <button id="undo" class="pill-btn" title="Undo perubahan terakhir (⌘Z)" disabled>
+        <svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M9 7L4 12l5 5M4 12h11a5 5 0 010 10h-2" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>Undo</button>
+      <button id="hist" class="pill-btn" title="Riwayat perubahan & catatan untuk Claude">Riwayat<span class="n" hidden></span></button>
+      <button id="pull" class="pill-btn" title="Ambil editan yang dibuat langsung di Google Sheet">Tarik dari Sheet</button>
+      <button id="push" class="pill-btn primary" hidden title="Tulis ulang tab RAB di Google Sheet">Push ke Sheet</button>
+    </div>
+    <div class="top-total"><span id="total"></span><small>Total RAB</small></div>
+    <div class="live" id="live"><span class="dot"></span><span id="live-text">menghubungkan…</span></div>
+  </div>
+</header>
+
+<div class="design-warn" id="design" hidden></div>
+<section class="stats" id="cards"></section>
+
+<main class="layout">
+  <nav class="side">
+    <div class="side-h">Bab</div>
+    <ul id="babs"></ul>
+    <div class="side-h">Sumber angka</div>
+    <ul id="kinds"></ul>
+    <div class="side-h">File proyek</div>
+    <ul id="files" class="files"></ul>
+  </nav>
+
+  <div class="center">
+    <section class="stage">
+      <div class="canvas" id="canvas">
+        <div class="toolbar-3d">
+          <div class="seg" id="views">
+            <button data-view="iso" class="on">3D</button><button data-view="atas">Atas</button><button data-view="depan">Selatan</button>
+            <button data-view="timur">Timur</button><button data-view="barat">Barat</button><button data-view="belakang">Utara</button>
+          </div>
+          <div class="seg" id="cut"></div>
+          <div class="seg" id="modes"><button data-mode="material" class="on">Material</button><button data-mode="usage">Cakupan RAB</button></div>
+        </div>
+        <div class="hud" id="hud"></div>
+        <div class="editbar" id="editbar" hidden></div>
+        <div class="legend" id="legend" hidden><span><i class="dot-k" style="background:#0071e3"></i>dipakai di RAB</span><span><i class="dot-k" style="background:#c7c7cc"></i>tidak dirujuk</span></div>
+        <div class="nomodel" id="nomodel" hidden>Model 3D belum diekspor.<br>Di SketchUp: <code>SerasaRAB.watch_export(...)</code></div>
+      </div>
+    </section>
+
+    <section class="table-wrap">
+      <div class="toolbar">
+        <label class="search">
+          <svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true"><circle cx="11" cy="11" r="7" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M20 20l-3.6-3.6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+          <input id="q" type="search" placeholder="Cari uraian, ruang, spec, grup SKP…">
+        </label>
+        <span id="count" class="muted"></span>
+      </div>
+      <div id="errors" class="errors" hidden></div>
+      <div class="table-scroll">
+        <table class="rab">
+          <thead><tr>
+            <th class="c-row">Baris</th><th>Uraian</th><th>Ruang / Area</th><th class="c-code">Kode</th>
+            <th class="c-num">Volume</th><th class="c-sat">Sat</th><th class="c-num">Total</th><th class="c-src">Sumber</th>
+          </tr></thead>
+          <tbody id="rows"></tbody>
+        </table>
+      </div>
+    </section>
+  </div>
+
+  <aside class="inspector" id="detail">
+    <div class="empty">Pilih baris RAB untuk melihat bagian model yang menjadi sumber volumenya, atau klik objek di model 3D.</div>
+  </aside>
+</main>
+
+<div class="modal" id="modal" hidden></div>
+<div class="toast" id="toast" role="status"></div>
+<script type="module" src="/app.js"></script>
+</body>
+</html>
