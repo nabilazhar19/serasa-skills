@@ -36,11 +36,11 @@ Service account (disarankan; jalankan di shell komputer user, key di `00 Serasa 
 ```
 python3 build_rab.py input.json --push --creds <key.json> --spreadsheet <ID> --prepare template      # file baru (salinan template)
 python3 build_rab.py input.json --push --creds <key.json> --spreadsheet <ID> --prepare clone:"<tab>" # area lain di file yang sama
-python3 build_rab.py input.json --push --creds <key.json> --spreadsheet <ID> --prepare none          # tulis ulang (revisi)
+python3 build_rab.py input.json --push --creds <key.json> --spreadsheet <ID> --prepare none          # rebuild seluruh data (bukan patch/lanjut bab)
 ```
 - `template`: ganti nama `Serasa Template` → nama tab proyek, unmerge & kosongkan baris ≥13 (isi contoh), isi F1, buat tab Audit, tulis.
 - Builder membaca AHS live dan **berhenti** bila ada Spec yang tidak persis sama dengan uraian AHS (pakai tipe `audit` untuk pekerjaan yang memang tidak ada).
-- Output: `error=… harga0=… total=…` + subtotal per bab + jumlah AHS terpakai/analisa. Jangan membaca ulang sheet.
+- Output: `error=… harga0=… total=…` + subtotal per bab + jumlah AHS terpakai/analisa. Baca balik rentang tulis/dependennya; jangan membaca ulang seluruh sheet tanpa kebutuhan. Ringkasan formula tidak membuktikan geometri tanpa hitung ganda.
 - File baru: salin template lewat connector Drive (`copy_file`, judul = nama proyek), lalu share ke email service account sebagai Editor (`share_file`).
 Tanpa kredensial: `--ahs <ekspor AHS>` → `out/connector_batch.json` (satu batchUpdate, ±650 KB untuk ±150 baris; mahal di chat — usahakan push).
 
@@ -50,3 +50,6 @@ Tanpa kredensial: `--ahs <ekspor AHS>` → `out/connector_batch.json` (satu batc
 - Satuan `ls` pada item per-bulan (mis. PP5 listrik kerja) → volume = jumlah bulan, tulis di kolom Ruang.
 - Sheet 11 kolom: sel cek ditaruh di kolom A, 3 baris di bawah Total (dihapus lagi oleh builder).
 - `fields` bertanda kurung bisa ditolak → path bertitik.
+
+## Volume estimasi dan kelanjutan
+H estimasi = #FFD966, angka sementara tetap tampil, perlu diisi manual. Pending tetap kuning muda seluruh baris tanpa angka. Catatan sumber ringkas di Audit, bukan uraian panjang di Ruang. Pertahankan logo; tempatkan legenda pada area kosong. Lihat [revisi bertahap](incremental-edit.md) sebelum melanjutkan sheet yang sudah berisi pekerjaan pengguna.

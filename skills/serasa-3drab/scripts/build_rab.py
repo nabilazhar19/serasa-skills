@@ -30,6 +30,7 @@ COLS = ["Bab", "Uraian", "Ruang", "Lantai", "Kode Specs", "Spec", "Satuan", "Vol
 AHS_DV = "=AHS!$A$2:$A$2159"
 RP = '[$Rp-421]#,##0'
 PEND_BG = {"red": 1, "green": 0.949, "blue": 0.8}      # kuning muda (sama dengan template)
+EST_BG = {"red": 1, "green": 217 / 255, "blue": 102 / 255}  # hanya Volume estimasi
 FIN_LABEL = {"ekspos": "Aci Ekspos + Coating", "putih": "Cat Putih", "terracotta": "Cat Tekstur Terracotta", "pola": "Aci Ekspos Pola Blok"}
 
 
@@ -79,6 +80,14 @@ class Builder:
     def _push(self, cells, kind="data", dv=False):
         cells = cells + [""] * (11 - len(cells))
         self.rows.append({"c": cells, "k": kind, "dv": dv})
+
+    def mark_estimated(self, source, start=None):
+        """Propagasi estimasi ke hasil turunan; tidak mengubah volume atau harga."""
+        if not source.get("estimated"): return
+        for row in self.rows[start if start is not None else len(self.rows) - 1:]:
+            if row["k"] in ("ahs", "audit", "kusen"):
+                row["estimated"] = True
+                row["quantity_note"] = source.get("quantity_note", "Perlu diisi manual dengan ukuran final.")
 
     # -- struktur
     def bab(self, no, title):
@@ -132,7 +141,7 @@ class Builder:
         ws = self.spec["wall_specs"]
         title = title or {"plester": "Plester (Per ruangan)", "aci": "Aci (Per ruangan)", "finish": "Dinding (Per ruangan)"}[which]
         for w in self.spec["walls"]:
-            for t, a in w["parts"].items():
+            for t, a in w.get("layer_parts", {}).get(which, w["parts"]).items():
                 if only and t not in only: continue
                 if which == "plester": sp = ws["plester"]
                 elif which == "aci": sp = ws["aci"].get(t)
@@ -141,6 +150,8 @@ class Builder:
                           or ws["finish"]["interior" if w.get("interior", True) else "exterior"].get(t))
                 if not sp: continue
                 self.ahs_row(title, self._lab(w, t), w["lantai"], sp, a)
+                self.mark_estimated({"estimated": w.get("estimated", False) or t in w.get("estimated_parts", []),
+                                     "quantity_note": w.get("quantity_note", "Ukuran dinding perlu diisi manual.")})
 
     def openingan(self, code, ur="Openingan Kusen"):
         per = {}
@@ -148,9 +159,12 @@ class Builder:
             w, h = float(o["w"]), float(o["h"])
             k = 2 * (w + h) if o.get("type") in ("fix", "louvre") else 2 * h + w
             lt = o["lantai"].split(" (")[0]          # 'Lantai 1 (+0,50)' -> 'Lantai 1'
-            p = per.setdefault(lt, [0, 0]); p[0] += k; p[1] += 1
-        for lt, (m1, n) in per.items():
+            count = o.get("vol", 1)
+            p = per.setdefault(lt, [0, 0, False]); p[0] += k * count; p[1] += count
+            p[2] = p[2] or o.get("estimated", False)
+        for lt, (m1, n, estimated) in per.items():
             self.audit_row(ur, f"{n} bukaan (lihat bab kusen)", lt, code, round(m1, 2))
+            self.mark_estimated({"estimated": estimated, "quantity_note": "Termasuk bukaan dengan ukuran/jumlah estimasi; periksa keliling final."})
 
     def openings(self):
         for o in self.spec.get("openings", []):
@@ -159,12 +173,14 @@ class Builder:
             self.audit_used.setdefault(code, []).append(r)
             self._push(["", o["jenis"], o["ruang"], o["lantai"], code, o["spec"], o.get("sat", "unit"), o.get("vol", 1),
                         ("AUDIT", code), f"=I{r}*H{r}"], "kusen")
+            self.mark_estimated(o)
             self._last_ur = None
 
     def build(self):
         for b in self.spec["bab"]:
             self.bab(b["no"], b["title"])
             for it in b.get("rows", []):
+                first = len(self.rows)
                 t = it["type"]
                 if t == "sub": self.sub(it["title"])
                 elif t == "ahs": self.ahs_row(it.get("uraian", ""), it.get("ruang", ""), it.get("lantai", ""), it["spec"], it["vol"])
@@ -176,6 +192,7 @@ class Builder:
                 elif t == "pending": self.pending(it["uraian"], it.get("ruang", ""), it.get("lantai", ""), it.get("reason", "menunggu data (belum ada di SKP)"))
                 elif t == "openings": self.openings()
                 else: raise ValueError("row type tidak dikenal: " + t)
+                self.mark_estimated(it, first)
         self.close()
         self.total_row = self.r(); self._push(["Total", "", "", "", "", "", "", "", f"=SUM(K{DS}:K{self.total_row - 1})"], "total")
         for d in sorted(set(self.used) & self.ahs.dups):
@@ -188,7 +205,7 @@ def build_audit(spec, b, tab, start=1):
     """mengembalikan (rows, harga_cell{code:'H12'}, info) ; kolom A..I"""
     T = f"'{tab}'"
     rows = [[f"AUDIT RAB - {spec['project']['title']}"],
-            ["Dibuat otomatis oleh serasa-3drab. Harga analisa = asumsi harga pasar; komponen 'AHS:' mengambil harga live dari tab AHS."],
+            ["Dibuat otomatis oleh serasa-3drab. Harga non-AHS mengikuti sumber tiap komponen; komponen 'AHS:' mengambil harga live dari tab AHS."],
             [""]]
     price = {}
 
@@ -204,7 +221,7 @@ def build_audit(spec, b, tab, start=1):
                 r = start + len(rows); p = c["price"]
                 if isinstance(p, str) and p.startswith("AHS:"):
                     p = f"=VLOOKUP({q(p[4:])};AHS!$A:$D;4;FALSE)"
-                rows.append(["", "   " + c["name"], c["sat"], c["koef"], p, f"=D{r}*E{r}", c.get("src", "asumsi"), "", ""])
+                rows.append(["", "   " + c["name"], c["sat"], c["koef"], p, f"=D{r}*E{r}", c.get("src", "Perlu verifikasi harga"), "", ""])
             r1 = start + len(rows) - 1
             rows[r0 - start][7] = f"=SUM(F{r0 + 1}:F{r1})"; price[it["code"]] = f"H{r0}"
             rows.append([""])
@@ -233,6 +250,15 @@ def build_audit(spec, b, tab, start=1):
                  ["Baris", "Uraian", "Ruang", "", "", "", "", "", "Alasan"]]
         for rr, ur, ruang, reason in b.pend:
             rows.append([f"F{rr}", ur, ruang, "", "", "", "", "", reason])
+    estimates = [(DS + i, row) for i, row in enumerate(b.rows) if row.get("estimated")]
+    notes = spec.get("audit_notes", [])
+    if estimates or notes:
+        rows += [[""], ["E. CATATAN VOLUME DAN CAKUPAN"],
+                 ["Kuning pekat pada Volume = estimasi, wajib diisi manual. Kuning muda seluruh baris = pending."]]
+        for rr, row in estimates:
+            rows.append([f"H{rr}", row["c"][2], "", "", "", "", "", "", row["quantity_note"]])
+        for note in notes:
+            rows.append(["", "", "", "", "", "", "", "", note])
     return [x + [""] * (9 - len(x)) for x in rows], price
 
 
@@ -271,6 +297,7 @@ def rab_requests(sid, b, header, audit_tab, price):
             if row["k"] in ("ahs", "data") and j == 1: kw["bold"] = True
             if row["k"] == "total" and j == 8: kw["bold"] = True
             if row["k"] == "pending": kw["bg"] = PEND_BG; kw["italic"] = j == 5
+            if row.get("estimated") and j == 7: kw["bg"] = EST_BG
             cell = {"userEnteredValue": _val(v), "userEnteredFormat": _fmt(**kw)}
             if j == 5 and row["dv"]:
                 cell["dataValidation"] = {"condition": {"type": "ONE_OF_RANGE", "values": [{"userEnteredValue": AHS_DV}]}, "strict": True}
@@ -285,13 +312,14 @@ def audit_requests(asid, rows):
     out = []; secC = False
     for r in rows:
         if isinstance(r[0], str) and r[0].startswith("C. "): secC = True
-        title = isinstance(r[0], str) and re.match(r"^[ABCD]\. |^AUDIT", r[0] or "")
+        title = isinstance(r[0], str) and re.match(r"^[ABCDE]\. |^AUDIT", r[0] or "")
         hdr = r[0] in ("Kode", "Baris")
         if isinstance(r[0], str) and r[0].startswith("D. "): secC = True
         code_row = bool(r[0]) and not title and not hdr and not str(r[0]).startswith("=") and not secC
         vals = []
         for j, v in enumerate(r):
             kw = dict(size=10 if title else 9, bold=bool(title or hdr or code_row or (j == 7 and code_row)))
+            if j in (1, 8): kw["wrap"] = "WRAP"
             if j in (4, 5, 7): kw["num"] = RP
             if j == 3: kw["num"] = "#,##0.00"
             if secC and j == 3: kw["num"] = "0"

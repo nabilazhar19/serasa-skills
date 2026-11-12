@@ -337,7 +337,7 @@
    "group": "kusen",
    "name": "Jendela kaca mati etalase 265 x 140 cm (Toko 1)",
    "sat": "unit",
-   "note": "SKP: Group#792, 265 x 140 cm, z +1,10..+2,50",
+   "note": "Ukuran model: 265 x 140 cm, z +1,10..+2,50",
    "components": [
     {
      "name": "Kusen aluminium 4\" powder coat hitam keliling 2x(2,65+1,40)",
@@ -370,7 +370,7 @@
    "group": "kusen",
    "name": "Jendela kaca mati etalase 209 x 140 cm (Toko 2)",
    "sat": "unit",
-   "note": "SKP: Group#791, 209 x 140 cm",
+   "note": "Ukuran model: 209 x 140 cm",
    "components": [
     {
      "name": "Kusen aluminium 4\" powder coat hitam keliling 2x(2,09+1,40)",
@@ -403,7 +403,7 @@
    "group": "kusen",
    "name": "Pintu kaca swing 2 daun + kaca mati samping 271 x 244 cm (balkon Unit 1)",
    "sat": "unit",
-   "note": "SKP: Group#647, kusen 271x244, 2 daun kaca 95x230",
+   "note": "Ukuran model: kusen 271x244, 2 daun kaca 95x230",
    "components": [
     {
      "name": "Kusen aluminium 4\" powder coat hitam (2x2,44 + 2,71)",
@@ -460,7 +460,7 @@
    "group": "kusen",
    "name": "Pintu kaca swing 2 daun + kaca mati samping 250 x 244 cm (balkon Unit 2)",
    "sat": "unit",
-   "note": "SKP: Group#325, kusen 250x244, 2 daun kaca 95x230",
+   "note": "Ukuran model: kusen 250x244, 2 daun kaca 95x230",
    "components": [
     {
      "name": "Kusen aluminium 4\" powder coat hitam (2x2,44 + 2,50)",
@@ -1066,18 +1066,22 @@
     {
      "type": "ahs",
      "uraian": "Plafond",
-     "ruang": "Plafon Ruang Lt.2 Unit 1 Fin. Gypsum Board (asumsi, plafon Lt.2 tidak dimodelkan)",
+     "ruang": "Plafon Ruang Lt.2 Unit 1 Fin. Gypsum Board",
      "lantai": "Lantai 2",
      "spec": "Pemasangan Plafon Gypsum Board dengan Compound 9 x 1200 x 2400 mm, Merek Aplus",
-     "vol": 22.52
+     "vol": 22.52,
+     "estimated": true,
+     "quantity_note": "Plafon belum dimodelkan; ukuran perlu diisi manual."
     },
     {
      "type": "ahs",
      "uraian": "Plafond",
-     "ruang": "Plafon Ruang Lt.2 Unit 2 Fin. Gypsum Board (asumsi)",
+     "ruang": "Plafon Ruang Lt.2 Unit 2 Fin. Gypsum Board",
      "lantai": "Lantai 2",
      "spec": "Pemasangan Plafon Gypsum Board dengan Compound 9 x 1200 x 2400 mm, Merek Aplus",
-     "vol": 19.28
+     "vol": 19.28,
+     "estimated": true,
+     "quantity_note": "Plafon belum dimodelkan; ukuran perlu diisi manual."
     },
     {
      "type": "ahs",

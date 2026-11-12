@@ -8,9 +8,9 @@ Format mengikuti standar Agent Skills (`SKILL.md` + `scripts/` + `references/`),
 - `scripts/skp_extract.rb` — ekstraksi kuantitas dari SketchUp (v2: `SerasaRAB.takeoff` satu panggilan)
 - `scripts/install_sketchup_plugin.sh` — pasang `skp_extract.rb` ke folder Plugins SketchUp (macOS) agar termuat otomatis
 - `scripts/build_rab.py` — membangun & menulis sheet dari input JSON; `--push` via service account (mode `--prepare template` / `clone:<tab>`), atau file siap kirim untuk connector
-- `references/` — metode take-off, pemetaan material → kode MASTER AHS, format input, format & jebakan Google Sheets
+- `references/` — metode take-off, pemetaan pekerjaan → AHS live, rekonsiliasi volume, revisi bertahap, format input, format & jebakan Google Sheets
 - `examples/mini_input.json` — contoh ringkas format template Nov 2026 (baca ini dulu)
-- `examples/ruko_rev1_input.json` — contoh lengkap: Ruko BKL di file 0113_BENGKULU HOUSE REV1
+- `examples/ruko_bkl2_input.json` — contoh struktur input lengkap; hitung ulang ukuran dan harga untuk proyek aktif
 - `examples/legacy/`, `scripts/legacy/` — format lama (MASTER AHS), hanya untuk file lama
 
 ## Instalasi

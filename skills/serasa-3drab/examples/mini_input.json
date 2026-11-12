@@ -203,7 +203,7 @@
    "group": "kusen",
    "name": "Jendela kaca mati etalase 265 x 140 cm (Toko 1)",
    "sat": "unit",
-   "note": "SKP: Group#792, 265 x 140 cm, z +1,10..+2,50",
+   "note": "Ukuran model: 265 x 140 cm, z +1,10..+2,50",
    "components": [
     {
      "name": "Kusen aluminium 4\" powder coat hitam keliling 2x(2,65+1,40)",
@@ -259,24 +259,28 @@
      "ruang": "Selama pelaksanaan ± 4 bulan",
      "lantai": "All Floor",
      "code": "AUD-01",
-     "vol": 4
+     "vol": 4,
+     "estimated": true,
+     "quantity_note": "Durasi pelaksanaan sementara 4 bulan; isi durasi final."
     }
    ]
   },
   {
    "no": "II",
-   "title": "Pekerjaan Galian & Urugan",
+   "title": "Pekerjaan Tanah, Galian & Urugan",
    "rows": [
     {
-     "type": "note",
-     "uraian": "Struktur (pondasi, sloof, kolom, balok, pelat Lt.2, kanopi beton, tangga beton) belum dihitung - model & perhitungan struktur belum ada",
-     "spec": "Menyusul setelah desain struktur"
+     "type": "pending",
+     "uraian": "Galian tanah pondasi",
+     "ruang": "Ruko 2 unit",
+     "lantai": "Lantai 1",
+     "reason": "Ukuran pondasi dan kondisi tanah belum tersedia."
     }
    ]
   },
   {
-   "no": "III",
-   "title": "Pekerjaan Dinding",
+   "no": "IV",
+   "title": "Pekerjaan Dinding, Plester & Acian",
    "rows": [
     {
      "type": "ahs",
@@ -291,13 +295,7 @@
     },
     {
      "type": "wall_aci"
-    }
-   ]
-  },
-  {
-   "no": "IV",
-   "title": "Openingan Kusen",
-   "rows": [
+    },
     {
      "type": "openingan",
      "code": "OPK"
@@ -314,8 +312,8 @@
    ]
   },
   {
-   "no": "VIII",
-   "title": "Pekerjaan Finishing",
+   "no": "IX",
+   "title": "Pekerjaan Finishing Arsitektur",
    "rows": [
     {
      "type": "wall_finish"
@@ -334,5 +332,8 @@
     }
    ]
   }
+ ],
+ "audit_notes": [
+  "Contoh format saja; volume dan harga perlu dihitung dari sumber proyek aktif."
  ]
 }

@@ -1,95 +1,71 @@
 ---
 name: serasa-3drab
-description: Buat RAB (Rencana Anggaran Biaya) format PT Serasa Rancang Indonesia dari model SketchUp (.skp) dan denah - rincian per ruang, Spec dropdown dari tab AHS (kode & harga VLOOKUP), kode + spesifikasi + analisa harga kusen/pintu/jendela dari model, tab Audit (pekerjaan non-AHS & AHS terpakai), di salinan Template RAB Google Sheet. Pakai saat user minta "buat RAB", "hitung RAB dari skp", "RAB format Serasa", atau melampirkan skp + denah.
+description: Buat, lanjutkan, atau koreksi RAB format PT Serasa Rancang Indonesia dari SketchUp dan denah ke Google Sheets, dengan rincian per ruang, harga AHS live, analisa bukaan, dan Audit volume. Gunakan untuk RAB Serasa atau hitung biaya dari SKP; revisi mempertahankan perubahan manual pengguna.
 ---
 
-# Serasa 3D RAB (serasa-3drab) — dari SKP + denah ke Google Sheet RAB
+# Serasa 3D RAB
 
-Output: salinan Template RAB (judul = nama proyek, mis. `0113_BENGKULU HOUSE REV1`) berisi
-- tab RAB proyek (tab `Serasa Template` diganti nama, mis. `Ruko BKL`) dengan rincian per ruang, dan
-- tab **`Audit`**: (A) pekerjaan yang tidak ada di AHS + analisanya, (B) analisa harga kusen/pintu/jendela, (C) item AHS yang terpakai.
+Hasil: tab RAB pada salinan Template Serasa atau tab tujuan yang diminta, disertai tab Audit. Ikuti batas area dan tahap yang diminta pengguna; “lanjut bab” berarti melanjutkan tab yang sama. Jangan memperluas ke massa lain atau utilitas bersama tanpa dasar pembagian.
 
-- Template (WAJIB, jangan buat dari nol): https://docs.google.com/spreadsheets/d/1zwpn8sGUDQK4_FUd86FiYBzSVwW9y-pygasOf73Kahg — tab `AHS` (IMPORTRANGE Rekap AHS: A Uraian, B Kategori, C Satuan, D Harga, E Kode) + `Serasa Template`. Tidak ada lagi MASTER AHS / IKK / koefisien.
-- Contoh hasil format baru: file `0113_BENGKULU HOUSE REV1`, tab `ruko bkl 2` + `Audit ruko bkl 2` (urutan pekerjaan + pending). Tab `Ruko BKL` di file yang sama belum mengikuti urutan pekerjaan. File lama `0113_BENGKULU HOUSE` memakai format lama (MASTER AHS) — jangan dijadikan acuan format.
+## Aturan inti
 
-## Aturan format RAB (template Nov 2026)
-1. **Uraian (B)** = judul singkat, hanya di baris pertama grup. **Spec (F)** = referensinya.
-2. **Semua bab kecuali kusen**: Spec = **uraian tab AHS persis**, dropdown plaintext (validasi `=AHS!$A$2:$A$2159`); Kode (E), Satuan (G), Harga (I) = VLOOKUP ke tab AHS dari Spec. Jangan mengetik harga/kode manual.
-3. **Bab kusen, pintu & jendela**: Kode = kode tipe buatan (P1, P2, J1, PJ1…; tipe identik = kode sama), Spec = spesifikasi lengkap pintu/jendela termasuk ukuran (dari model SKP), Satuan unit, Harga = analisa dari model (komponen di tab Audit bagian B).
-4. **Pekerjaan yang ada di model tapi tidak ada di AHS**: tetap diisi (RAB harus penuh) — analisa harganya, tulis Spec sebagai teks tanpa dropdown, Harga merujuk ke tab Audit bagian A. Jangan memaksakan item AHS yang tidak sesuai.
-5. Tab Audit bagian C mencatat semua item AHS yang terpakai (kode, uraian, jumlah baris, volume & total live).
-6. **Urutan bab & pekerjaan WAJIB mengikuti tab template `urutan pekerjaan`** (judul bab I–XI, sub-judul, dan nama pekerjaan di kolom B). Kolom Uraian memakai nama pekerjaan dari tab itu; rincian (ruang, finishing, ukuran) ditulis di kolom Ruang. Pekerjaan yang tidak relevan untuk proyek dilewati; bab yang tidak relevan (mis. Kolam) dilewati.
-7. **Pekerjaan relevan yang datanya belum ada di SKP** (struktur: pondasi/sloof/kolom/balok/pelat/tangga/dak per Bekisting-Besi Ulir-Besi Polos-Beton, galian pondasi, urugan kembali; atau item persiapan yang menunggu metode kontraktor) → baris **pending**: kuning, Kode "-", Spec "PENDING - <alasan>", tanpa volume/harga; tercatat di tab Audit bagian D supaya bisa dilanjutkan nanti.
+- **Nama yang terbaca manusia.** Ruang memakai nama area dan kode tipe: `Teras > Toko 1`, `Dinding Interior Toko 2 Fin. Cat Putih`. PID, ID internal, nama `Group#…`, dan jalur hierarki teknis hanya di data kerja lokal, tidak di RAB atau Audit.
+- **Bahasa ringkas.** RAB memuat pekerjaan, lokasi, bahan dan ukuran; dasar perkiraan atau keterbatasan singkat masuk Audit. Gunakan `Dinding di belakang panel kayu`, bukan `substrate asumsi`. Keterangan belakang panel tetap ada hanya pada bidang yang terkena panel. Hindari kata “asumsi” berulang pada Ruang/Spec.
+- **Volume estimasi:** H berwarna **#FFD966**, angka sementara tetap ada untuk diisi manual pengguna. Berlaku juga pada turunan ukuran estimasi: pasangan, plester, acian, finishing, openingan, plafon, waterproofing dan MEP. Persetujuan memakai estimasi tidak membuatnya menjadi ukuran terverifikasi. Pilihan bahan perkiraan saja tidak mengubah status volume terukur.
+- **Pending:** seluruh baris **#FFF2CC**, E=`-`, F=`PENDING - alasan singkat`, H/I/J kosong, dicatat di Audit D. Bedakan pekerjaan belum terukur dari volume estimasi yang sudah dianggarkan. Pekerjaan tak relevan dilewati, bukan dibuat pending.
+- **Paket dihitung sekali.** Bila analisa/paket sudah memuat aksesori, sealant, rangka, klip atau upah, jangan tambah baris RAB untuk komponen itu, termasuk baris nol bertuliskan “TERMASUK”. Komponen tetap boleh dirinci di analisa Audit jika belum termasuk harga komponen lain.
+- **Validasi angka bukan validasi geometri.** Rumus bebas error tidak membuktikan volume benar atau tanpa hitung ganda. Rekonsiliasi sumber bidang sebelum mengisi Sheet.
 
-## Hemat token
-1. Baca reference hanya saat masuk langkahnya; contoh input: `examples/mini_input.json` (kecil) atau `examples/ruko_bkl2_input.json` (lengkap, urutan pekerjaan + pending).
-2. Script dipakai dari file. Ruby: plugin `SerasaRAB` (langkah 2). Python: `scripts/build_rab.py` apa adanya.
-3. Data RAB tidak lewat chat: `--push` service account. Builder memvalidasi Spec terhadap AHS live dan mencetak ringkasan.
-4. Verifikasi = ringkasan builder (`error`, `harga0`, total, subtotal); jangan membaca ulang seluruh sheet/AHS.
-5. Mencari uraian AHS: ekspor/baca kolom A+E tab AHS sekali ke file lokal, lalu cari dengan script (grep kata kunci), bukan dibaca di chat.
+## Sumber dan format
 
-## Lokasi scripts & references (cek berurutan)
-1. Folder skill ini (`scripts/`, `references/`, `examples/`).
-2. Claude Project "Automasi gambar kerja": `serasa-3drab/scripts/*`, `serasa-3drab/references/*.md`, `serasa-3drab/examples/*.json` (project_read saat dibutuhkan).
-3. Paket `serasa-3drab.zip` / repo `serasa-skills` dari user.
-`scripts/legacy/build_rab_v2.py` hanya untuk file format lama (MASTER AHS).
+Template wajib: https://docs.google.com/spreadsheets/d/1zwpn8sGUDQK4_FUd86FiYBzSVwW9y-pygasOf73Kahg
+- `AHS`: A uraian, B kategori, C satuan, D harga final, E kode. Tidak ada MASTER AHS/IKK/koefisien tambahan.
+- `Serasa Template`: 11 kolom; header baris 12; data mulai 13. Pertahankan format, identitas perusahaan, logo dan validasi.
+- `urutan pekerjaan`: baca live sekali per tahap kerja, simpan lokal; pakai judul bab, subjudul dan Uraian persis sesuai urutan. Lewati yang tidak relevan, misalnya kolam pada lingkup tanpa kolam.
 
-## Alat
-- SketchUp: MCP SketchUp (`eval_ruby`, `get_viewport_screenshot`) atau Ruby Console.
-- Google Sheets/Drive: connector Drive (copy & share file) + service account (`--push`, dijalankan di shell komputer user; key di `00 Serasa Architect/_serasa_keys/`).
-- Python 3 + `google-api-python-client google-auth` di shell yang menjalankan push.
-
-## Input dari user
-1. Model **.skp** (desain final — kalau beda dengan denah, **SKP yang dipakai**).
-2. **Denah** dengan area yang ditandai — hanya area itu yang dihitung.
-3. Nama file/tab tujuan. Opsional: lokasi (zona), batasan ("struktur tidak dihitung").
-Hal yang tidak bisa diputuskan dari model → asumsi paling masuk akal, tulis di kolom Ruang/Spec, laporkan di akhir. Jangan berhenti bertanya kecuali keputusannya mahal diulang.
+Semua baris AHS: F = uraian AHS persis, dropdown `=AHS!$A$2:$A$2159`; E/G/I = VLOOKUP dari F, J=H×I. K subtotal bab dan I baris Total mengikuti template. Jangan mengetik kode/harga AHS manual. Harga non-AHS dan bukaan merujuk analisa Audit. Kode P/J/PJ sama hanya untuk tipe dengan ukuran dan spesifikasi identik. Lihat [format Sheet](references/sheet-format.md) saat menulis.
 
 ## Alur kerja
-### 1. Denah → area hitung
-Ruang, fungsi, dimensi pokok, batas area yang ditandai.
 
-### 2. SKP → kuantitas (`references/skp-method.md`)
-1. `defined?(SerasaRAB) ? SerasaRAB::VERSION : 'belum'`. `2.1`+ → pakai. Belum/lama → `load "<folder skill>/scripts/skp_extract.rb"; SerasaRAB.install_plugin`. Agen cloud: tulis file ke folder proyek terhubung (`_serasa_tools/`, staged path unik), lalu `load` + `install_plugin`. **Jangan tempel isi script.**
-2. Model yang terbuka harus model proyek ini (`Sketchup.active_model.title`); jangan menutup/mengganti model user tanpa izin.
-3. `save_camera` → `info(region)` → `plan_view` Lt.1 & Lt.2 + `persp` → `materials(region)`.
-4. Ruang + `bands` → **satu panggilan** `takeoff(region, rooms, bands, angle, wall_pids)` → dinding per ruang × tipe, eksterior per pita × arah, pasangan per pita, lantai/plafon, bukaan (`frame_xyz` = ukuran kusen, `leaves` = jumlah daun).
-5. Catat detail kusen untuk spesifikasi: ukuran, jumlah daun, jenis bukaan, material kusen/daun, kaca, hardware yang terlihat di model (nama komponen/material, mis. "Glass Patch Chrome").
-6. `restore`.
+### 1. Kenali pekerjaan baru atau kelanjutan
 
-### 3. Pekerjaan → uraian AHS (`references/finishing-mapping.md`)
-Cari padanan di tab AHS untuk setiap pekerjaan. Ada → tipe `ahs` dengan uraian persis. Tidak ada / tidak sesuai model → tipe `audit` + analisa (komponen boleh `AHS:<uraian>` agar harga ikut AHS live).
+Baca denah/batas merah, model aktif, tab tujuan dan tahap yang sudah selesai. Untuk kelanjutan, baca **Sheet live sebelum input lama**: harga, pilihan bahan, volume, formula dan warna mungkin diubah pengguna. Simpan snapshot dan daftar baris lokal. Jangan mulai ulang atau memindahkan tab tanpa diminta.
 
-### 4. Input JSON (`references/input-format.md`)
-`project`, `luasan`, `walls` + `wall_specs`, `openings` (kode tipe, jenis, ruang A > B, lantai, w, h, type, panels, spec lengkap), `audit` (analisa non-AHS + kusen `group: "kusen"`), `bab` mengikuti `urutan pekerjaan` dengan baris `ahs | audit | pending | sub | wall_plaster | wall_aci | wall_finish (uraian, only) | openingan | openings`. Contoh lengkap: `examples/ruko_bkl2_input.json`.
-Cek offline dulu: `python3 build_rab.py input.json --ahs <ekspor AHS>` → harus tanpa error.
+### 2. Ukur melalui SketchUp MCP
 
-### 5. Tulis ke sheet (`references/sheet-format.md`)
-1. Salin template dengan connector Drive `copy_file` (judul = nama proyek, folder = folder file proyek sebelumnya bila ada), lalu `share_file` ke email service account sebagai writer.
-2. Cek tab AHS di salinan terbaca (IMPORTRANGE aktif).
-3. `python3 build_rab.py input.json --push --creds <key> --spreadsheet <ID> --prepare template` (file baru) · `clone:"<tab>"` (area lain di file yang sama) · `none` (tulis ulang/revisi).
+Gunakan skill `sketchup-mcp-workflow` bila tersedia: verifikasi versi bridge dan path model aktif. Jika model berbeda, minta pengguna mengaktifkan model yang benar sambil mengerjakan sumber lain yang independen. Jangan mengukur model lain.
 
-### 6. Verifikasi & laporan
-- Ringkasan builder harus `error=0`, `harga0=0`.
-- Laporkan: link file, total & subtotal per bab, luasan, daftar pekerjaan non-AHS (tab Audit A) dan analisa kusen (B), jumlah item AHS terpakai (C), jumlah baris pending (D), **asumsi**.
+Sumber SKP dan perubahan live pengguna dipertahankan; takeoff hanya inspeksi. Baca [metode SKP](references/skp-method.md) sebelum ekstraksi. Gunakan `SerasaRAB` bila tersedia; simpan hasil JSON lokal, bukan output panjang di chat. Periksa denah dan tampilan model, batas elevasi, tebal, material, bukaan dan bidang yang tidak dimodelkan. Nama material render tidak membuktikan bahan konstruksi.
 
-## Aturan isi (ringkas)
-- Bab (tab `urutan pekerjaan`): I Persiapan · II Tanah, Galian & Urugan · III Struktur · IV Dinding, Plester & Acian (pasangan, plester per ruang, acian per ruang, openingan kusen) · V Kusen, Pintu & Jendela · VI Atap & Kanopi · VII Plumbing & Sanitari (PLUMBING, GWT, rainwater, SANITARI, PENGUJIAN) · VIII Listrik & Sistem Pendukung (LISTRIK, TATA UDARA, SISTEM PENDUKUNG, PLTS, PENGUJIAN) · IX Finishing Arsitektur (FINISHING DINDING, LANTAI, TANGGA DAN BORDES, PLAFON, RAILING, SECONDARY SKIN, WATERPROOFING) · X Luar & Lanskap · XI Kolam. Baca tab itu dari template setiap kali (bisa berubah).
-- Ruang per baris dinding: `Dinding Interior <Ruang> Fin. <finishing>` / `Dinding Eksterior <zona> Fin. …`; pintu/jendela: `Ruang A > Ruang B`.
-- Default template: pasangan PW11, plester PD1, aci AD1 (cat) / AD2 (ekspos).
-- Openingan kusen: m1 keliling bukaan per lantai (analisa `OPK`).
-- MEP yang tidak dimodelkan boleh estimasi; tulis "estimasi" di sub-judul.
-- Luasan: tapak, total, tiap lantai (termasuk teras/balkon beratap; carport & area tanpa atap tidak), catatan rincian di A8.
+### 3. Rekonsiliasi kuantitas sebelum harga
 
-## Jebakan
-- Spec harus persis sama dengan uraian AHS (spasi, "Ø", kutip). Builder berhenti bila tidak cocok.
-- Uraian AHS ganda → VLOOKUP ambil baris pertama (builder memberi peringatan).
-- Item satuan `ls` yang dihitung per bulan (PP5) → volume = jumlah bulan, jelaskan di kolom Ruang.
-- F1 Zona: dropdown ke tab 'Daftar Zona' yang tidak ikut di template → isi teks saja.
-- Sheet 11 kolom; sel bantu di kolom A.
-- Dinding yang menerus beberapa lantai: `takeoff`/`walls_sampled` (per pita z).
-- Kaca tanpa material tidak terdeteksi `glazing` → cek leaf tipis di `info`/screenshot.
-- Commit file ke komputer user dari staged path yang sama bisa mengirim versi lama → nama staged unik.
-- Service account tidak bisa memiliki file baru → salin lewat connector, lalu share ke SA.
-- Copy template bisa gagal permission di folder tim → salin ke root Drive user lalu beri tahu user.
-- `npx skills add` hanya menyalin folder skill; plugin SketchUp terpasang saat `install_plugin` pertama kali dijalankan (atau `scripts/install_sketchup_plugin.sh` di macOS).
+Baca [rekonsiliasi volume](references/quantity-reconciliation.md) saat takeoff atau koreksi volume. Buat register lokal per elemen/bidang, ruang, lantai, lapisan dan sumber. Deduplicasi kontak, intersection, geometri bertumpuk dan muka tertutup. Periksa pasangan–plester–acian per lantai, termasuk pita balkon/parapet dan bidang belakang panel. Jangan memaksa plester = 2×pasangan tanpa menjelaskan selisih.
+
+Ketidaklengkapan model: ambil ukuran yang didukung denah; jika perlu keputusan penting, tanyakan singkat sambil meneruskan pekerjaan independen. Estimasi yang diizinkan diberi penanda. Struktur, sambungan, benturan dan lanjutan tangga tanpa dasar tetap pending. Jangan memodelkan atau menyatakan konflik sudah selesai karena anggarannya ada.
+
+### 4. Pilih AHS dan susun input
+
+Baca AHS live sekali ke cache lokal, cari padanan lokal sesuai [pemetaan finishing](references/finishing-mapping.md). Default template adalah pilihan anggaran, bukan bukti bahan model. Paket terpasang dibandingkan cakupannya dengan komponen lain agar tidak ganda. Bila AHS tidak sesuai, buat analisa Audit; jangan memaksakan padanan.
+
+Gunakan [format input](references/input-format.md). Builder mendukung `estimated: true`, `quantity_note`, `audit_notes`, serta `layer_parts` untuk membedakan area plester/acian/finish. Input lama tanpa flag tidak menandai estimasi otomatis: klasifikasikan sumber dulu. Jalankan offline sebelum push. Contoh `examples/ruko_bkl2_input.json` hanya contoh struktur; ukuran, harga, lingkup dan persetujuannya tidak berlaku otomatis untuk proyek baru.
+
+### 5. Tulis sesuai mode
+
+- **RAB baru:** salin seluruh template melalui connector Drive, beri akses service account bila diperlukan; jalankan `scripts/build_rab.py` untuk tab baru. Kredensial lokal di folder `_serasa_keys` bila tersedia, jangan tampilkan isinya.
+- **Kelanjutan/koreksi:** ikuti [revisi bertahap](references/incremental-edit.md). Tambahkan bab sebelum Total atau patch rentang sasaran; salin format/validasi dari baris sejenis, lalu tulis formula sesuai baris baru. Pertahankan angka manual dan warna. **`--prepare none` menghapus dan membangun ulang data RAB/Audit; jangan gunakan untuk patch atau lanjut bab.** Rebuild hanya bila memang diperlukan dan perubahan live sudah direkonsiliasi ke input.
+
+Audit A non-AHS, B analisa bukaan, C AHS terpakai dengan SUMIF live, D pending, E catatan ringkas dan sumber volume estimasi. Referensi baris harus mengikuti posisi akhir. Jangan memasukkan daftar ID model.
+
+### 6. Verifikasi dan laporkan
+
+Periksa perubahan saja ditambah dependennya: formula error/harga nol, subtotal dan total, cakupan paket, register bidang, estimasi H kuning, pending tanpa angka, serta referensi Audit. Pastikan angka/formula/warna bab sebelumnya tetap kecuali koreksi yang diminta. Baca balik rentang tulis dan cek tampilan; bila render tidak tersedia, periksa format dan ukuran baris melalui API, sebutkan batas pemeriksaannya jika relevan.
+
+Laporkan link tab, total sementara, perubahan utama dan pending yang material. Jangan menyebut RAB final lengkap bila struktur/detail atau volume manual belum terisi. Berhenti pada tahap yang diminta.
+
+## Hemat pemanggilan dan konteks
+
+- Cache metadata, AHS dan urutan pekerjaan sekali per tahap. Baca ulang hanya yang dapat berubah dan memengaruhi write.
+- Ukur elemen terkait dalam satu ekspor; proses geometri lokal. Chat menerima ringkasan masalah/total, bukan seluruh mesh, AHS, atau batch JSON.
+- Simpan snapshot Sheet, register baris, sumber volume, alasan estimasi dan hasil verifikasi di output proyek agar kelanjutan tidak mengukur ulang tanpa alasan.
+- Perubahan terbatas memakai patch kecil, bukan rebuild semua bab. Verifikasi sekali setelah perubahan, ulangi hanya untuk kegagalan atau koreksi baru.
+- Baca references sesuai langkah; script ada di `scripts/`. Tidak perlu mengambil contoh proyek lain bila format dan sumber aktif sudah jelas.

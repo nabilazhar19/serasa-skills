@@ -1,0 +1,10 @@
+# Lanjut bab dan koreksi tanpa menimpa input manual
+
+1. Identifikasi spreadsheetId, sheetId RAB/Audit dari metadata live. Baca rentang target dan baris sejenis dengan nilai, formula, validasi, format dan merge. Snapshot lokal menjadi dasar sebelum write; jangan memakai nomor baris dari percakapan lama saja.
+2. Bandingkan sumber kerja terakhir dengan live. Perubahan pilihan AHS, harga, ukuran, isi kosong dan warna dari pengguna dipertahankan. Jangan mengembalikan otomatis pilihan lama karena model/material atau input JSON belum diperbarui.
+3. Siapkan patch: baris insert sebelum Total untuk bab baru, atau sel/rentang terbatas untuk koreksi. Copy format dan validasi dari contoh sejenis, lalu ganti seluruh isi yang spesifik baris agar tidak meninggalkan formula/subtotal lama. `--prepare none` builder adalah rebuild, bukan mode patch.
+4. Hitung ulang subtotal bab baru dan total; perbarui Audit C (SUMIF live + referensi baris) dan D dari posisi akhir. Gunakan daftar/rentang baris singkat bila daftar panjang. Perbarui judul tahap dan hapus catatan “menunggu bab berikutnya” yang sudah kedaluwarsa.
+5. H estimasi #FFD966 dengan catatan singkat di Audit; pending #FFF2CC tanpa volume/harga. Jangan menghapus angka estimasi hanya karena pengguna diminta mengisi manual. Jaga legenda yang ada; tambahkan di tempat kosong yang terbaca, jangan menimpa logo perusahaan.
+6. Write batch terarah. Bila timeout, baca kondisi live sebelum replay agar tidak menggandakan insert. Jangan retry seluruh batch insert tanpa memastikan hasilnya.
+7. Readback: formula/validasi benar, subtotal lama tetap kecuali revisi yang diminta, warna volume tetap, angka baru cocok register sumber, total tidak memasukkan dua subtotal yang sama. Periksa wrap/tinggi baris target dan Audit. Untuk baris tanpa harga yang Spec-nya kosong akibat edit manual, bedakan dari pending eksplisit; jangan klaim semua sudah berharga.
+8. Simpan hasil akhir, register baris dan verifikasi lokal. Nyatakan snapshot live sebagai acuan kelanjutan jika input lama belum memuat seluruh edit manual. Batasi laporan pada hasil yang dicek.

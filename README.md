@@ -4,7 +4,7 @@ Kumpulan skill agent AI internal PT Serasa Rancang Indonesia.
 
 | Skill | Fungsi |
 |---|---|
-| `serasa-3drab` | Buat RAB format Serasa dari model SketchUp (.skp) + denah ke Google Sheet (rincian per ruang, MASTER AHS/AHS + IKK, tab Analisa) |
+| `serasa-3drab` | Buat, lanjutkan, dan koreksi RAB dari SketchUp + denah ke Google Sheets; AHS live, Audit volume, penanda estimasi, serta perlindungan input manual |
 
 ## Install (Claude Code, Codex, Cursor, dll.)
 
@@ -12,10 +12,10 @@ Butuh Node.js 18+.
 
 ```bash
 # global (semua proyek), pilih agent secara interaktif
-npx skills add <OWNER>/serasa-skills -g
+npx skills add nabilazhar19/serasa-skills -g
 
 # langsung ke Claude Code + Codex tanpa pertanyaan
-npx skills add <OWNER>/serasa-skills --skill serasa-3drab -g -a claude-code -a codex -y
+npx skills add nabilazhar19/serasa-skills --skill serasa-3drab -g -a claude-code -a codex -y
 ```
 
 Lokasi hasil install:
@@ -24,7 +24,7 @@ Lokasi hasil install:
 
 Update ke versi terbaru: jalankan ulang perintah `npx skills add` yang sama.
 
-Cek isi repo tanpa install: `npx skills add <OWNER>/serasa-skills --list`
+Cek isi repo tanpa install: `npx skills add nabilazhar19/serasa-skills --list`
 
 ## Kebutuhan saat dipakai
 - Akses SketchUp lewat MCP (eval_ruby + screenshot) atau Ruby Console.

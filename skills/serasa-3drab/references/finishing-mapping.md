@@ -39,4 +39,7 @@ SC3 kloset · SJ1 jet washer · SW3 wastafel · SF1 floor drain · SK1 kran.
 - Pembersihan lokasi rutin per bulan (dulu PP3) → `AUD-01`.
 - Plester aci openingan kusen per m1 (dulu X-01) → `OPK` (komponen PD2 + AD1 dari AHS + upah tali air).
 - Semua kusen/pintu/jendela → kode tipe P/J/PJ dengan analisa di tab Audit bagian B.
-- Struktur (pondasi, kolom, balok, pelat) belum dihitung bila model struktur belum ada → baris `note`.
+- Struktur relevan tanpa detail pondasi/kolom/balok/pelat → baris `pending`, tanpa angka; jangan memakai `note` sebagai pengganti daftar pekerjaan yang belum terukur.
+
+## Cakupan harga
+Default di atas bukan bukti material. Baca cakupan AHS/paket sebelum merinci komponen: aksesori/sealant, rangka plafon/decking, klip dan upah yang sudah termasuk tidak ditambahkan sebagai baris RAB. Aci ekspos yang sudah dihitung hanya ditambah coating, bukan paket aci+coating.

@@ -42,3 +42,26 @@ Aturan:
 - Kode tipe kusen sama untuk unit identik (P1 dipakai dua kali), satu baris per bukaan.
 - Openingan kusen: swing/slide = 2×tinggi + lebar, fix/louvre = 2×(lebar + tinggi); dikelompokkan per lantai dasar (teks sebelum " (").
 - Volume angka (titik desimal di JSON).
+
+## Status volume dan area tiap lapisan
+
+Builder mendukung field berikut (opsional demi kompatibilitas input lama):
+
+```json
+{
+  "audit_notes": ["Dinding memakai AAC 10 cm; detail bahan perlu verifikasi."],
+  "walls": [{
+    "room": "WC Toko 1", "lantai": "Lantai 1", "interior": true,
+    "parts": {"putih": 12.4},
+    "layer_parts": {"plester": {"putih": 12.4}, "aci": {"putih": 1.0}, "finish": {"putih": 1.0}},
+    "estimated": true, "quantity_note": "Ukuran WC dari denah; isi ukuran final."
+  }]
+}
+```
+
+- Pada baris `ahs` / `audit`, tambahkan `estimated: true` dan `quantity_note` bila volumenya estimasi. Berlaku juga pada `openings[]`; keliling openingan agregat ditandai jika ada bukaan estimasi.
+- Flag pada blok pembangkit (misalnya `wall_plaster`) menandai semua baris hasil blok itu. Untuk sebagian dinding, gunakan flag pada record `walls[]` atau daftar `estimated_parts: ["putih"]`; turunan bagian itu ikut ditandai.
+- `layer_parts` menimpa `parts` hanya untuk lapisan yang disebut (`plester`, `aci`, `finish`); `{}` melewati lapisan itu. Bila tidak ada, builder memakai `parts` lama. Jangan menganggap luas semua lapisan sama tanpa rekonsiliasi. Bila batas bidang/metodenya kompleks, gunakan baris `ahs` eksplisit per ruang/lapisan dari register yang sudah diperiksa.
+- Flag hanya memberi warna H #FFD966 dan catatan di Audit E, tidak menghapus angka/harga. Flag tidak otomatis mendeteksi estimasi: agen harus mengklasifikasikan sumber. Catatan pilihan bahan saja memakai `audit_notes`, tidak menandai volume terukur.
+- Jangan gunakan nama teknis/internal ID dalam `room`, `ruang`, `note`, `spec` atau teks Audit. Simpan jejak teknis di register lokal terpisah.
+- Isi kosong dan pilihan bahan live milik pengguna tidak boleh dipulihkan dari JSON lama saat melanjutkan. Snapshot live dan patch adalah acuan; input builder untuk rebuild harus direkonsiliasi dulu.

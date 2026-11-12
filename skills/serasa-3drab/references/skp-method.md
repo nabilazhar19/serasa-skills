@@ -33,7 +33,7 @@ SerasaRAB.takeoff(region, rooms, bands, angle, wall_pids)
 `wall_pids` = pid group dinding (+ fascia/parapet) dari `info`. Kalau nil → semua root di region (lebih berisik:
 ikut menghitung rangka secondary skin, ledge, dsb).
 Hasil (±8 KB):
-- `walls.rooms` `[ruang, tipe, m2]` → plester = aci = finishing per ruang (`walls[].parts` di input).
+- `walls.rooms` `[ruang, tipe, m2]` → kandidat luas per ruang (`walls[].parts`); rekonsiliasi kontak, bukaan dan kebutuhan tiap lapisan sebelum digunakan. Plester, acian dan finishing tidak selalu sama luas.
 - `walls.exterior` `[pita, arah, tipe, m2]` → zona eksterior (gabungkan per fasad / pita).
 - `walls.one_side` `[pid, pita, m2]` → pasangan bata per lantai (jumlahkan per pita).
 - `floors` / `under` → muka horizontal atas / bawah per group-material-elevasi; muka kecil dirangkum `mat:"kecil"`
@@ -42,7 +42,7 @@ Hasil (±8 KB):
   `leaves` = jumlah leaf berkaca (indikatif jumlah daun). Kaca **tanpa material** tidak terdeteksi → cek leaf tipis
   (≤10 mm) di `info` / screenshot.
 
-Sampling 100 mm per pita z: akurat untuk dinding yang menerus beberapa lantai (versi lama salah membagi lantai).
+Sampling 100 mm per pita z membantu membagi dinding menerus, tetapi melewatkan detail kecil/pertemuan. Periksa selisih memakai geometri eksak bila perlu; baca [rekonsiliasi volume](quantity-reconciliation.md).
 
 ## 3. Tambahan bila perlu
 - `slopes(pids_atap)` → atap miring per material & kemiringan (muka `up` = penutup; `dn` kayu = plafon miring).
@@ -54,7 +54,7 @@ Sampling 100 mm per pita z: akurat untuk dinding yang menerus beberapa lantai (v
 - Luas lantai kotor = sisi luar dinding tiap massa + deck/teras/balkon **beratap**. Carport & area tanpa atap tidak.
 
 ## Catatan interpretasi
-- Muka `-` (tanpa material) = cat putih. Dinding tebal terhitung dua sisi (interior + eksterior) — memang begitu.
+- Muka `-` tidak membuktikan cat putih atau bahan tertentu. Gunakan konteks/denah; pilihan anggaran yang belum pasti dicatat singkat di Audit. Plester dua sisi hanya untuk muka terbuka yang memang diplester.
 - Dua pelat bertumpuk (mis. +2,98 dan +3,98) → yang bawah biasanya plafon Lt.1, yang atas lantai Lt.2.
-- Tangga yang terpotong di model: asumsikan menerus ke lantai atas, tulis asumsinya.
-- Signage, furnitur, mobil, vegetasi: tidak dihitung.
+- Tangga terpotong: hitung bagian yang dapat diukur; lanjutan pending kecuali estimasi terpisah sudah diizinkan. Jangan mengarang bentuk lanjutan atau mengabaikan konflik sekat/void.
+- Mobil dan furnitur dekoratif bukan pekerjaan konstruksi. Signage/vegetasi hanya dihitung bila termasuk lingkup yang diminta; jangan mengambil lanskap bersama di luar batas area.
