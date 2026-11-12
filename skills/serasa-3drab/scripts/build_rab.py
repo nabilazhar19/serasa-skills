@@ -19,6 +19,7 @@ Pemakaian:
   python3 build_rab.py input.json --ahs ahs.json --out out                  # cek + file siap kirim (connector)
   python3 build_rab.py input.json --push --creds key.json --spreadsheet ID --prepare template
   python3 build_rab.py input.json --push --creds key.json --spreadsheet ID --prepare clone:"<tab RAB lain>"
+  python3 build_rab.py input.json --push --creds key.json --spreadsheet ID --prepare patch   # revisi: hanya baris berubah
 --ahs (mode offline): JSON [{"u":uraian,"s":satuan,"h":harga,"c":kode}] atau CSV ekspor tab AHS. Mode push membaca AHS live.
 Locale Indonesia: argumen ';' dan desimal ','.
 """
@@ -79,7 +80,8 @@ class Builder:
 
     def _push(self, cells, kind="data", dv=False):
         cells = cells + [""] * (11 - len(cells))
-        self.rows.append({"c": cells, "k": kind, "dv": dv})
+        # src/loc: asal angka & lokasi di input -> dipakai viewport (koreksi, sorotan 3D); tidak ditulis ke Sheet
+        self.rows.append({"c": cells, "k": kind, "dv": dv, "src": getattr(self, "_src", None), "loc": getattr(self, "_loc", None)})
 
     def mark_estimated(self, source, start=None):
         """Propagasi estimasi ke hasil turunan; tidak mengubah volume atau harga."""
@@ -140,7 +142,8 @@ class Builder:
     def walls(self, which, title=None, only=None):
         ws = self.spec["wall_specs"]
         title = title or {"plester": "Plester (Per ruangan)", "aci": "Aci (Per ruangan)", "finish": "Dinding (Per ruangan)"}[which]
-        for w in self.spec["walls"]:
+        for wi, w in enumerate(self.spec["walls"]):
+            layer = which if which in w.get("layer_parts", {}) else None   # layer_parts[which] menimpa parts untuk lapisan ini
             for t, a in w.get("layer_parts", {}).get(which, w["parts"]).items():
                 if only and t not in only: continue
                 if which == "plester": sp = ws["plester"]
@@ -149,9 +152,11 @@ class Builder:
                     sp = (w.get("finish_spec", {}).get(t)
                           or ws["finish"]["interior" if w.get("interior", True) else "exterior"].get(t))
                 if not sp: continue
+                self._src = (w.get("src") or {}).get(t); self._loc = ["wall", wi, t, which, layer]
                 self.ahs_row(title, self._lab(w, t), w["lantai"], sp, a)
                 self.mark_estimated({"estimated": w.get("estimated", False) or t in w.get("estimated_parts", []),
                                      "quantity_note": w.get("quantity_note", "Ukuran dinding perlu diisi manual.")})
+        self._loc = None
 
     def openingan(self, code, ur="Openingan Kusen"):
         per = {}
@@ -163,12 +168,14 @@ class Builder:
             p = per.setdefault(lt, [0, 0, False]); p[0] += k * count; p[1] += count
             p[2] = p[2] or o.get("estimated", False)
         for lt, (m1, n, estimated) in per.items():
+            self._loc = None
+            self._src = {"kind": "rumus", "detail": f"Keliling {n} bukaan di {lt} (pintu 2T+L, jendela 2(L+T)) dari ukuran kusen bab V", "calc": f"= {m1:.2f} m1"}
             self.audit_row(ur, f"{n} bukaan (lihat bab kusen)", lt, code, round(m1, 2))
             self.mark_estimated({"estimated": estimated, "quantity_note": "Termasuk bukaan dengan ukuran/jumlah estimasi; periksa keliling final."})
 
     def openings(self):
-        for o in self.spec.get("openings", []):
-            r = self.r(); code = o["code"]
+        for oi, o in enumerate(self.spec.get("openings", [])):
+            r = self.r(); code = o["code"]; self._src = o.get("src"); self._loc = ["open", oi]
             if code not in self.audit: self.errors.append(f"baris {r}: analisa kusen '{code}' tidak ada di 'audit'")
             self.audit_used.setdefault(code, []).append(r)
             self._push(["", o["jenis"], o["ruang"], o["lantai"], code, o["spec"], o.get("sat", "unit"), o.get("vol", 1),
@@ -177,11 +184,11 @@ class Builder:
             self._last_ur = None
 
     def build(self):
-        for b in self.spec["bab"]:
-            self.bab(b["no"], b["title"])
-            for it in b.get("rows", []):
+        for bi, b in enumerate(self.spec["bab"]):
+            self._loc = None; self.bab(b["no"], b["title"])
+            for ri, it in enumerate(b.get("rows", [])):
                 first = len(self.rows)
-                t = it["type"]
+                t = it["type"]; self._src = it.get("src"); self._loc = ["bab", bi, ri]
                 if t == "sub": self.sub(it["title"])
                 elif t == "ahs": self.ahs_row(it.get("uraian", ""), it.get("ruang", ""), it.get("lantai", ""), it["spec"], it["vol"])
                 elif t == "audit": self.audit_row(it.get("uraian", ""), it.get("ruang", ""), it.get("lantai", ""), it["code"], it["vol"])
@@ -193,7 +200,7 @@ class Builder:
                 elif t == "openings": self.openings()
                 else: raise ValueError("row type tidak dikenal: " + t)
                 self.mark_estimated(it, first)
-        self.close()
+        self._loc = None; self.close()
         self.total_row = self.r(); self._push(["Total", "", "", "", "", "", "", "", f"=SUM(K{DS}:K{self.total_row - 1})"], "total")
         for d in sorted(set(self.used) & self.ahs.dups):
             self.errors.append(f"PERINGATAN: uraian AHS ganda (VLOOKUP ambil yang pertama): {d}")
@@ -409,16 +416,91 @@ def push(a, spec, ahs_items_cb):
     print(f"AHS terpakai: {len(b.used)} item; non-AHS/analisa: {len(b.audit_used)} kode; pending: {len(b.pend)} baris")
 
 
+# ---------------------------------------------------------------- patch (revisi tanpa membangun ulang tab)
+def _norm(v):
+    if v is None: return ""
+    if isinstance(v, bool): return str(v)
+    if isinstance(v, (int, float)): return round(float(v), 6)
+    v = str(v).strip()
+    if v.startswith("="): return v.replace(";", ",").replace(" ", "")
+    try: return round(float(v), 6)
+    except ValueError: return v
+
+
+def plan_patch(b, live, audit_tab, price):
+    """bandingkan baris builder dengan isi live (FORMULA). Hasil: (struktur_sama, [index baris berubah])."""
+    want = []
+    for row in b.rows:
+        want.append([f"='{audit_tab}'!{price.get(v[1], 'H1')}" if isinstance(v, tuple) else v for v in row["c"]])
+    live = [list(r) + [""] * (11 - len(r)) for r in live[:len(want)]]
+    live += [[""] * 11] * (len(want) - len(live))
+    same = True
+    for w, l, row in zip(want, live, b.rows):   # struktur: bab di posisi yang sama & total di baris yang sama
+        if row["k"] in ("bab", "total") and _norm(w[0]) != _norm(l[0]): same = False; break
+    changed = [i for i, (w, l) in enumerate(zip(want, live)) if [_norm(x) for x in w] != [_norm(x) for x in l[:11]]]
+    return same, changed, want
+
+
+def patch(a, spec):
+    """--prepare patch: tulis hanya baris yang berubah (nilai+format baris itu); Audit ditulis ulang bila isinya berubah.
+    Format/warna manual di baris lain tidak disentuh. Struktur berubah (bab bergeser / total pindah) -> keluar kode 3."""
+    from google.oauth2 import service_account
+    from googleapiclient.discovery import build as gbuild
+    creds = service_account.Credentials.from_service_account_file(a.creds, scopes=["https://www.googleapis.com/auth/spreadsheets"])
+    S = gbuild("sheets", "v4", credentials=creds, cache_discovery=False).spreadsheets(); ID = a.spreadsheet
+    vals = S.values().get(spreadsheetId=ID, range="AHS!A1:E3000").execute().get("values", [])[1:]
+    ahs = Ahs([{"u": r[0], "s": r[2] if len(r) > 2 else "", "h": r[3] if len(r) > 3 else "", "c": r[4] if len(r) > 4 else ""} for r in vals if r and r[0]])
+    b = Builder(spec, ahs).build()
+    errs = [e for e in b.errors if not e.startswith("PERINGATAN")]
+    if errs:
+        for e in errs: print(e)
+        sys.exit("BERHENTI: perbaiki error di atas dulu")
+    tab = spec["project"]["tab"]; atab = spec["project"].get("audit_tab", "Audit")
+    meta = S.get(spreadsheetId=ID, fields="sheets(properties(sheetId,title,gridProperties))").execute()
+    sh = {x["properties"]["title"]: x["properties"] for x in meta["sheets"]}
+    if tab not in sh or atab not in sh: sys.exit(f"tab '{tab}' / '{atab}' tidak ada — pakai --prepare template/clone")
+    sid, asid = sh[tab]["sheetId"], sh[atab]["sheetId"]
+    live = S.values().get(spreadsheetId=ID, range=f"'{tab}'!A{DS}:K{DS + len(b.rows) + 60}", valueRenderOption="FORMULA").execute().get("values", [])
+    arows, price = build_audit(spec, b, tab)
+    same, changed, _ = plan_patch(b, live, atab, price)
+    if not same or len(live) > len(b.rows) + 3:
+        print("STRUKTUR BERUBAH: jumlah/posisi baris RAB beda dengan tab live -> perlu --prepare none (bangun ulang)")
+        sys.exit(3)
+    full = rab_requests(sid, b, build_header(spec), atab, price)[2]["updateCells"]["rows"]
+    reqs = [{"updateCells": {"range": _rng(sid, DS - 1 + i, DS + i, 0, 11), "rows": [full[i]], "fields": "userEnteredValue,userEnteredFormat,dataValidation"}} for i in changed]
+    hdr = build_header(spec)
+    live_h = S.values().get(spreadsheetId=ID, range=f"'{tab}'!A1:C{len(hdr)}", valueRenderOption="FORMULA").execute().get("values", [])
+    for i, r in enumerate(hdr):
+        lr = (live_h[i] if i < len(live_h) else []) + [""] * 3
+        if i >= 3 and [_norm(x) for x in r] != [_norm(x) for x in lr[:3]]:
+            reqs.append({"updateCells": {"range": _rng(sid, i, i + 1, 0, 3), "rows": [{"values": [{"userEnteredValue": _val(v)} for v in r]}], "fields": "userEnteredValue"}})
+    live_a = S.values().get(spreadsheetId=ID, range=f"'{atab}'!A1:I{len(arows) + 80}", valueRenderOption="FORMULA").execute().get("values", [])
+    audit_changed = len(live_a) != len([r for r in arows]) or any([_norm(x) for x in r] != [_norm(x) for x in (list(l) + [""] * 9)[:9]] for r, l in zip(arows, live_a))
+    if audit_changed:
+        reqs.append({"updateCells": {"range": _rng(asid, 0, sh[atab]["gridProperties"]["rowCount"], 0, 9), "fields": "userEnteredValue,userEnteredFormat"}})
+        reqs += audit_requests(asid, arows)
+    if reqs: S.batchUpdate(spreadsheetId=ID, body={"requests": reqs}).execute()
+    cell = f"'{tab}'!A{b.total_row + 3}"
+    S.values().update(spreadsheetId=ID, range=cell, valueInputOption="USER_ENTERED", body={"values": [[check_formula(b)]]}).execute()
+    chk = S.values().get(spreadsheetId=ID, range=cell).execute()["values"][0][0]
+    S.values().clear(spreadsheetId=ID, range=cell).execute()
+    err, zero, total, subs = (chk.split("|") + ["", "", "", ""])[:4]
+    print(f"PATCH tab '{tab}': {len(changed)} baris ditulis ({', '.join(str(DS + i) for i in changed[:30])}{'…' if len(changed) > 30 else ''}); "
+          f"audit {'ditulis ulang' if audit_changed else 'tetap'}")
+    print(f"error={err} harga0={zero} total=Rp{int(float(total or 0)):,}".replace(",", "."))
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("input"); ap.add_argument("--out", default="out"); ap.add_argument("--ahs")
     ap.add_argument("--push", action="store_true"); ap.add_argument("--creds"); ap.add_argument("--spreadsheet")
-    ap.add_argument("--prepare", default="template", help="template | clone:<tab> | none (tulis ulang tab yang sudah ada)")
+    ap.add_argument("--prepare", default="template", help="template | clone:<tab> | patch (tulis baris yang berubah saja) | none (bangun ulang tab)")
     ap.add_argument("--sheet-id", type=int, default=0); ap.add_argument("--audit-sheet-id", type=int, default=1)
     a = ap.parse_args()
     spec = json.load(open(a.input, encoding="utf-8"))
     if a.push:
         if not (a.creds and a.spreadsheet): sys.exit("--push butuh --creds dan --spreadsheet")
+        if a.prepare == "patch": return patch(a, spec)
         return push(a, spec, None)
     if not a.ahs: sys.exit("mode offline butuh --ahs (ekspor tab AHS) untuk validasi spec")
     b = Builder(spec, Ahs(load_ahs(a.ahs))).build()

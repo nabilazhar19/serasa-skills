@@ -1,0 +1,11 @@
+{
+ "version": "1.0",
+ "files": {
+  "app.js": "9c86c9c875e7948482381722fd9a9ad7410311202ade6b34abf42b354348c868",
+  "index.html": "85b92c942199be359b651c15fdba19460b1673e3f2e85c4b8cdf59ac8667dcfb",
+  "style.css": "dde4dfe6882fd9f2c55c9421a10dbf146057acc9417b9fa9eab3a81bf750e6fa",
+  "viewer3d.js": "89f4d35c5ad789d87ec2f39779dc6d7b5c4d140f0eb0cf9111d0b94bd32e0c4b",
+  "vendor/OrbitControls.js": "5a44a9e86a2a0fb11933eed69bc2cd33c76a496854c1aed6ed776efa87d7b064",
+  "vendor/three.module.min.js": "3e690ac7d180b0aadf0891bea39eec643e29e2d3e75c99b18689518665f69ba6"
+ }
+}

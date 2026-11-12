@@ -1,0 +1,4 @@
+viewport/state.json
+viewport/server.log
+__pycache__/
+*.pyc

@@ -1,7 +1,7 @@
 """Offline checks for quantity provenance; no credentials or Sheet writes."""
 import copy
 import unittest
-from build_rab import Ahs, Builder, DS, EST_BG, PEND_BG, build_audit, rab_requests
+from build_rab import Ahs, Builder, DS, EST_BG, PEND_BG, build_audit, plan_patch, rab_requests
 
 class QuantityProvenanceTests(unittest.TestCase):
     def setUp(self):
@@ -62,5 +62,19 @@ class QuantityProvenanceTests(unittest.TestCase):
         b2, _, _=self.render(legacy)
         self.assertEqual([r['c'] for r in b.rows],[r['c'] for r in b2.rows])
         self.assertFalse(any(r.get('estimated') for r in b2.rows))
+
+    def test_patch_plan_writes_only_changed_rows(self):
+        self.spec['walls'] = [{'room': 'WC', 'lantai': 'Lantai 1', 'parts': {'putih': 12.4}}]
+        self.spec['bab'][0]['rows'] = [{'type': 'wall_plaster'}, {'type': 'wall_finish'}]
+        b = Builder(copy.deepcopy(self.spec), self.ahs).build()
+        _, prices = build_audit(self.spec, b, 'RAB')
+        same, changed, want = plan_patch(b, [], 'Audit', prices)
+        live = [[str(v).replace(',', ';') if isinstance(v, str) else v for v in r] for r in want]   # locale ; di Sheet
+        self.assertEqual(plan_patch(b, live, 'Audit', prices)[:2], (True, []))
+        spec2 = copy.deepcopy(self.spec); spec2['walls'][0]['parts']['putih'] = 13.0
+        b2 = Builder(spec2, self.ahs).build()
+        same, changed, _ = plan_patch(b2, live, 'Audit', prices)
+        self.assertTrue(same)
+        self.assertTrue(changed and all(b2.rows[i]['k'] not in ('bab', 'total') for i in changed))
 
 if __name__=='__main__': unittest.main()

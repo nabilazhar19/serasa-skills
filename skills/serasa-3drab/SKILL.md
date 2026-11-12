@@ -5,7 +5,7 @@ description: Buat, lanjutkan, atau koreksi RAB format PT Serasa Rancang Indonesi
 
 # Serasa 3D RAB
 
-Hasil: tab RAB pada salinan Template Serasa atau tab tujuan yang diminta, disertai tab Audit. Ikuti batas area dan tahap yang diminta pengguna; “lanjut bab” berarti melanjutkan tab yang sama. Jangan memperluas ke massa lain atau utilitas bersama tanpa dasar pembagian.
+Hasil: tab RAB pada salinan Template Serasa atau tab tujuan yang diminta, disertai tab Audit, **dan Viewport RAB lokal** (`http://localhost:8765`: model 3D + tabel RAB, tiap baris menunjuk sumber volumenya, koreksi & Push dari halaman) yang tampil sejak awal sampai akhir. Ikuti batas area dan tahap yang diminta pengguna; “lanjut bab” berarti melanjutkan tab yang sama. Jangan memperluas ke massa lain atau utilitas bersama tanpa dasar pembagian.
 
 ## Aturan inti
 
@@ -15,6 +15,19 @@ Hasil: tab RAB pada salinan Template Serasa atau tab tujuan yang diminta, disert
 - **Pending:** seluruh baris **#FFF2CC**, E=`-`, F=`PENDING - alasan singkat`, H/I/J kosong, dicatat di Audit D. Bedakan pekerjaan belum terukur dari volume estimasi yang sudah dianggarkan. Pekerjaan tak relevan dilewati, bukan dibuat pending.
 - **Paket dihitung sekali.** Bila analisa/paket sudah memuat aksesori, sealant, rangka, klip atau upah, jangan tambah baris RAB untuk komponen itu, termasuk baris nol bertuliskan “TERMASUK”. Komponen tetap boleh dirinci di analisa Audit jika belum termasuk harga komponen lain.
 - **Validasi angka bukan validasi geometri.** Rumus bebas error tidak membuktikan volume benar atau tanpa hitung ganda. Rekonsiliasi sumber bidang sebelum mengisi Sheet.
+
+## Persiapan & Viewport RAB (berlaku untuk Claude, Codex, atau agen lain; Windows & Mac)
+
+**Sekali per komputer:** di SketchUp `defined?(SerasaRAB) ? SerasaRAB::VERSION : 'belum'`. Bila belum atau < 2.4: `load "<skill>/scripts/skp_extract.rb"; SerasaRAB.install_plugin`, yang menjalankan `scripts/setup.py` dan memasang plugin ke semua versi SketchUp, viewport ke folder bersama, serta library Python. Tanpa akses SketchUp: `python3 scripts/setup.py` (Windows `py -3 scripts\setup.py`; tanpa Python: `setup.bat`/`setup.command`). Agen di cloud: salin folder skill ke folder proyek pengguna yang terhubung, lalu `load`/`install_plugin` dari sana. **Jangan menempel isi script.**
+
+**Siklus viewport** — perintah lengkap di [viewport](references/viewport.md); `T` = `viewport/tools.py` di folder bersama:
+1. Begitu folder proyek & nama input diketahui: `T init --project DIR --input <nama>_input.json --title …` lalu `T open --project DIR`. Viewport terbuka di browser pengguna dan menunggu data.
+2. Tiap langkah alur kerja di bawah: `T status --project DIR --message "<langkah>" --step n --steps 6`. Satu baris, tanpa ID.
+3. Setelah take-off: `SerasaRAB.watch_export(...)` ke `_serasa_tools/<nama>_model3d.json` + `T init --model3d …`; model 3D muncul dan diekspor ulang setiap SKP disimpan.
+4. Input yang ditulis langsung tampil (tanpa restart). Setelah push: `T init` dengan sheet_url/gid/spreadsheet_id/creds/ahs_source, `T bind`, lalu `T status --stage selesai`. Sebutkan `http://localhost:8765` di laporan.
+5. Koreksi pengguna: viewport mengurus edit/undo/Tarik dari Sheet/Push (`--prepare patch`). "Kerjakan catatan" → `T notes` → ubah input → `T note-done --id N`.
+
+**Kunci desain:** tampilan viewport final. Jangan mengubah `viewport/web/` kecuali pengguna meminta perubahan tampilan secara eksplisit. `T check` harus `kunci desain: OK`. Logika baru masuk `viewport/core/`.
 
 ## Sumber dan format
 
@@ -35,7 +48,7 @@ Baca denah/batas merah, model aktif, tab tujuan dan tahap yang sudah selesai. Un
 
 Gunakan skill `sketchup-mcp-workflow` bila tersedia: verifikasi versi bridge dan path model aktif. Jika model berbeda, minta pengguna mengaktifkan model yang benar sambil mengerjakan sumber lain yang independen. Jangan mengukur model lain.
 
-Sumber SKP dan perubahan live pengguna dipertahankan; takeoff hanya inspeksi. Baca [metode SKP](references/skp-method.md) sebelum ekstraksi. Gunakan `SerasaRAB` bila tersedia; simpan hasil JSON lokal, bukan output panjang di chat. Periksa denah dan tampilan model, batas elevasi, tebal, material, bukaan dan bidang yang tidak dimodelkan. Nama material render tidak membuktikan bahan konstruksi.
+Sumber SKP dan perubahan live pengguna dipertahankan; takeoff hanya inspeksi. Baca [metode SKP](references/skp-method.md) sebelum ekstraksi. Gunakan `SerasaRAB` (v2.4+) bila tersedia; simpan hasil JSON lokal, bukan output panjang di chat. Periksa denah dan tampilan model, batas elevasi, tebal, material, bukaan dan bidang yang tidak dimodelkan. Nama material render tidak membuktikan bahan konstruksi.
 
 ### 3. Rekonsiliasi kuantitas sebelum harga
 
@@ -47,12 +60,12 @@ Ketidaklengkapan model: ambil ukuran yang didukung denah; jika perlu keputusan p
 
 Baca AHS live sekali ke cache lokal, cari padanan lokal sesuai [pemetaan finishing](references/finishing-mapping.md). Default template adalah pilihan anggaran, bukan bukti bahan model. Paket terpasang dibandingkan cakupannya dengan komponen lain agar tidak ganda. Bila AHS tidak sesuai, buat analisa Audit; jangan memaksakan padanan.
 
-Gunakan [format input](references/input-format.md). Builder mendukung `estimated: true`, `quantity_note`, `audit_notes`, serta `layer_parts` untuk membedakan area plester/acian/finish. Input lama tanpa flag tidak menandai estimasi otomatis: klasifikasikan sumber dulu. Jalankan offline sebelum push. Contoh `examples/ruko_bkl2_input.json` hanya contoh struktur; ukuran, harga, lingkup dan persetujuannya tidak berlaku otomatis untuk proyek baru.
+Gunakan [format input](references/input-format.md). Builder mendukung `estimated: true`, `quantity_note`, `audit_notes`, serta `layer_parts` untuk membedakan area plester/acian/finish. Input lama tanpa flag tidak menandai estimasi otomatis: klasifikasikan sumber dulu. Tulis input ke `<folder proyek>/_serasa_tools/<nama>_input.json` (sumber yang sama dibaca viewport), dengan `src` per bidang bila ada (asal angka untuk panel Sumber). Jalankan offline sebelum push. Contoh `examples/ruko_bkl2_input.json` hanya contoh struktur; ukuran, harga, lingkup dan persetujuannya tidak berlaku otomatis untuk proyek baru.
 
 ### 5. Tulis sesuai mode
 
 - **RAB baru:** salin seluruh template melalui connector Drive, beri akses service account bila diperlukan; jalankan `scripts/build_rab.py` untuk tab baru. Kredensial lokal di folder `_serasa_keys` bila tersedia, jangan tampilkan isinya.
-- **Kelanjutan/koreksi:** ikuti [revisi bertahap](references/incremental-edit.md). Tambahkan bab sebelum Total atau patch rentang sasaran; salin format/validasi dari baris sejenis, lalu tulis formula sesuai baris baru. Pertahankan angka manual dan warna. **`--prepare none` menghapus dan membangun ulang data RAB/Audit; jangan gunakan untuk patch atau lanjut bab.** Rebuild hanya bila memang diperlukan dan perubahan live sudah direkonsiliasi ke input.
+- **Kelanjutan/koreksi:** ikuti [revisi bertahap](references/incremental-edit.md). Tambahkan bab sebelum Total atau patch rentang sasaran; salin format/validasi dari baris sejenis, lalu tulis formula sesuai baris baru. Pertahankan angka manual dan warna. Koreksi angka/spec tanpa ubah struktur: `build_rab.py … --push --prepare patch` (hanya sel berubah; exit 3 = struktur berubah, perlu rebuild). **`--prepare none` menghapus dan membangun ulang data RAB/Audit; jangan gunakan untuk patch atau lanjut bab.** Rebuild hanya bila memang diperlukan dan perubahan live sudah direkonsiliasi ke input.
 
 Audit A non-AHS, B analisa bukaan, C AHS terpakai dengan SUMIF live, D pending, E catatan ringkas dan sumber volume estimasi. Referensi baris harus mengikuti posisi akhir. Jangan memasukkan daftar ID model.
 
@@ -60,7 +73,7 @@ Audit A non-AHS, B analisa bukaan, C AHS terpakai dengan SUMIF live, D pending, 
 
 Periksa perubahan saja ditambah dependennya: formula error/harga nol, subtotal dan total, cakupan paket, register bidang, estimasi H kuning, pending tanpa angka, serta referensi Audit. Pastikan angka/formula/warna bab sebelumnya tetap kecuali koreksi yang diminta. Baca balik rentang tulis dan cek tampilan; bila render tidak tersedia, periksa format dan ukuran baris melalui API, sebutkan batas pemeriksaannya jika relevan.
 
-Laporkan link tab, total sementara, perubahan utama dan pending yang material. Jangan menyebut RAB final lengkap bila struktur/detail atau volume manual belum terisi. Berhenti pada tahap yang diminta.
+Laporkan link tab, link viewport, total sementara, perubahan utama dan pending yang material. Jangan menyebut RAB final lengkap bila struktur/detail atau volume manual belum terisi. Berhenti pada tahap yang diminta.
 
 ## Hemat pemanggilan dan konteks
 

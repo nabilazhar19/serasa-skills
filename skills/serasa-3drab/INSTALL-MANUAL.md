@@ -5,8 +5,9 @@ Format mengikuti standar Agent Skills (`SKILL.md` + `scripts/` + `references/`),
 
 ## Isi
 - `SKILL.md` — alur kerja & aturan (mulai dari sini)
-- `scripts/skp_extract.rb` — ekstraksi kuantitas dari SketchUp (v2: `SerasaRAB.takeoff` satu panggilan)
-- `scripts/install_sketchup_plugin.sh` — pasang `skp_extract.rb` ke folder Plugins SketchUp (macOS) agar termuat otomatis
+- `scripts/skp_extract.rb` — plugin SketchUp v2.4: take-off (`SerasaRAB.takeoff`), ekspor 3D, menu Extensions › Serasa RAB
+- `scripts/setup.py` (+ `setup.bat` Windows, `setup.command` Mac) — pemasang sekali klik: plugin ke semua versi SketchUp, viewport, library Python
+- `viewport/` — Viewport RAB lokal (`viewport/tools.py` untuk agen apa pun); lihat `references/viewport.md`
 - `scripts/build_rab.py` — membangun & menulis sheet dari input JSON; `--push` via service account (mode `--prepare template` / `clone:<tab>`), atau file siap kirim untuk connector
 - `references/` — metode take-off, pemetaan pekerjaan → AHS live, rekonsiliasi volume, revisi bertahap, format input, format & jebakan Google Sheets
 - `examples/mini_input.json` — contoh ringkas format template Nov 2026 (baca ini dulu)
@@ -26,10 +27,12 @@ Untuk membuat RAB format Serasa, ikuti ~/.codex/skills/serasa-3drab/SKILL.md
 ## Kebutuhan
 - Akses SketchUp: MCP SketchUp (eval_ruby + screenshot) atau user menjalankan Ruby Console.
 - Akses Google Sheets/Drive ke template `1zwpn8sGUDQK4_FUd86FiYBzSVwW9y-pygasOf73Kahg` (minimal view + bisa membuat salinan).
-- Python 3; opsional `pip install -r requirements.txt` untuk `--push` dan `pymupdf` untuk membaca PDF denah.
+- Python 3.8+ (dipasang `setup.bat` di Windows bila belum ada). Library Google dipasang `setup.py`; `pymupdf` opsional untuk membaca PDF denah.
 
 ## Setelah install (sekali per komputer)
-1. SketchUp: otomatis — saat skill pertama kali dipakai, agen menjalankan `SerasaRAB.install_plugin` (Mac & Windows). Manual (macOS): `bash scripts/install_sketchup_plugin.sh`, lalu restart SketchUp.
+1. Otomatis — saat skill pertama kali dipakai, agen menjalankan `SerasaRAB.install_plugin` (Mac & Windows, semua versi SketchUp, plus viewport & library Python).
+   Manual: klik dua kali `setup.command` (Mac) atau `setup.bat` (Windows; memasang Python lewat winget bila belum ada), lalu restart SketchUp.
+   Hasil: menu **Extensions › Serasa RAB › Buka Viewport RAB**, dan viewport menyala sendiri saat model proyek dibuka.
 2. Service account Google (agar data RAB tidak lewat chat): lihat `references/sheet-format.md` bagian "Service account".
 
 ## Uji cepat
