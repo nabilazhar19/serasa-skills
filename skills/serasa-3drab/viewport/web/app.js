@@ -3,7 +3,7 @@
 import { Viewer3D } from "/viewer3d.js";
 
 const $ = (s) => document.querySelector(s);
-const S = { data: null, bab: null, kind: null, q: "", sel: null, pick: null, prevVals: {}, meshMtime: null, view: "detail", edit: null, ahs: null, busy: false, again: false };
+const S = { building: null, data: null, bab: null, kind: null, q: "", sel: null, pick: null, prevVals: {}, meshMtime: null, view: "detail", edit: null, ahs: null, busy: false, again: false };
 const rp = (v) => v == null ? "" : "Rp" + Math.round(v).toLocaleString("id-ID");
 const num = (v) => v == null ? "" : Number(v).toLocaleString("id-ID", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 const esc = (s) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
@@ -15,6 +15,32 @@ const SHORT = { skp: "SKP", rumus: "Rumus", estimasi: "Estimasi", asumsi: "Asums
 const hasHl = (r) => r.hl && ((r.hl.ids || []).length || (r.hl.tags || []).length || (r.hl.parts || []).length);
 const rowOf = (n) => S.data && S.data.rows.find((x) => x.row === n);
 const title = (r) => r.uraian || r.uraian_group || "";
+
+function scopeData() {
+  const d = S.data;
+  if (!d || !d.buildings) return d;
+  const b = d.buildings.find((x) => x.id === S.building);
+  if (!b) return { ...d, project: { ...d.project, tab: "Rekap Proyek" } };
+  const rows = d.rows.filter((r) => r.kind === "sub" || r.building === b.id);
+  const babs = d.babs.map((x) => {
+    const rs = rows.filter((r) => r.bab === x.no && r.kind !== "sub");
+    return { ...x, row: b.bab_rows[x.no] || x.row, total: rs.reduce((n, r) => n + r.total, 0), count: rs.length, pending: rs.filter((r) => r.kind === "pending").length };
+  }).filter((x) => x.count);
+  const stats = {};
+  for (const r of rows) {
+    if (r.kind === "sub") continue;
+    const key = kindOf(r), old = stats[key] || { ...d.stats[key], rows: 0, total: 0 };
+    old.rows++; old.total += r.total; stats[key] = old;
+  }
+  return { ...d, scope: b, rows, babs, stats, total: b.total, estimated: b.estimated,
+    luasan: b.shared ? { ...b.luasan, lantai: [] } : b.luasan,
+    project: { ...d.project, tab: b.tab, sheet_link: b.sheet_link } };
+}
+function scopeHighlight(fly = false) {
+  if (!S.mesh || S.sel || S.pick || S.edit) return;
+  const b = S.data.buildings && S.data.buildings.find((x) => x.id === S.building);
+  viewer.highlight(b ? { ids: b.ids, tags: [] } : null, fly);
+}
 
 const viewer = new Viewer3D($("#canvas"), {
   onPick: (p) => { S.pick = p; S.sel = null; S.view = "detail"; render(); if (!p) { viewer.highlight(null, false); $("#hud").innerHTML = ""; } },
@@ -55,8 +81,8 @@ async function load(flash) {
 function usage() {
   if (!S.data) return;
   const u = new Set();
-  for (const r of S.data.rows) if (r.hl && r.kind !== "pending") for (const k of ["ids", "tags", "parts"]) (r.hl[k] || []).forEach((x) => u.add(x));
-  viewer.setUsage(u);
+  for (const r of scopeData().rows) if (r.hl && r.kind !== "pending") for (const k of ["ids", "tags", "parts"]) (r.hl[k] || []).forEach((x) => u.add(x));
+  viewer.setUsage(u); scopeHighlight(false);
 }
 
 async function post(url, body) {
@@ -73,7 +99,7 @@ async function edit(body, okMsg) {
 
 // ---------------------------------------------------------------- render
 function render(changed = new Set()) {
-  const d = S.data; if (!d) return; const p = d.project;
+  const d = scopeData(); if (!d) return; const p = d.project;
   $("#p-title").textContent = p.title;
   $("#p-sub").textContent = d.empty ? `${d.project_path || ""}` + (S.mesh ? ` · ekspor 3D ${S.mesh.exported}` : "")
     : `Tab "${p.tab}" · model ${d.meta.model || "-"} · take-off ${d.meta.takeoff_date || "-"}` + (S.mesh ? ` · ekspor 3D ${S.mesh.exported}` : "");
@@ -89,10 +115,16 @@ function render(changed = new Set()) {
   }
   ["#pull", "#undo", "#hist"].forEach((s) => ($(s).hidden = false));
   $("#total").textContent = rp(d.total);
+  $("#total-label").textContent = d.scope ? "Total " + d.scope.label : "Total proyek";
+  $("#project-total").hidden = !d.scope;
+  $("#project-total").textContent = "Proyek " + rp(S.data.total);
+  $("#building-strip").hidden = !d.buildings;
+  if (d.buildings) $("#buildings").innerHTML = [{id:"",label:"Semua",total:S.data.total}, ...d.buildings].map((b) =>
+    `<button class="building-tab ${(!S.building && !b.id) || S.building === b.id ? "on" : ""}" role="tab" aria-selected="${!!((!S.building && !b.id) || S.building === b.id)}" data-building="${esc(b.id)}"><span>${esc(b.label)}</span><small>${rp(b.total)}</small></button>`).join("");
   const sh = $("#sheet"); sh.hidden = !p.sheet_link; if (p.sheet_link) sh.href = p.sheet_link;
   $("#push").hidden = !d.push_ready;
-  if (!S.pushing) $("#push").innerHTML = d.unpushed ? `Push ke Sheet <span class="cnt">${d.unpushed}</span>` : "Push ke Sheet";
-  $("#push").title = d.unpushed ? `${d.unpushed} perubahan belum dikirim ke Google Sheet` : "Sheet sudah sama dengan viewport";
+  if (!S.pushing) $("#push").innerHTML = d.multi_sheet ? `Push semua RAB${d.unpushed ? `<span class="cnt">${d.unpushed}</span>` : ""}` : d.unpushed ? `Push ke Sheet <span class="cnt">${d.unpushed}</span>` : "Push ke Sheet";
+  $("#push").title = d.multi_sheet ? `Kirim perubahan ke ${d.buildings.length} tab RAB dan Audit-nya` : d.unpushed ? `${d.unpushed} perubahan belum dikirim ke Google Sheet` : "Sheet sudah sama dengan viewport";
   const top = d.history.log[0];
   if (top && S.lastLog !== undefined && top.id !== S.lastLog && (top.op === "model" || top.op === "ahs")) toast(top.summary, top.op === "model" && top.details && top.details.conflicts && top.details.conflicts.length ? "warn" : "ok");
   S.lastLog = top ? top.id : null;
@@ -132,13 +164,17 @@ function render(changed = new Set()) {
     if (!rs.some((r) => r.kind !== "sub")) continue;
     for (let i = rs.length - 1; i >= 0; i--)  // buang sub-judul yang tidak punya baris setelah difilter
       if (rs[i].kind === "sub" && (i === rs.length - 1 || rs[i + 1].kind === "sub")) rs.splice(i, 1);
-    html += `<tr class="bab"><td class="c-row">${b.row}</td><td colspan="5">${esc(b.no)} · ${esc(b.title)}</td><td class="c-num">${rp(b.total)}</td><td></td></tr>`;
+    html += `<tr class="bab"><td class="c-row">${S.building || !d.buildings ? b.row : "·"}</td><td colspan="5">${esc(b.no)} · ${esc(b.title)}</td><td class="c-num">${rp(b.total)}</td><td></td></tr>`;
+    let lastWork = null;
     for (const r of rs) {
-      if (r.kind === "sub") { html += `<tr class="sub"><td class="c-row">${r.row}</td><td colspan="7">${esc(r.uraian)}</td></tr>`; continue; }
+      if (r.kind === "sub") lastWork = null;
+      if (r.kind === "sub") { html += `<tr class="sub"><td class="c-row">${d.scope ? d.scope.sub_rows[r.row] || "" : d.buildings ? "·" : r.row}</td><td colspan="7">${esc(r.uraian)}</td></tr>`; continue; }
       shown++;
       const k = kindOf(r), cls = ["row", r.kind === "pending" ? "pending" : "", S.sel === r.row ? "sel" : "", changed.has(r.row) ? "flash" : ""].join(" ");
-      const ur = r.uraian ? esc(r.uraian) : `<span class="ur-cont">↳ ${esc(r.uraian_group || "")}</span>`;
-      html += `<tr class="${cls}" data-row="${r.row}"><td class="c-row">${r.row}</td><td>${ur}</td><td>${esc(r.ruang)}</td><td class="c-code">${esc(r.code)}</td>
+      const work = title(r);
+      const ur = work !== lastWork ? esc(work) : `<span class="ur-cont">↳ ${esc(work)}</span>`;
+      lastWork = work;
+      html += `<tr class="${cls}" data-row="${r.row}"><td class="c-row">${r.sheet_row || r.row}</td><td>${ur}${d.buildings && !S.building ? `<small class="row-building">${esc(r.building_label)}</small>` : ""}</td><td>${esc(r.ruang)}</td><td class="c-code">${esc(r.code)}</td>
         <td class="c-num${r.estimated ? " est" : ""}"${r.estimated ? ` title="${esc(r.quantity_note || "volume estimasi")}"` : ""}>${num(r.vol)}${r.manual ? '<i class="mk" title="koreksi manual">✎</i>' : ""}${r.conflict ? '<i class="cf" title="model berubah, bentrok dengan koreksi manual">⚠</i>' : ""}</td><td class="c-sat">${esc(r.sat)}</td><td class="c-num">${rp(r.total || null)}</td>
         <td class="c-src" title="${esc(kindLabel(k))}">${badge(k, SHORT[k] || k)}</td></tr>`;
     }
@@ -163,7 +199,7 @@ function inspector2() {
 
 function rowsForPick(p) {
   const parts = p.whole ? viewer.parts.filter((q) => q.obj.pid === p.pid) : [{ obj: { name: p.name, pid: p.pid }, tags: p.tags, key: p.key }];
-  return S.data.rows.filter((r) => r.hl && r.kind !== "sub" && parts.some((part) => viewer.match(part, r.hl)));
+  return scopeData().rows.filter((r) => r.hl && r.kind !== "sub" && parts.some((part) => viewer.match(part, r.hl)));
 }
 // baris yang dihitung dari muka ini (tag cocok) vs yang hanya mengacu ke objeknya secara utuh
 const faceSpecific = (r) => (r.hl.tags || []).length || (r.hl.parts || []).length;
@@ -174,6 +210,7 @@ function select(row, fly = true) {
   $("#hud").innerHTML = !r ? "" : any
     ? `<b>${esc(title(r))}</b> · ${num(r.vol)} ${esc(r.sat)}<span class="r">${esc(r.ruang)}</span><span class="n">${viewer.hitCount} bagian model disorot${r.hl.room ? " · dibatasi kotak ruang" : ""}</span>`
     : `<b>${esc(title(r))}</b><span class="r">${r.kind === "pending" ? "Pending — belum ada di model" : "Tidak diambil dari geometri model (" + esc(kindLabel(kindOf(r))) + ")"}</span>`;
+  if (!r) scopeHighlight(false);
   return any;
 }
 
@@ -188,7 +225,7 @@ function detailRow(r) {
   const el = $("#detail");
   if (!r) { el.innerHTML = ""; return; }
   const s = r.src || {}, k = kindOf(r), c = r.can || {};
-  let h = `<div class="i-meta"><span class="src"><i class="k-${k}"></i>${esc(kindLabel(k))}</span><span class="bar">|</span><span>Baris ${r.row} · ${esc(r.lantai)}</span></div>
+  let h = `<div class="i-meta"><span class="src"><i class="k-${k}"></i>${esc(kindLabel(k))}</span><span class="bar">|</span><span>Baris ${r.sheet_row || r.row} · ${esc(r.building_label ? "RAB " + r.building_label + " · " : "")}${esc(r.lantai)}</span></div>
     <h2>${esc(title(r))}</h2><p class="i-desc">${esc(r.ruang)}</p>
     <div class="big">${r.vol == null ? "—" : unitHtml(num(r.vol), r.sat)}</div>
     ${r.conflict ? `<div class="conflict"><b>⚠ Model berubah</b> — angka model sekarang ${num(r.conflict.model)} ${esc(r.sat)}, tapi baris ini dikoreksi manual (${num(r.vol)}).
@@ -208,6 +245,7 @@ function detailRow(r) {
       <tr><td><b>Harga satuan</b></td><td></td><td class="c-num"><b>${rp(r.analysis.price)}</b></td></tr></table></div>`;
   // ---- koreksi
   let k2 = "";
+  if (S.data.buildings && r.loc) k2 += `<label class="fld"><span>Bangunan RAB</span><div class="row-in"><select id="ed-building">${S.data.buildings.map((b) => `<option value="${b.id}" ${r.building === b.id ? "selected" : ""}>${esc(b.label)}</option>`).join("")}</select><button class="btn ghost" data-act="building-save" data-row="${r.row}">Pindahkan</button></div></label>`;
   if (c.vol) k2 += `<label class="fld"><span>Volume (${esc(r.sat)})</span><div class="row-in"><input id="ed-vol" type="text" inputmode="decimal" value="${r.vol == null ? "" : String(r.vol).replace(".", ",")}">
       <button class="btn" data-act="vol" data-row="${r.row}">Simpan</button></div></label>
       ${(r.shared || []).length ? `<p class="hint">Angka ini juga dipakai baris ${r.shared.join(", ")} (plester/aci/finishing dinding yang sama).</p>` : ""}`;
@@ -322,7 +360,7 @@ function openReview(d, mode) {
   m.innerHTML = `<div class="sheet rv"><div class="sh-head"><div><b>${mode === "push" ? "Ada editan langsung di Google Sheet" : "Editan di Google Sheet"}</b>
       <span class="muted">Tab "${esc(d.tab)}" dibanding push terakhir. Centang yang mau diambil ke web${mode === "push" ? "; yang tidak dicentang akan ditimpa saat push" : ""}.</span></div><button class="x" data-act="spec-close">✕</button></div>
     <div class="sp-list">${d.items.map((i) => `<label class="rv-item ${i.conflict ? "conf" : ""}"><input type="checkbox" value="${esc(i.id)}" ${i.conflict ? "" : "checked"}>
-        <span class="rv-l"><b>Baris ${i.sheet_row}</b> ${esc(i.uraian)} <span class="muted">${esc((i.ruang || "").slice(0, 50))}</span>
+        <span class="rv-l"><b>${i.sheet_tab ? esc(i.sheet_tab) + " · " : ""}Baris ${i.sheet_row}</b> ${esc(i.uraian)} <span class="muted">${esc((i.ruang || "").slice(0, 50))}</span>
         <span class="rv-v">${esc(i.field)}: <s>${fmtv(i.base, i.col)}</s> → <b>${fmtv(i.sheet, i.col)}</b> <span class="muted">di Sheet</span>
         ${i.conflict ? `<br><span class="warn">⚠ di web juga diubah jadi ${fmtv(i.web, i.col)} — pilih salah satu</span>` : ""}</span></span></label>`).join("")}
       ${d.struct.length ? `<div class="rv-struct"><b>Baris ditambah / dihapus di Sheet</b><span class="muted">Tidak bisa dipetakan otomatis — akan masuk catatan untuk Claude.</span>
@@ -415,11 +453,18 @@ const parseNum = (s) => { s = String(s).trim(); return Number(s.includes(",") ? 
 
 document.addEventListener("click", async (e) => {
   const t = e.target;
+  const building = t.closest("[data-building]");
+  if (building) {
+    if (S.edit) return toast("Selesaikan pemilihan sumber dahulu", "warn");
+    S.building = building.dataset.building || null; S.sel = S.pick = S.bab = S.kind = null; S.view = "detail"; S.q = ""; $("#q").value = "";
+    render(); usage(); scopeHighlight(true); return;
+  }
   if (t.id === "clearpick") { e.preventDefault(); S.pick = null; viewer.highlight(null, false); render(); return; }
   const act = t.closest("[data-act]");
   if (act) {
     e.preventDefault(); const a = act.dataset.act, row = +act.dataset.row || null;
     if (a === "vol") { const v = parseNum($("#ed-vol").value); if (!isFinite(v) || $("#ed-vol").value.trim() === "") return toast("Volume tidak valid", "err"); await edit({ op: "vol", row, value: v }); }
+    else if (a === "building-save") { if (await edit({ op: "building", row, building: $("#ed-building").value })) { S.sel = null; await load(true); scopeHighlight(false); } }
     else if (a === "spec-open") openSpec(row);
     else if (a === "spec-close") closeSpec();
     else if (a === "spec-apply") { if (await edit({ op: "spec", row: S.specPick.row, spec: S.specPick.sel })) closeSpec(); }

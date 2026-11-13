@@ -76,6 +76,8 @@ Gunakan [format input](references/input-format.md). Builder mendukung `estimated
 - **RAB baru:** salin seluruh template melalui connector Drive, beri akses service account bila diperlukan; jalankan `scripts/build_rab.py` untuk tab baru. Kredensial lokal di folder `_serasa_keys` bila tersedia, jangan tampilkan isinya.
 - **Kelanjutan/koreksi:** ikuti [revisi bertahap](references/incremental-edit.md). Tambahkan bab sebelum Total atau patch rentang sasaran; salin format/validasi dari baris sejenis, lalu tulis formula sesuai baris baru. Pertahankan angka manual dan warna. Koreksi angka/spec tanpa ubah struktur: `build_rab.py … --push --prepare patch` (hanya sel berubah; exit 3 = struktur berubah, perlu rebuild). **`--prepare none` menghapus dan membangun ulang data RAB/Audit; jangan gunakan untuk patch atau lanjut bab.** Rebuild hanya bila memang diperlukan dan perubahan live sudah direkonsiliasi ke input.
 
+RAB terpisah per bangunan (Rumah/Kost/Ruko, dll.) **hanya bila diminta eksplisit**: satu input induk + `building_tabs` di viewport.json, Push semua tab lewat viewport — lihat [viewport](references/viewport.md#rab-terpisah-per-bangunan-hanya-bila-pengguna-memintanya-secara-eksplisit).
+
 Audit A non-AHS, B analisa bukaan (rinci, [analisa](references/analisa.md)), C AHS terpakai dengan SUMIF live, D pending, E catatan ringkas dan sumber volume estimasi. Referensi baris harus mengikuti posisi akhir. Jangan memasukkan daftar ID model.
 
 ### 6. Verifikasi dan laporkan

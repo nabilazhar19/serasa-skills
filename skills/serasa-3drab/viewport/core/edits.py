@@ -82,6 +82,14 @@ class Editor:
     # ---------------------------------------------------------------- operasi
     def apply(self, req, rows_by_no):
         op = req.get("op")
+        if op == "building":      # RAB per bangunan: pindahkan baris ke bangunan lain
+            from core import scopes
+            L = scopes.labels(self.cfg); key = req.get("building"); row = rows_by_no.get(req.get("row"))
+            if key not in L or not row or not row.get("loc"): raise ValueError("Bangunan atau baris tidak valid")
+            spec = self.spec(); loc = row["loc"]
+            holder = spec["bab"][loc[1]]["rows"][loc[2]] if loc[0] == "bab" else spec["openings"][loc[1]] if loc[0] == "open" else spec["walls"][loc[1]]
+            holder["building"] = key
+            return self._commit(spec, op, row, "Pekerjaan dialokasikan ke " + L[key])
         if op == "undo": return self.undo()
         if op == "note": return self.add_note(req, rows_by_no.get(req.get("row")))
         if op == "note_done": return self.note_done(req.get("id"), req.get("done", True))
@@ -268,6 +276,9 @@ class Editor:
         return os.path.normpath(os.path.join(self.base, os.path.expanduser(c["creds"])))
 
     def sheet_check(self):
+        if self.cfg.get("building_tabs"):
+            from core.scope_sheets import check
+            return check(self)
         from core import sheetsync as SS
         spec = self.spec(); ahs = self._read(self.ahs, [])
         web, ds = SS.build_rows(self.builder, spec, ahs)
@@ -306,7 +317,7 @@ class Editor:
                     vol = cols["H"]["sheet"] if "H" in cols else None
                     rows[loc[2]] = {"type": "ahs", "uraian": it.get("uraian", ""), "ruang": cols["C"]["sheet"] if "C" in cols else it.get("ruang", ""),
                                     "lantai": it.get("lantai", ""), "spec": sp, "vol": vol or 0,
-                                    "src": {"kind": "asumsi", "detail": "Diisi langsung di Google Sheet", "sheet": {"at": _now()}}, "_was": it}
+                                    "src": {"kind": "asumsi", "detail": "Diisi langsung di Google Sheet", "sheet": {"at": _now()}}, "building": it.get("building"), "_was": it}
                     done += list(cols.values()); continue
                 for col, i in cols.items():
                     if col == "H": it["vol"] = i["sheet"]
@@ -334,7 +345,11 @@ class Editor:
                    if st["type"] == "tambah" else f"Di Google Sheet baris '{st['uraian']} · {st['ruang']}' dihapus")
             self.add_note({"text": txt + " — masukkan ke input RAB atau abaikan.", "auto": True}, None)
         _, sbase = self._paths()
-        os.makedirs(os.path.dirname(sbase), exist_ok=True); self._write(sbase, {"target": self._sheet_target(), "rows": sheet})   # editan Sheet sudah ditinjau
+        if self.cfg.get("building_tabs"):
+            from core.scope_sheets import reviewed
+            reviewed(self, sheet)
+        else:
+            os.makedirs(os.path.dirname(sbase), exist_ok=True); self._write(sbase, {"target": self._sheet_target(), "rows": sheet})   # editan Sheet sudah ditinjau
         if not done:
             return {"ok": True, "summary": "Tidak ada perubahan yang diambil" + (f" ({len(skipped)} dilewati)" if skipped else ""), "skipped": skipped}
         return self._commit(spec, "sheet", None, f"Tarik dari Sheet: {len(done)} perubahan diambil" + (f", {len(skipped)} dilewati" if skipped else ""),
@@ -383,6 +398,9 @@ class Editor:
 
     # ---------------------------------------------------------------- push ke Google Sheet
     def push(self, force=False, rebuild=False):
+        if self.cfg.get("building_tabs"):
+            from core.scope_sheets import push
+            return push(self, force, rebuild)
         if not force:
             d = self.sheet_check()
             if d["items"] or d["struct"]:

@@ -25,12 +25,13 @@
       <button id="pull" class="pill-btn" title="Ambil editan yang dibuat langsung di Google Sheet">Tarik dari Sheet</button>
       <button id="push" class="pill-btn primary" hidden title="Tulis ulang tab RAB di Google Sheet">Push ke Sheet</button>
     </div>
-    <div class="top-total"><span id="total"></span><small>Total RAB</small></div>
+    <div class="top-total"><span id="total"></span><small id="total-label">Total proyek</small><small id="project-total" hidden></small></div>
     <div class="live" id="live"><span class="dot"></span><span id="live-text">menghubungkan…</span></div>
   </div>
 </header>
 
 <div class="design-warn" id="design" hidden></div>
+<section id="building-strip" class="building-strip" hidden><div class="scope-heading">Bangunan</div><div id="buildings" class="building-tabs" role="tablist" aria-label="Pilih bangunan"></div></section>
 <section class="stats" id="cards"></section>
 
 <main class="layout">

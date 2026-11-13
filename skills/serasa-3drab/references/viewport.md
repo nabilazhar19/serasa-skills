@@ -60,3 +60,17 @@ Tampilan **dan** kode viewport, builder, plugin dan setup dikunci `LOCK.json` (s
 - `T check`: Python, library Google, kunci desain, server.
 - Server tidak menyala: `viewport/server.log`. Port 8765 dipakai program lain → hentikan program itu (viewport selalu di 8765 agar plugin, agen dan bookmark sama).
 - Push "Library Google belum terpasang": jalankan `scripts/setup.py` dengan Python yang sama dengan `env.json`.
+
+## RAB terpisah per bangunan (hanya bila pengguna memintanya secara eksplisit)
+Default satu tab RAB. Bila pengguna meminta tab terpisah (mis. Rumah / Kost / Ruko): tetap SATU input induk; tambahkan `building_tabs` di
+`viewport.json`:
+```json
+"building_tabs": [
+  {"id": "rumah", "label": "Rumah", "tab": "RAB Rumah", "audit_tab": "Audit Rumah", "sheet_id": 101, "audit_id": 111, "match": "\\brumah\\b"},
+  {"id": "kost",  "label": "Kost",  "tab": "RAB Kost",  "audit_tab": "Audit Kost",  "sheet_id": 102, "audit_id": 112, "match": "\\bkost?\\b"},
+  {"id": "bersama", "label": "Area Bersama", "tab": "RAB Area Bersama", "audit_tab": "Audit Area Bersama", "sheet_id": 104, "audit_id": 114, "shared": true}]
+```
+- Alokasi baris: `building` di baris/bukaan/dinding → regex `match` pada Ruang/Area → tab `shared` (tapak, pagar, taman, biaya proyek, pending belum teralokasi; dihitung sekali).
+- Tab & Audit tiap bangunan dibuat dulu di Sheet (salin format tab RAB template), `sheet_id`/`audit_id` = gid tab itu. Rekap proyek boleh berupa tab formula yang menjumlah total tiap tab.
+- Viewport: strip bangunan di bawah header (tabel, total, luas, sorotan model per bangunan; total proyek tetap tampil), pilihan "Bangunan RAB" di panel baris untuk memindahkan alokasi, tombol **Push semua RAB** (patch per tab; struktur berubah → konfirmasi rebuild tab itu saja; baseline per tab di `.koreksi/split_state.json`).
+- **Jangan** menjalankan `build_rab.py` langsung pada input induk proyek `building_tabs`; Push lewat viewport (`core/scope_sheets.py`).

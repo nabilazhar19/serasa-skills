@@ -487,6 +487,8 @@ def patch(a, spec):
     live_a = S.values().get(spreadsheetId=ID, range=f"'{atab}'!A1:I{len(arows) + 80}", valueRenderOption="FORMULA").execute().get("values", [])
     audit_changed = len(live_a) != len([r for r in arows]) or any([_norm(x) for x in r] != [_norm(x) for x in (list(l) + [""] * 9)[:9]] for r, l in zip(arows, live_a))
     if audit_changed:
+        if len(arows) > sh[atab]["gridProperties"]["rowCount"]:   # tab Audit kurang baris -> tambah dulu
+            reqs.append({"updateSheetProperties": {"properties": {"sheetId": asid, "gridProperties": {"rowCount": len(arows) + 40}}, "fields": "gridProperties.rowCount"}})
         reqs.append({"updateCells": {"range": _rng(asid, 0, sh[atab]["gridProperties"]["rowCount"], 0, 9), "fields": "userEnteredValue,userEnteredFormat"}})
         reqs += audit_requests(asid, arows)
     if reqs: S.batchUpdate(spreadsheetId=ID, body={"requests": reqs}).execute()

@@ -154,7 +154,7 @@ def load(cfg, base=None):
             cur = {"no": c[0], "title": c[1], "row": n, "total": 0.0, "count": 0, "pending": 0}; babs.append(cur); continue
         if k in ("blank", "total"): continue
         if k == "sub":
-            rows.append({"row": n, "kind": "sub", "bab": cur["no"], "uraian": c[1]}); continue
+            rows.append({"row": n, "kind": "sub", "bab": cur["no"], "uraian": c[1], "loc": row.get("loc")}); continue
         r = {"row": n, "kind": k, "bab": cur["no"], "uraian": c[1], "ruang": c[2], "lantai": c[3],
              "spec": c[5], "vol": c[7] if isinstance(c[7], (int, float)) else None, "src": row.get("src")}
         r["hl"] = _highlight(r["src"], walls.get(id(row.get("src"))))
@@ -203,7 +203,7 @@ def load(cfg, base=None):
         kk = (r.get("src") or {}).get("kind")
         st = stats.setdefault(kk or "none", {"label": KINDS.get(kk, kk), "rows": 0, "total": 0.0}); st["rows"] += 1; st["total"] += r["total"]
 
-    return {
+    result = {
         "history": {"log": log[-40:][::-1], "notes": notes[::-1], "can_undo": any(not e.get("undone") for e in log),
                     "open_notes": sum(n.get("status") == "open" for n in notes)},
         "push_ready": bool(cfg.get("spreadsheet_id") and cfg.get("creds")),
@@ -221,6 +221,10 @@ def load(cfg, base=None):
         "model3d": {"url": "/api/model3d", "mtime": os.path.getmtime(files["model3d"])} if os.path.exists(files.get("model3d", "")) else None,
         "generated_at": time.strftime("%H:%M:%S"),
     }
+    if cfg.get("building_tabs"):   # RAB per bangunan (hanya bila diminta pengguna)
+        from core.scopes import view
+        result.update(view(spec, rows, babs, cfg, ahs_items))
+    return result
 
 
 def total_for_spec(spec, ahs_items, builder_path):

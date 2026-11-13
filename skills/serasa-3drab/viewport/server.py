@@ -34,6 +34,8 @@ import core.edits as edits  # noqa: E402
 import core.sync as sync  # noqa: E402
 import core.sheetsync as sheetsync  # noqa: E402
 import core.analysis as analysis  # noqa: E402
+import core.scopes as scopes  # noqa: E402
+import core.scope_sheets as scope_sheets  # noqa: E402
 
 STATE = {"version": 0, "scope": "init", "cache": None, "mesh": None, "static": {}, "project": None, "lock": threading.Lock(),
          "push": threading.Lock(), "edit": threading.RLock(), "design": None}
@@ -128,24 +130,24 @@ def switch(path):
 
 
 def watcher(interval):
-    global model, mesh, edits, sync, sheetsync, project, analysis
+    global model, mesh, edits, sync, sheetsync, project, analysis, scopes, scope_sheets
     prev = snapshot()
     while True:
         time.sleep(interval)
         cur = snapshot()
         changed = [(f, v[2]) for f, v in cur.items() if prev.get(f, (None,))[:2] != v[:2]]
         if changed and set(cur) == set(prev):
-            scopes = {s for _, s in changed}
-            if "server" in scopes:  # server.py sendiri berubah -> jalankan ulang proses ini (browser tersambung lagi otomatis)
+            changed_scopes = {s for _, s in changed}
+            if "server" in changed_scopes:  # server.py sendiri berubah -> jalankan ulang proses ini (browser tersambung lagi otomatis)
                 print(time.strftime("%H:%M:%S"), "server.py berubah, memulai ulang...", flush=True)
                 args = [a for a in sys.argv[1:]]
                 os.execv(sys.executable, [sys.executable, os.path.abspath(__file__)] + args)
-            if "core" in scopes:
+            if "core" in changed_scopes:
                 try:
-                    project, model, mesh, edits, sync, sheetsync, analysis = (importlib.reload(m) for m in (project, model, mesh, edits, sync, sheetsync, analysis))
+                    project, model, mesh, edits, sync, sheetsync, analysis, scopes, scope_sheets = (importlib.reload(m) for m in (project, model, mesh, edits, sync, sheetsync, analysis, scopes, scope_sheets))
                 except Exception as e: print("reload core gagal:", e)
-            if "model3d" in scopes: model_changed()
-            bump(scopes)
+            if "model3d" in changed_scopes: model_changed()
+            bump(changed_scopes)
             print(time.strftime("%H:%M:%S"), "berubah:", ", ".join(os.path.basename(f) for f, _ in changed), flush=True)
         prev = cur
 
