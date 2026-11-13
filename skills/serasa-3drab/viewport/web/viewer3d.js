@@ -39,12 +39,12 @@ export class Viewer3D {
       hl: lam({ color: 0xff9f0a, emissive: 0x7a4500, polygonOffset: true, polygonOffsetFactor: -1 }),
       ghost: lam({ color: 0xd2d2d7, transparent: true, opacity: 0.12, depthWrite: false }),
       used: lam({ color: 0x0071e3 }), unused: lam({ color: 0xc7c7cc, transparent: true, opacity: 0.35, depthWrite: false }),
-      pickSelf: lam({ color: 0x0058b9, emissive: 0x002a5c, polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2 }),
-      pickObj: lam({ color: 0x6fa8ef, emissive: 0x0b2747, polygonOffset: true, polygonOffsetFactor: -1 }),
+      pickSelf: lam({ color: 0x0071e3, emissive: 0x00346b, polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2 }),   // bidang yang diklik
+      pickObj: lam({ color: 0xe8e8ed, emissive: 0x111114, polygonOffset: true, polygonOffsetFactor: -1 }),                               // objek induknya: abu netral
       edit: lam({ color: 0x34c759, emissive: 0x0d4a1c, polygonOffset: true, polygonOffsetFactor: -1 }),
       dim: lam({ vertexColors: true, transparent: true, opacity: 0.55, depthWrite: false }),
     };
-    this.E = { normal: line(0x48484a, 0.45), ghost: line(0x8a857c, 0.07), hl: line(0xb86e00, 0.9), pick: line(0x1e3a8a, 0.95), edit: line(0x1b7a35, 0.95) };
+    this.E = { normal: line(0x48484a, 0.45), ghost: line(0x8a857c, 0.07), hl: line(0xb86e00, 0.9), pick: line(0x6e6e73, 0.7), face: line(0x002a5c, 1), edit: line(0x1b7a35, 0.95) };
     for (const m of [...Object.values(this.M), ...Object.values(this.E)]) m.clippingPlanes = this.clip;
     this.clipMats = {};
     this.ray = new THREE.Raycaster(); this.ray.params.Line.threshold = 0;
@@ -237,11 +237,13 @@ export class Viewer3D {
 
   // lapisan sorot satu bidang (segitiga bidang itu saja, di atas part-nya)
   setFaceOverlay(part, face) {
-    if (this.faceMesh) { this.scene.remove(this.faceMesh); this.faceMesh.geometry.dispose(); this.faceMesh = null; }
+    if (this.faceMesh) { this.scene.remove(this.faceMesh, this.faceLine); this.faceMesh.geometry.dispose(); this.faceLine.geometry.dispose(); this.faceMesh = this.faceLine = null; }
     if (!part) return;
     const src = part.mesh.geometry.attributes.position.array;
     const g = new THREE.BufferGeometry(); g.setAttribute("position", new THREE.BufferAttribute(src.slice(face.start * 9, (face.start + face.n) * 9), 3)); g.computeVertexNormals();
-    this.faceMesh = new THREE.Mesh(g, this.M.pickSelf); this.faceMesh.renderOrder = 3; this.scene.add(this.faceMesh);
+    this.faceMesh = new THREE.Mesh(g, this.M.pickSelf); this.faceMesh.renderOrder = 3;
+    this.faceLine = new THREE.LineSegments(new THREE.EdgesGeometry(g, 1), this.E.face); this.faceLine.renderOrder = 4;   // garis tepi bidang
+    this.scene.add(this.faceMesh, this.faceLine);
   }
 
   highlight(hl, fly = true) {
