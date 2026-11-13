@@ -10,7 +10,7 @@ Satu server untuk semua proyek: kalau server sudah jalan, perintah yang sama han
 (POST /api/switch) lalu membuka browser - aman dipanggil berulang oleh agen / plugin SketchUp.
 Proyek = folder yang punya _serasa_tools/viewport.json (lihat core/project.py).
 
-GET  /                -> web/index.html   (tampilan TERKUNCI: web/LOCK.json berisi hash; jangan diubah agen)
+GET  /                -> web/index.html   (TERKUNCI: LOCK.json di folder skill berisi hash tampilan & kode; jangan diubah agen)
 GET  /api/project     -> view model (core/model.py), di-cache sampai file berubah
 GET  /api/model3d     -> geometri 3D biner ringkas (core/mesh.py dari ekspor SketchUp)
 GET  /api/ahs         -> daftar spec AHS (pemilih spec)
@@ -24,7 +24,7 @@ GET  /events          -> Server-Sent Events saat file proyek / kode berubah
 import argparse, glob, gzip, hashlib, importlib, json, os, sys, threading, time, urllib.request, webbrowser
 from http.server import ThreadingHTTPServer, BaseHTTPRequestHandler
 
-VERSION = "1.0"
+VERSION = "2.5"
 BASE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, BASE)
 import core.project as project  # noqa: E402
@@ -33,12 +33,15 @@ import core.mesh as mesh  # noqa: E402
 import core.edits as edits  # noqa: E402
 import core.sync as sync  # noqa: E402
 import core.sheetsync as sheetsync  # noqa: E402
+import core.analysis as analysis  # noqa: E402
+import core.scopes as scopes  # noqa: E402
+import core.scope_sheets as scope_sheets  # noqa: E402
 
 STATE = {"version": 0, "scope": "init", "cache": None, "mesh": None, "static": {}, "project": None, "lock": threading.Lock(),
-         "push": threading.Lock(), "design": None}
+         "push": threading.Lock(), "edit": threading.RLock(), "design": None}
 CT = {".html": "text/html; charset=utf-8", ".js": "text/javascript; charset=utf-8", ".css": "text/css; charset=utf-8",
       ".json": "application/json; charset=utf-8", ".png": "image/png", ".svg": "image/svg+xml"}
-CORRECTIONS = ("koreksi_log.json", "koreksi_catatan.json", "viewport_status.json")
+CORRECTIONS = ("koreksi_log.json", "koreksi_catatan.json", "viewport_status.json", "export_status.json")
 
 
 def cfg():
@@ -46,16 +49,9 @@ def cfg():
 
 
 def design_check():
-    """tampilan dikunci: bandingkan hash web/ dengan web/LOCK.json."""
-    try: lock = json.load(open(os.path.join(BASE, "web", "LOCK.json"), encoding="utf-8"))
-    except (OSError, ValueError): return {"ok": False, "changed": ["LOCK.json hilang"]}
-    changed = []
-    for rel, h in lock.get("files", {}).items():
-        p = os.path.join(BASE, "web", *rel.split("/"))
-        try: ok = hashlib.sha256(open(p, "rb").read()).hexdigest() == h
-        except OSError: ok = False
-        if not ok: changed.append(rel)
-    return {"ok": not changed, "changed": changed, "version": lock.get("version")}
+    """versi resmi dikunci: tampilan + kode viewport + builder + plugin (core/lock.py, LOCK.json)."""
+    from core import lock
+    return lock.check()
 
 
 def watched():
@@ -106,8 +102,9 @@ def model_changed():
     try:
         c = cfg()
         if not c or not os.path.exists(c.get("input") or ""): return
-        data = model.load(c)
-        res = edits.Editor(c, c["_base"]).model_sync(data.get("rows", []))
+        with STATE["edit"]:
+            data = model.load(c)
+            res = edits.Editor(c, c["_base"]).model_sync(data.get("rows", []))
         if res: print(time.strftime("%H:%M:%S"), res["summary"], flush=True)
     except Exception as e:
         print("sinkron model gagal:", type(e).__name__, e, flush=True)
@@ -133,24 +130,24 @@ def switch(path):
 
 
 def watcher(interval):
-    global model, mesh, edits, sync, sheetsync, project
+    global model, mesh, edits, sync, sheetsync, project, analysis, scopes, scope_sheets
     prev = snapshot()
     while True:
         time.sleep(interval)
         cur = snapshot()
         changed = [(f, v[2]) for f, v in cur.items() if prev.get(f, (None,))[:2] != v[:2]]
         if changed and set(cur) == set(prev):
-            scopes = {s for _, s in changed}
-            if "server" in scopes:  # server.py sendiri berubah -> jalankan ulang proses ini (browser tersambung lagi otomatis)
+            changed_scopes = {s for _, s in changed}
+            if "server" in changed_scopes:  # server.py sendiri berubah -> jalankan ulang proses ini (browser tersambung lagi otomatis)
                 print(time.strftime("%H:%M:%S"), "server.py berubah, memulai ulang...", flush=True)
                 args = [a for a in sys.argv[1:]]
                 os.execv(sys.executable, [sys.executable, os.path.abspath(__file__)] + args)
-            if "core" in scopes:
+            if "core" in changed_scopes:
                 try:
-                    project, model, mesh, edits, sync, sheetsync = (importlib.reload(m) for m in (project, model, mesh, edits, sync, sheetsync))
+                    project, model, mesh, edits, sync, sheetsync, analysis, scopes, scope_sheets = (importlib.reload(m) for m in (project, model, mesh, edits, sync, sheetsync, analysis, scopes, scope_sheets))
                 except Exception as e: print("reload core gagal:", e)
-            if "model3d" in scopes: model_changed()
-            bump(scopes)
+            if "model3d" in changed_scopes: model_changed()
+            bump(changed_scopes)
             print(time.strftime("%H:%M:%S"), "berubah:", ", ".join(os.path.basename(f) for f, _ in changed), flush=True)
         prev = cur
 
@@ -182,7 +179,7 @@ class H(BaseHTTPRequestHandler):
             c = cfg()
             if not c or not c.get("model3d") or not os.path.isfile(c["model3d"]): return self._json(404, {"error": "model3d belum diekspor"})
             with STATE["lock"]:
-                if STATE["mesh"] is None: STATE["mesh"] = gzip.compress(mesh.pack(c["model3d"])[0], 6)
+                if STATE["mesh"] is None: STATE["mesh"] = gzip.compress(mesh.pack(c["model3d"])[0], 1)
                 body = STATE["mesh"]
             return self._send(200, body, "application/octet-stream", gz=True)
         if path == "/api/ahs":
@@ -195,7 +192,7 @@ class H(BaseHTTPRequestHandler):
                 self.wfile.write(f"data: {json.dumps({'version': seen, 'scope': 'hello'})}\n\n".encode()); self.wfile.flush()
                 t = time.time()
                 while True:
-                    time.sleep(0.3)
+                    time.sleep(0.15)
                     if STATE["version"] != seen:
                         seen = STATE["version"]
                         self.wfile.write(f"data: {json.dumps({'version': seen, 'scope': STATE['scope']})}\n\n".encode()); self.wfile.flush()
@@ -204,7 +201,7 @@ class H(BaseHTTPRequestHandler):
             except (BrokenPipeError, ConnectionResetError, ConnectionAbortedError):
                 return
         f = os.path.normpath(os.path.join(BASE, "web", "index.html" if path == "/" else path.lstrip("/")))
-        if not f.startswith(os.path.join(BASE, "web")) or not os.path.isfile(f) or f.endswith("LOCK.json"):
+        if not f.startswith(os.path.join(BASE, "web")) or not os.path.isfile(f) or f.endswith(".json"):
             return self._send(404, b"not found", "text/plain")
         vendor = os.sep + "vendor" + os.sep in f
         key = (f, os.path.getmtime(f))
@@ -233,11 +230,13 @@ class H(BaseHTTPRequestHandler):
             if not c: raise ValueError("belum ada proyek aktif")
             ed = edits.Editor(c, c["_base"])
             if path == "/api/edit":
-                data = self._project()[1]
-                res = ed.apply(req, {r["row"]: r for r in data.get("rows", [])})
+                with STATE["edit"]:
+                    data = self._project()[1]
+                    res = ed.apply(req, {r["row"]: r for r in data.get("rows", [])})
             elif path == "/api/push":
                 if not STATE["push"].acquire(blocking=False): return self._json(409, {"ok": False, "error": "push sedang berjalan"})
-                try: res = ed.push(force=bool(req.get("force")), rebuild=bool(req.get("rebuild")))
+                try:
+                    with STATE["edit"]: res = ed.push(force=bool(req.get("force")), rebuild=bool(req.get("rebuild")))
                 finally: STATE["push"].release()
             else:
                 return self._json(404, {"ok": False, "error": "tidak ada"})
@@ -270,7 +269,7 @@ def main():
     ap = argparse.ArgumentParser(description="Viewport RAB Serasa")
     ap.add_argument("--project", help="folder proyek (berisi _serasa_tools/viewport.json) atau path viewport.json")
     ap.add_argument("--port", type=int, default=8765); ap.add_argument("--host", default="127.0.0.1")
-    ap.add_argument("--interval", type=float, default=0.5); ap.add_argument("--open", action="store_true", help="buka browser")
+    ap.add_argument("--interval", type=float, default=0.3); ap.add_argument("--open", action="store_true", help="buka browser")
     a = ap.parse_args()
     if already_running(a.port, a.project, a.open): return
     target = project.find_config(a.project) if a.project else project.find_config(project.last() or "")

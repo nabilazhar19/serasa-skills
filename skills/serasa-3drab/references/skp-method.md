@@ -61,9 +61,14 @@ Sampling 100 mm per pita z membantu membagi dinding menerus, tetapi melewatkan d
 - Mobil dan furnitur dekoratif bukan pekerjaan konstruksi. Signage/vegetasi hanya dihitung bila termasuk lingkup yang diminta; jangan mengambil lanskap bersama di luar batas area.
 
 ## Ekspor 3D untuk Viewport RAB
-- `SerasaRAB.watch_export(region, "<proyek>/_serasa_tools/<nama>_model3d.json", rooms, bands, angle)` — sekali setelah ruang & pita
-  ditetapkan (argumen sama dengan `takeoff`). Mengekspor mesh + luas per tag (`R|ruang|tipe`, `E|arah|tipe`, `F|…`, `C|…`) dan
-  mengekspor ulang otomatis setiap model disimpan (tetap aktif setelah SketchUp dibuka ulang). Butuh model yang sudah punya path.
-- `SerasaRAB.viewport` — buka viewport untuk folder model aktif (juga lewat menu Extensions › Serasa RAB).
-  `SerasaRAB.run_tools([...], wait: true)` menjalankan perintah `tools.py` di komputer pengguna (untuk agen tanpa shell lokal).
+- `SerasaRAB.watch_export(region, "<proyek>/_serasa_tools/<nama>_model3d.json", rooms, bands, angle, {"measures": {...}})` — sekali setelah
+  ruang & pita ditetapkan (argumen sama dengan `takeoff`). Format 4: geometri sekali per definisi + instance, muka per bidang, garis tepi
+  SketchUp, luas per tag (`R|ruang|tipe`, `E|arah|tipe`, `Q|pita|E|arah|tipe`, `F|…`, `C|…`), ukuran khusus per resep `measures`.
+  Setelah itu tiap Save: hanya objek yang berubah dihitung ulang, dicicil per tick (SketchUp tetap bisa dipakai), progres di
+  `_serasa_tools/export_status.json`. Tetap aktif setelah SketchUp dibuka ulang. Butuh model yang sudah punya path.
+- `serasa_watch.json` boleh diedit agen: `measures`, `skip_layers` (regex layer tidak diekspor), `display_layers` (regex layer
+  yang tetap tampil walau di-skip, default `KONTUR` = tapak). Lihat [viewport](viewport.md#ukuran-khusus-measures-di-serasa_watchjson).
+- `SerasaRAB.export_full` / menu Extensions › Serasa RAB › Ekspor penuh model 3D — bila ragu hasil ekspor bertahap.
+- `SerasaRAB.viewport` — buka viewport untuk folder model aktif (juga lewat menu). `SerasaRAB.run_tools([...], wait: true)` menjalankan
+  `tools.py` di komputer pengguna (untuk agen tanpa shell lokal).
 - Plugin menyalakan server viewport di belakang layar saat model yang punya `_serasa_tools/viewport.json` dibuka.

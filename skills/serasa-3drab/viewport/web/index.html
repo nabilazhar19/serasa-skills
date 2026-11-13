@@ -25,12 +25,13 @@
       <button id="pull" class="pill-btn" title="Ambil editan yang dibuat langsung di Google Sheet">Tarik dari Sheet</button>
       <button id="push" class="pill-btn primary" hidden title="Tulis ulang tab RAB di Google Sheet">Push ke Sheet</button>
     </div>
-    <div class="top-total"><span id="total"></span><small>Total RAB</small></div>
+    <div class="top-total"><span id="total"></span><small id="total-label">Total proyek</small><small id="project-total" hidden></small></div>
     <div class="live" id="live"><span class="dot"></span><span id="live-text">menghubungkan…</span></div>
   </div>
 </header>
 
 <div class="design-warn" id="design" hidden></div>
+<section id="building-strip" class="building-strip" hidden><div class="scope-heading">Bangunan</div><div id="buildings" class="building-tabs" role="tablist" aria-label="Pilih bangunan"></div></section>
 <section class="stats" id="cards"></section>
 
 <main class="layout">
@@ -51,9 +52,10 @@
             <button data-view="iso" class="on">3D</button><button data-view="atas">Atas</button><button data-view="depan">Selatan</button>
             <button data-view="timur">Timur</button><button data-view="barat">Barat</button><button data-view="belakang">Utara</button>
           </div>
-          <div class="seg" id="cut"></div>
+          <div class="seg" id="cut"><button data-sec="none" class="on">Utuh</button><button data-sec="plan">Denah</button><button data-sec="cut">Potongan</button><button data-sec="box">Kotak</button></div>
           <div class="seg" id="modes"><button data-mode="material" class="on">Material</button><button data-mode="usage">Cakupan RAB</button></div>
         </div>
+        <div class="cutctl" id="cutctl" hidden></div>
         <div class="hud" id="hud"></div>
         <div class="editbar" id="editbar" hidden></div>
         <div class="legend" id="legend" hidden><span><i class="dot-k" style="background:#0071e3"></i>dipakai di RAB</span><span><i class="dot-k" style="background:#c7c7cc"></i>tidak dirujuk</span></div>

@@ -3,7 +3,7 @@
 import { Viewer3D } from "/viewer3d.js";
 
 const $ = (s) => document.querySelector(s);
-const S = { data: null, bab: null, kind: null, q: "", sel: null, pick: null, prevVals: {}, meshMtime: null, view: "detail", edit: null, ahs: null, busy: false, again: false };
+const S = { building: null, data: null, bab: null, kind: null, q: "", sel: null, pick: null, prevVals: {}, meshMtime: null, view: "detail", edit: null, ahs: null, busy: false, again: false };
 const rp = (v) => v == null ? "" : "Rp" + Math.round(v).toLocaleString("id-ID");
 const num = (v) => v == null ? "" : Number(v).toLocaleString("id-ID", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 const esc = (s) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
@@ -16,9 +16,36 @@ const hasHl = (r) => r.hl && ((r.hl.ids || []).length || (r.hl.tags || []).lengt
 const rowOf = (n) => S.data && S.data.rows.find((x) => x.row === n);
 const title = (r) => r.uraian || r.uraian_group || "";
 
+function scopeData() {
+  const d = S.data;
+  if (!d || !d.buildings) return d;
+  const b = d.buildings.find((x) => x.id === S.building);
+  if (!b) return { ...d, project: { ...d.project, tab: "Rekap Proyek" } };
+  const rows = d.rows.filter((r) => r.kind === "sub" || r.building === b.id);
+  const babs = d.babs.map((x) => {
+    const rs = rows.filter((r) => r.bab === x.no && r.kind !== "sub");
+    return { ...x, row: b.bab_rows[x.no] || x.row, total: rs.reduce((n, r) => n + r.total, 0), count: rs.length, pending: rs.filter((r) => r.kind === "pending").length };
+  }).filter((x) => x.count);
+  const stats = {};
+  for (const r of rows) {
+    if (r.kind === "sub") continue;
+    const key = kindOf(r), old = stats[key] || { ...d.stats[key], rows: 0, total: 0 };
+    old.rows++; old.total += r.total; stats[key] = old;
+  }
+  return { ...d, scope: b, rows, babs, stats, total: b.total, estimated: b.estimated,
+    luasan: b.shared ? { ...b.luasan, lantai: [] } : b.luasan,
+    project: { ...d.project, tab: b.tab, sheet_link: b.sheet_link } };
+}
+function scopeHighlight(fly = false) {
+  if (!S.mesh || S.sel || S.pick || S.edit) return;
+  const b = S.data.buildings && S.data.buildings.find((x) => x.id === S.building);
+  viewer.highlight(b ? { ids: b.ids, tags: [] } : null, fly);
+}
+
 const viewer = new Viewer3D($("#canvas"), {
   onPick: (p) => { S.pick = p; S.sel = null; S.view = "detail"; render(); if (!p) { viewer.highlight(null, false); $("#hud").innerHTML = ""; } },
   onEdit: (keys, area) => { S.edit.keys = keys; S.edit.area = area; editBar(); },
+  onSection: () => cutValues(),
 });
 
 // ---------------------------------------------------------------- data
@@ -27,9 +54,7 @@ async function loadMesh() {
   if (!res.ok) { $("#nomodel").hidden = false; return; }
   $("#nomodel").hidden = true;
   S.mesh = viewer.load(await res.arrayBuffer());
-  $("#cut").innerHTML = `<button data-cut="" class="on">Utuh</button>` +
-    (S.mesh.bands || []).filter((b) => b[0] !== "Parapet").map((b) => `<button data-cut="${Math.round(b[1] + 1300)}">Potong ${esc(b[0])}</button>`).join("");
-  usage(); render(); if (S.sel) select(S.sel, false);
+  cutPanel(); usage(); render(); if (S.sel) select(S.sel, false);
 }
 
 async function load(flash) {
@@ -56,8 +81,8 @@ async function load(flash) {
 function usage() {
   if (!S.data) return;
   const u = new Set();
-  for (const r of S.data.rows) if (r.hl && r.kind !== "pending") for (const k of ["ids", "tags", "parts"]) (r.hl[k] || []).forEach((x) => u.add(x));
-  viewer.setUsage(u);
+  for (const r of scopeData().rows) if (r.hl && r.kind !== "pending") for (const k of ["ids", "tags", "parts"]) (r.hl[k] || []).forEach((x) => u.add(x));
+  viewer.setUsage(u); scopeHighlight(false);
 }
 
 async function post(url, body) {
@@ -74,12 +99,12 @@ async function edit(body, okMsg) {
 
 // ---------------------------------------------------------------- render
 function render(changed = new Set()) {
-  const d = S.data; if (!d) return; const p = d.project;
+  const d = scopeData(); if (!d) return; const p = d.project;
   $("#p-title").textContent = p.title;
   $("#p-sub").textContent = d.empty ? `${d.project_path || ""}` + (S.mesh ? ` · ekspor 3D ${S.mesh.exported}` : "")
     : `Tab "${p.tab}" · model ${d.meta.model || "-"} · take-off ${d.meta.takeoff_date || "-"}` + (S.mesh ? ` · ekspor 3D ${S.mesh.exported}` : "");
   agentStatus(d.status);
-  const dl = $("#design"); dl.hidden = !d.design || d.design.ok; if (d.design && !d.design.ok) dl.textContent = `Tampilan viewport berbeda dari versi resmi (${d.design.changed.join(", ")}). Pasang ulang skill serasa-3drab.`;
+  const dl = $("#design"); dl.hidden = !d.design || d.design.ok; if (d.design && !d.design.ok) dl.textContent = `Viewport / plugin berbeda dari versi resmi ${d.design.version || ""} (${d.design.changed.slice(0, 4).join(", ")}${d.design.changed.length > 4 ? ", …" : ""}). Pasang ulang: SketchUp › Extensions › Serasa RAB › Pasang ulang / perbarui.`;
   document.body.classList.toggle("is-empty", !!d.empty);
   if (d.empty) {
     $("#total").textContent = "—"; ["#sheet", "#push", "#pull", "#undo", "#hist"].forEach((s) => ($(s).hidden = true));
@@ -90,10 +115,16 @@ function render(changed = new Set()) {
   }
   ["#pull", "#undo", "#hist"].forEach((s) => ($(s).hidden = false));
   $("#total").textContent = rp(d.total);
+  $("#total-label").textContent = d.scope ? "Total " + d.scope.label : "Total proyek";
+  $("#project-total").hidden = !d.scope;
+  $("#project-total").textContent = "Proyek " + rp(S.data.total);
+  $("#building-strip").hidden = !d.buildings;
+  if (d.buildings) $("#buildings").innerHTML = [{id:"",label:"Semua",total:S.data.total}, ...d.buildings].map((b) =>
+    `<button class="building-tab ${(!S.building && !b.id) || S.building === b.id ? "on" : ""}" role="tab" aria-selected="${!!((!S.building && !b.id) || S.building === b.id)}" data-building="${esc(b.id)}"><span>${esc(b.label)}</span><small>${rp(b.total)}</small></button>`).join("");
   const sh = $("#sheet"); sh.hidden = !p.sheet_link; if (p.sheet_link) sh.href = p.sheet_link;
   $("#push").hidden = !d.push_ready;
-  if (!S.pushing) $("#push").innerHTML = d.unpushed ? `Push ke Sheet <span class="cnt">${d.unpushed}</span>` : "Push ke Sheet";
-  $("#push").title = d.unpushed ? `${d.unpushed} perubahan belum dikirim ke Google Sheet` : "Sheet sudah sama dengan viewport";
+  if (!S.pushing) $("#push").innerHTML = d.multi_sheet ? `Push semua RAB${d.unpushed ? `<span class="cnt">${d.unpushed}</span>` : ""}` : d.unpushed ? `Push ke Sheet <span class="cnt">${d.unpushed}</span>` : "Push ke Sheet";
+  $("#push").title = d.multi_sheet ? `Kirim perubahan ke ${d.buildings.length} tab RAB dan Audit-nya` : d.unpushed ? `${d.unpushed} perubahan belum dikirim ke Google Sheet` : "Sheet sudah sama dengan viewport";
   const top = d.history.log[0];
   if (top && S.lastLog !== undefined && top.id !== S.lastLog && (top.op === "model" || top.op === "ahs")) toast(top.summary, top.op === "model" && top.details && top.details.conflicts && top.details.conflicts.length ? "warn" : "ok");
   S.lastLog = top ? top.id : null;
@@ -133,13 +164,17 @@ function render(changed = new Set()) {
     if (!rs.some((r) => r.kind !== "sub")) continue;
     for (let i = rs.length - 1; i >= 0; i--)  // buang sub-judul yang tidak punya baris setelah difilter
       if (rs[i].kind === "sub" && (i === rs.length - 1 || rs[i + 1].kind === "sub")) rs.splice(i, 1);
-    html += `<tr class="bab"><td class="c-row">${b.row}</td><td colspan="5">${esc(b.no)} · ${esc(b.title)}</td><td class="c-num">${rp(b.total)}</td><td></td></tr>`;
+    html += `<tr class="bab"><td class="c-row">${S.building || !d.buildings ? b.row : "·"}</td><td colspan="5">${esc(b.no)} · ${esc(b.title)}</td><td class="c-num">${rp(b.total)}</td><td></td></tr>`;
+    let lastWork = null;
     for (const r of rs) {
-      if (r.kind === "sub") { html += `<tr class="sub"><td class="c-row">${r.row}</td><td colspan="7">${esc(r.uraian)}</td></tr>`; continue; }
+      if (r.kind === "sub") lastWork = null;
+      if (r.kind === "sub") { html += `<tr class="sub"><td class="c-row">${d.scope ? d.scope.sub_rows[r.row] || "" : d.buildings ? "·" : r.row}</td><td colspan="7">${esc(r.uraian)}</td></tr>`; continue; }
       shown++;
       const k = kindOf(r), cls = ["row", r.kind === "pending" ? "pending" : "", S.sel === r.row ? "sel" : "", changed.has(r.row) ? "flash" : ""].join(" ");
-      const ur = r.uraian ? esc(r.uraian) : `<span class="ur-cont">↳ ${esc(r.uraian_group || "")}</span>`;
-      html += `<tr class="${cls}" data-row="${r.row}"><td class="c-row">${r.row}</td><td>${ur}</td><td>${esc(r.ruang)}</td><td class="c-code">${esc(r.code)}</td>
+      const work = title(r);
+      const ur = work !== lastWork ? esc(work) : `<span class="ur-cont">↳ ${esc(work)}</span>`;
+      lastWork = work;
+      html += `<tr class="${cls}" data-row="${r.row}"><td class="c-row">${r.sheet_row || r.row}</td><td>${ur}${d.buildings && !S.building ? `<small class="row-building">${esc(r.building_label)}</small>` : ""}</td><td>${esc(r.ruang)}</td><td class="c-code">${esc(r.code)}</td>
         <td class="c-num${r.estimated ? " est" : ""}"${r.estimated ? ` title="${esc(r.quantity_note || "volume estimasi")}"` : ""}>${num(r.vol)}${r.manual ? '<i class="mk" title="koreksi manual">✎</i>' : ""}${r.conflict ? '<i class="cf" title="model berubah, bentrok dengan koreksi manual">⚠</i>' : ""}</td><td class="c-sat">${esc(r.sat)}</td><td class="c-num">${rp(r.total || null)}</td>
         <td class="c-src" title="${esc(kindLabel(k))}">${badge(k, SHORT[k] || k)}</td></tr>`;
     }
@@ -163,9 +198,11 @@ function inspector2() {
 }
 
 function rowsForPick(p) {
-  const part = { obj: { name: p.name, pid: p.pid }, tags: p.tags, key: p.key };
-  return S.data.rows.filter((r) => r.hl && r.kind !== "sub" && viewer.match(part, r.hl));
+  const parts = p.whole ? viewer.parts.filter((q) => q.obj.pid === p.pid) : [{ obj: { name: p.name, pid: p.pid }, tags: p.tags, key: p.key }];
+  return scopeData().rows.filter((r) => r.hl && r.kind !== "sub" && parts.some((part) => viewer.match(part, r.hl)));
 }
+// baris yang dihitung dari muka ini (tag cocok) vs yang hanya mengacu ke objeknya secara utuh
+const faceSpecific = (r) => (r.hl.tags || []).length || (r.hl.parts || []).length;
 
 function select(row, fly = true) {
   const r = rowOf(row);
@@ -173,6 +210,7 @@ function select(row, fly = true) {
   $("#hud").innerHTML = !r ? "" : any
     ? `<b>${esc(title(r))}</b> · ${num(r.vol)} ${esc(r.sat)}<span class="r">${esc(r.ruang)}</span><span class="n">${viewer.hitCount} bagian model disorot${r.hl.room ? " · dibatasi kotak ruang" : ""}</span>`
     : `<b>${esc(title(r))}</b><span class="r">${r.kind === "pending" ? "Pending — belum ada di model" : "Tidak diambil dari geometri model (" + esc(kindLabel(kindOf(r))) + ")"}</span>`;
+  if (!r) scopeHighlight(false);
   return any;
 }
 
@@ -187,7 +225,7 @@ function detailRow(r) {
   const el = $("#detail");
   if (!r) { el.innerHTML = ""; return; }
   const s = r.src || {}, k = kindOf(r), c = r.can || {};
-  let h = `<div class="i-meta"><span class="src"><i class="k-${k}"></i>${esc(kindLabel(k))}</span><span class="bar">|</span><span>Baris ${r.row} · ${esc(r.lantai)}</span></div>
+  let h = `<div class="i-meta"><span class="src"><i class="k-${k}"></i>${esc(kindLabel(k))}</span><span class="bar">|</span><span>Baris ${r.sheet_row || r.row} · ${esc(r.building_label ? "RAB " + r.building_label + " · " : "")}${esc(r.lantai)}</span></div>
     <h2>${esc(title(r))}</h2><p class="i-desc">${esc(r.ruang)}</p>
     <div class="big">${r.vol == null ? "—" : unitHtml(num(r.vol), r.sat)}</div>
     ${r.conflict ? `<div class="conflict"><b>⚠ Model berubah</b> — angka model sekarang ${num(r.conflict.model)} ${esc(r.sat)}, tapi baris ini dikoreksi manual (${num(r.vol)}).
@@ -207,6 +245,7 @@ function detailRow(r) {
       <tr><td><b>Harga satuan</b></td><td></td><td class="c-num"><b>${rp(r.analysis.price)}</b></td></tr></table></div>`;
   // ---- koreksi
   let k2 = "";
+  if (S.data.buildings && r.loc) k2 += `<label class="fld"><span>Bangunan RAB</span><div class="row-in"><select id="ed-building">${S.data.buildings.map((b) => `<option value="${b.id}" ${r.building === b.id ? "selected" : ""}>${esc(b.label)}</option>`).join("")}</select><button class="btn ghost" data-act="building-save" data-row="${r.row}">Pindahkan</button></div></label>`;
   if (c.vol) k2 += `<label class="fld"><span>Volume (${esc(r.sat)})</span><div class="row-in"><input id="ed-vol" type="text" inputmode="decimal" value="${r.vol == null ? "" : String(r.vol).replace(".", ",")}">
       <button class="btn" data-act="vol" data-row="${r.row}">Simpan</button></div></label>
       ${(r.shared || []).length ? `<p class="hint">Angka ini juga dipakai baris ${r.shared.join(", ")} (plester/aci/finishing dinding yang sama).</p>` : ""}`;
@@ -219,13 +258,25 @@ function detailRow(r) {
 }
 
 function detailPick(p) {
-  const rows = rowsForPick(p);
-  $("#detail").innerHTML = `<div class="i-meta"><span class="src"><i class="k-skp"></i>Objek SKP</span><span class="bar">|</span><span>pid ${p.pid}</span></div>
-    <h2>${esc(p.name)}</h2><p class="i-desc">Layer ${esc(p.layer)} · bidang ini ${num(p.area)} m²</p>
-    ${p.tags.length ? `<div class="chips" style="margin-bottom:18px">${p.tags.map((t) => `<span class="t">${esc(t.replaceAll("|", " · "))}</span>`).join("")}</div>` : ""}
-    <div class="block"><h3>Dipakai di ${rows.length} baris RAB</h3>${rows.length ? rows.map((r) => `<div class="pr" data-row="${r.row}"><span>${r.row}</span>${esc(title(r))}<b>${num(r.vol)} ${esc(r.sat)}</b></div>`).join("") : `<p class="muted">Objek ini tidak dirujuk baris mana pun.</p>`}
-    <p class="hint">Objek salah masuk baris? Pilih barisnya, lalu “Pilih sumber di model 3D”.</p></div>` + noteForm(null, p.name);
-  $("#hud").innerHTML = `<b>${esc(p.name)}</b><span class="n">${rows.length} baris RAB memakai objek ini</span>`;
+  const rows = rowsForPick(p), what = p.whole ? "objek ini" : "bidang ini";
+  $("#detail").innerHTML = `<div class="i-meta"><span class="src"><i class="k-skp"></i>${p.whole ? "Objek SKP" : "Bidang SKP"}</span><span class="bar">|</span><span>pid ${p.pid}</span></div>
+    <h2>${esc(p.name)}</h2><p class="i-desc">Layer ${esc(p.layer)}${p.material && !p.whole ? ` · material ${esc(p.material)}` : ""}</p>
+    <div class="facebox">${p.whole ? "" : `<div><b>${num(p.area)} m²</b><span>bidang yang diklik</span></div>`}<div><b>${num(p.objArea)} m²</b><span>seluruh muka objek</span></div></div>
+    ${!p.whole && p.tags.length ? `<div class="chips" style="margin-bottom:18px">${p.tags.map((t) => `<span class="t">${esc(t.replaceAll("|", " · "))}</span>`).join("")}</div>` : ""}
+    <div class="actions" style="margin-bottom:16px"><button class="btn ghost" data-act="pick-whole" data-on="${p.whole ? 0 : 1}">${p.whole ? "Kembali ke bidang" : "Pilih seluruh objek"}</button></div>
+    ${pickRows(p, rows, what)}
+    <p class="hint">Salah masuk baris? Pilih barisnya, lalu “Pilih sumber di model 3D”.</p>` + noteForm(null, p.name);
+  const nf = p.whole ? rows.length : rows.filter(faceSpecific).length;
+  $("#hud").innerHTML = `<b>${esc(p.name)}</b>${p.whole ? "" : ` · ${num(p.area)} m²`}<span class="n">${nf} baris RAB menghitung ${what}</span>`;
+}
+
+function pickRows(p, rows, what) {
+  const li = (r) => `<div class="pr" data-row="${r.row}"><span>${r.row}</span>${esc(title(r))}<b>${num(r.vol)} ${esc(r.sat)}</b></div>`;
+  if (!rows.length) return `<div class="block"><h3>Dipakai di RAB</h3><p class="muted">${esc(what[0].toUpperCase() + what.slice(1))} tidak dirujuk baris mana pun.</p></div>`;
+  if (p.whole) return `<div class="block"><h3>Objek ini dipakai di ${rows.length} baris RAB</h3>${rows.map(li).join("")}</div>`;
+  const f = rows.filter(faceSpecific), o = rows.filter((r) => !faceSpecific(r));
+  return `<div class="block"><h3>Dihitung dari bidang ini · ${f.length} baris</h3>${f.length ? f.map(li).join("") : `<p class="muted">Tidak ada baris yang menghitung bidang ini secara khusus.</p>`}</div>` +
+    (o.length ? `<details class="block objrows"><summary><h3>Mengacu ke seluruh objek · ${o.length} baris</h3></summary>${o.map(li).join("")}</details>` : "");
 }
 
 function history() {
@@ -245,7 +296,7 @@ function logDetails(e) {
   const d = e.details; if (!d) return "";
   let h = "";
   if (e.op === "model") {
-    h += (d.changes || []).map((c) => `<div class="ld"><a href="#" data-goto="${c.row}">${c.row}</a> ${esc(c.uraian)} <span class="muted">${esc((c.ruang || "").slice(0, 40))}</span> <b>${num(c.old)} → ${num(c.new)}</b> ${esc(c.sat || "")}</div>`).join("");
+    h += (d.changes || []).map((c) => `<div class="ld"><a href="#" data-goto="${c.row}">${c.row}</a> ${esc(c.uraian)} <span class="muted">${esc((c.ruang || "").slice(0, 40))}</span> <b>${typeof c.old === "string" ? esc(c.old) : num(c.old)} → ${typeof c.new === "string" ? esc(c.new) : num(c.new)}</b> ${esc(c.sat || "")}</div>`).join("");
     h += (d.conflicts || []).map((c) => `<div class="ld cf"><a href="#" data-goto="${c.row}">${c.row}</a> ⚠ bentrok: manual ${num(c.manual)}, model ${num(c.model)}</div>`).join("");
   }
   if (e.op === "ahs") h += (d.used || []).map((c) => `<div class="ld">${c.removed ? "dihapus: " : ""}${esc(c.u.slice(0, 60))}${c.old ? ` <b>${esc(c.old)} → ${esc(c.new)}</b>` : ""}</div>`).join("");
@@ -309,7 +360,7 @@ function openReview(d, mode) {
   m.innerHTML = `<div class="sheet rv"><div class="sh-head"><div><b>${mode === "push" ? "Ada editan langsung di Google Sheet" : "Editan di Google Sheet"}</b>
       <span class="muted">Tab "${esc(d.tab)}" dibanding push terakhir. Centang yang mau diambil ke web${mode === "push" ? "; yang tidak dicentang akan ditimpa saat push" : ""}.</span></div><button class="x" data-act="spec-close">✕</button></div>
     <div class="sp-list">${d.items.map((i) => `<label class="rv-item ${i.conflict ? "conf" : ""}"><input type="checkbox" value="${esc(i.id)}" ${i.conflict ? "" : "checked"}>
-        <span class="rv-l"><b>Baris ${i.sheet_row}</b> ${esc(i.uraian)} <span class="muted">${esc((i.ruang || "").slice(0, 50))}</span>
+        <span class="rv-l"><b>${i.sheet_tab ? esc(i.sheet_tab) + " · " : ""}Baris ${i.sheet_row}</b> ${esc(i.uraian)} <span class="muted">${esc((i.ruang || "").slice(0, 50))}</span>
         <span class="rv-v">${esc(i.field)}: <s>${fmtv(i.base, i.col)}</s> → <b>${fmtv(i.sheet, i.col)}</b> <span class="muted">di Sheet</span>
         ${i.conflict ? `<br><span class="warn">⚠ di web juga diubah jadi ${fmtv(i.web, i.col)} — pilih salah satu</span>` : ""}</span></span></label>`).join("")}
       ${d.struct.length ? `<div class="rv-struct"><b>Baris ditambah / dihapus di Sheet</b><span class="muted">Tidak bisa dipetakan otomatis — akan masuk catatan untuk Claude.</span>
@@ -346,9 +397,49 @@ function editBar() {
 }
 function stopEdit() { S.edit = null; viewer.setEdit(null); editBar(); if (S.sel) select(S.sel, false); }
 
+// ---------------------------------------------------------------- garis potong
+const elev = (mm) => (mm >= 0 ? "+" : "−") + Math.abs(mm / 1000).toLocaleString("id-ID", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + " m";
+const planZ = (band) => Math.round(Math.max(band[1] + 300, band[2] - 1900));   // ±1,2-1,5 m di atas lantai pita
+function cutPanel() {
+  const s = viewer.sec, el = $("#cutctl"); document.querySelectorAll("[data-sec]").forEach((x) => x.classList.toggle("on", x.dataset.sec === s.mode));
+  if (!S.mesh || s.mode === "none") { el.hidden = true; return; }
+  const b = viewer.bounds(), caps = `<span class="sep"></span><label class="tog"><input type="checkbox" id="sec-caps" ${s.caps ? "checked" : ""}>Isi potongan</label>`;
+  if (s.mode === "plan") {
+    const bands = (S.mesh.bands || []).filter((x) => x[0] !== "Parapet");
+    el.innerHTML = `<span class="lbl">Tinggi potong</span><input type="range" id="sec-z" min="${Math.floor(b.z[0])}" max="${Math.ceil(b.z[1])}" step="10" value="${s.z}"><b id="sec-v"></b>` +
+      bands.map((x) => `<button class="chip" data-secz="${planZ(x)}">${esc(x[0])}</button>`).join("") + caps;
+  } else if (s.mode === "cut") {
+    const ax = s.axis || "y", r = b[ax];
+    el.innerHTML = `<div class="seg"><button data-secax="x" class="${ax === "x" ? "on" : ""}">Timur–Barat</button><button data-secax="y" class="${ax === "y" ? "on" : ""}">Utara–Selatan</button></div>
+      <input type="range" id="sec-p" min="${Math.floor(r[0])}" max="${Math.ceil(r[1])}" step="10" value="${s.pos}"><b id="sec-v"></b>
+      <button class="chip" data-secflip="1" title="Balik sisi yang disimpan">⇄ Balik</button>` + caps;
+  } else {
+    el.innerHTML = `<span class="lbl">Tarik titik biru untuk mengubah kotak</span><button class="chip" data-secreset="1">Reset</button>` + caps;
+  }
+  el.hidden = false; cutValues();
+}
+function cutValues() {
+  const s = viewer.sec, v = $("#sec-v"); if (!v) return;
+  if (s.mode === "plan") { v.textContent = elev(s.z); const r = $("#sec-z"); if (r && document.activeElement !== r) r.value = s.z; }
+  if (s.mode === "cut") { const b = viewer.bounds()[s.axis || "y"]; v.textContent = (((s.pos - b[0]) / 1000).toLocaleString("id-ID", { maximumFractionDigits: 2 })) + " m"; const r = $("#sec-p"); if (r && document.activeElement !== r) r.value = s.pos; }
+}
+function setCut(mode) {
+  if (!S.mesh) return;
+  const b = viewer.bounds(), s = viewer.sec, bands = (S.mesh.bands || []).filter((x) => x[0] !== "Parapet");
+  if (mode === "plan" && s.z == null) s.z = bands.length ? planZ(bands[0]) : Math.round((b.z[0] + b.z[1]) / 2);
+  if (mode === "cut" && s.pos == null) { s.axis = s.axis || "y"; s.pos = Math.round((b[s.axis][0] + b[s.axis][1]) / 2); }
+  viewer.setSection({ mode }); cutPanel();
+}
+
 // ---------------------------------------------------------------- umum
 function agentStatus(st) {
-  const el = $("#agent");
+  const el = $("#agent"), ex = S.data && S.data.export_status;
+  if (ex && (ex.state === "running" || ex.state === "writing")) {
+    el.hidden = false; el.className = "agent exp";
+    el.innerHTML = `<i class="spin"></i><span>${ex.state === "writing" ? "Menyimpan model 3D…" : "Memperbarui model 3D dari SKP…"}</span>${ex.total ? `<small>${ex.done || 0}/${ex.total}</small>` : ""}`;
+    return;
+  }
+  if (ex && ex.state === "error") { el.hidden = false; el.className = "agent exp"; el.innerHTML = `<span>Ekspor model gagal: ${esc(ex.error || "")}</span>`; return; }
   if (!st || !st.message) { el.hidden = true; return; }
   const done = /^(selesai|done)$/i.test(st.stage || "");
   el.hidden = false; el.className = "agent" + (done ? " done" : "");
@@ -362,11 +453,18 @@ const parseNum = (s) => { s = String(s).trim(); return Number(s.includes(",") ? 
 
 document.addEventListener("click", async (e) => {
   const t = e.target;
+  const building = t.closest("[data-building]");
+  if (building) {
+    if (S.edit) return toast("Selesaikan pemilihan sumber dahulu", "warn");
+    S.building = building.dataset.building || null; S.sel = S.pick = S.bab = S.kind = null; S.view = "detail"; S.q = ""; $("#q").value = "";
+    render(); usage(); scopeHighlight(true); return;
+  }
   if (t.id === "clearpick") { e.preventDefault(); S.pick = null; viewer.highlight(null, false); render(); return; }
   const act = t.closest("[data-act]");
   if (act) {
     e.preventDefault(); const a = act.dataset.act, row = +act.dataset.row || null;
     if (a === "vol") { const v = parseNum($("#ed-vol").value); if (!isFinite(v) || $("#ed-vol").value.trim() === "") return toast("Volume tidak valid", "err"); await edit({ op: "vol", row, value: v }); }
+    else if (a === "building-save") { if (await edit({ op: "building", row, building: $("#ed-building").value })) { S.sel = null; await load(true); scopeHighlight(false); } }
     else if (a === "spec-open") openSpec(row);
     else if (a === "spec-close") closeSpec();
     else if (a === "spec-apply") { if (await edit({ op: "spec", row: S.specPick.row, spec: S.specPick.sel })) closeSpec(); }
@@ -386,6 +484,7 @@ document.addEventListener("click", async (e) => {
     else if (a === "note") { const tx = $("#note-text").value; if (await edit({ op: "note", row, object: act.dataset.object || null, text: tx })) $("#note-text").value = ""; }
     else if (a === "note-done") await edit({ op: "note_done", id: +act.dataset.id, done: act.dataset.done === "1" });
     else if (a === "close-hist") { S.view = "detail"; inspector(); }
+    else if (a === "pick-whole" && S.pick) { S.pick.whole = act.dataset.on === "1"; viewer.pickWhole(S.pick.whole); render(); }
     return;
   }
   if (t.closest("#undo")) { await edit({ op: "undo" }); return; }
@@ -410,7 +509,11 @@ document.addEventListener("click", async (e) => {
   const k = t.closest("[data-kind]"); if (k) { S.kind = k.dataset.kind || null; render(); return; }
   const v = t.closest("[data-view]"); if (v) { document.querySelectorAll("[data-view]").forEach((x) => x.classList.toggle("on", x === v)); viewer.view(v.dataset.view); return; }
   const m = t.closest("[data-mode]"); if (m) { document.querySelectorAll("[data-mode]").forEach((x) => x.classList.toggle("on", x === m)); viewer.setMode(m.dataset.mode); $("#legend").hidden = m.dataset.mode !== "usage"; return; }
-  const c = t.closest("[data-cut]"); if (c) { document.querySelectorAll("[data-cut]").forEach((x) => x.classList.toggle("on", x === c)); viewer.setSection(c.dataset.cut ? +c.dataset.cut : null); return; }
+  const sc = t.closest("[data-sec]"); if (sc) { setCut(sc.dataset.sec); return; }
+  const sz = t.closest("[data-secz]"); if (sz) { viewer.setSection({ z: +sz.dataset.secz }); cutValues(); return; }
+  const sa = t.closest("[data-secax]"); if (sa) { const b = viewer.bounds()[sa.dataset.secax]; viewer.setSection({ axis: sa.dataset.secax, pos: Math.round((b[0] + b[1]) / 2) }); cutPanel(); return; }
+  if (t.closest("[data-secflip]")) { viewer.setSection({ flip: !viewer.sec.flip }); return; }
+  if (t.closest("[data-secreset]")) { viewer.setSection({ box: null, mode: "box" }); return; }
   const tr = t.closest("[data-row]"); if (tr) { const row = +tr.dataset.row; S.sel = S.sel === row && !tr.classList.contains("pr") ? null : row; S.pick = null; S.view = "detail"; render(); select(S.sel); }
 });
 document.addEventListener("keydown", (e) => {
@@ -420,6 +523,11 @@ document.addEventListener("keydown", (e) => {
   if (e.key === "Enter" && document.activeElement && document.activeElement.id === "ed-vol") document.querySelector('[data-act="vol"]').click();
 });
 $("#q").addEventListener("input", (e) => { S.q = e.target.value; render(); });
+document.addEventListener("input", (e) => {
+  if (e.target.id === "sec-z") { viewer.setSection({ z: +e.target.value }); cutValues(); }
+  if (e.target.id === "sec-p") { viewer.setSection({ pos: +e.target.value }); cutValues(); }
+});
+document.addEventListener("change", (e) => { if (e.target.id === "sec-caps") viewer.setSection({ caps: e.target.checked }); });
 document.addEventListener("input", (e) => { if (e.target.id === "sp-q" && S.specPick) { S.specPick.q = e.target.value; specList(); } });
 
 function connect() {

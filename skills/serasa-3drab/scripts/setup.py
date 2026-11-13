@@ -22,7 +22,7 @@ Tanpa library tambahan selain Python 3.8+.
 import argparse, glob, json, os, shutil, subprocess, sys, time
 
 SKILL = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-VERSION = "2.4"
+VERSION = "2.5"
 DEPS = {"googleapiclient": "google-api-python-client", "google.oauth2": "google-auth"}
 SKIP = {"__pycache__", "state.json", "server.log", ".DS_Store"}
 WIN = os.name == "nt"
@@ -80,7 +80,12 @@ def install_home(dst, dry):
     for f in ("build_rab.py", "setup.py", "skp_extract.rb"):
         s = os.path.join(SKILL, "scripts", f)
         if os.path.exists(s): shutil.copy2(s, os.path.join(dst, "scripts", f)); n += 1
-    for f in ("requirements.txt", "setup.command", "setup.bat"):
+    # file kode tambahan yang bukan bagian versi resmi (mis. tambalan agen) dinonaktifkan, tidak dihapus
+    for f in glob.glob(os.path.join(dst, "viewport", "core", "*.py")) + glob.glob(os.path.join(dst, "viewport", "web", "*.*")):
+        rel = os.path.relpath(f, dst)
+        if not os.path.exists(os.path.join(SKILL, rel)) and not f.endswith(".json"):
+            os.replace(f, f + ".tidak-resmi"); n += 1
+    for f in ("requirements.txt", "setup.command", "setup.bat", "LOCK.json", "AGENTS.md"):
         s = os.path.join(SKILL, f)
         if os.path.exists(s): shutil.copy2(s, os.path.join(dst, f))
     return f"{n} file diperbarui di {dst}"

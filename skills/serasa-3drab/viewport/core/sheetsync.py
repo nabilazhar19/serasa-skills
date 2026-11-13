@@ -10,6 +10,7 @@ Kolom yang dibandingkan: Uraian (B), Ruang (C), Lantai (D), Spec (F), Volume (H)
 Baris yang disisip/dihapus di Sheet dilaporkan sebagai perubahan struktur (jadi catatan untuk Claude).
 """
 import difflib, importlib.util, json, os
+from collections import Counter
 
 FIELDS = {"C": 2, "D": 3, "F": 5, "H": 7}           # kolom -> index sel
 LABEL = {"B": "uraian", "C": "ruang", "D": "lantai", "F": "spec", "H": "volume"}
@@ -62,6 +63,7 @@ def sheet_rows(values, ds):
 
 
 def _same(a, b):
+    if (a in (None, "")) != (b in (None, "")): return False
     if isinstance(a, float) or isinstance(b, float):
         try: return abs(float(a or 0) - float(b or 0)) < 0.005
         except (TypeError, ValueError): return a == b
@@ -69,15 +71,26 @@ def _same(a, b):
 
 
 def _align(xs, ys):
-    sm = difflib.SequenceMatcher(None, [x["key"] for x in xs], [y["key"] for y in ys], autojunk=False)
+    sm = difflib.SequenceMatcher(None, [(x["key"], x.get("F")) for x in xs], [(y["key"], y.get("F")) for y in ys], autojunk=False)
     pairs, ins, dele = [], [], []
+    def related(a, b):
+        # Equal-sized replacement blocks can contain unrelated inserted/deleted
+        # rows. Only map edits when other identifying fields still agree.
+        return (a.get("grp") == b.get("grp") and
+                (a.get("C") == b.get("C") or a.get("F") == b.get("F")))
     for tag, i1, i2, j1, j2 in sm.get_opcodes():
         if tag == "equal":
             pairs += [(xs[i1 + k], ys[j1 + k]) for k in range(i2 - i1)]
         elif tag == "replace" and (i2 - i1) == (j2 - j1):   # isi kunci berubah (mis. ruang diedit) tapi posisi sama
-            pairs += [(xs[i1 + k], ys[j1 + k]) for k in range(i2 - i1)]
+            for a, b in zip(xs[i1:i2], ys[j1:j2]):
+                if related(a, b): pairs.append((a, b))
+                else: dele.append(a); ins.append(b)
         else:
             dele += xs[i1:i2]; ins += ys[j1:j2]
+    for a in list(dele):
+        candidates = [b for b in ins if a["key"] == b["key"] and a.get("F") == b.get("F")]
+        if len(candidates) == 1 and sum(x["key"] == a["key"] and x.get("F") == a.get("F") for x in dele) == 1:
+            b = candidates[0]; pairs.append((a, b)); dele.remove(a); ins.remove(b)
     return pairs, ins, dele
 
 
