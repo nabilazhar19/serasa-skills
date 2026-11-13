@@ -324,6 +324,32 @@ export class Viewer3D {
   // isian bidang potong: teknik stencil paritas (jumlah permukaan di belakang bidang ganjil = di dalam solid).
   // Hanya geometri definisi yang tertutup (solid) yang dipakai, jadi muka tunggal/terbuka tidak membuat bercak.
   clearCaps() { for (const c of this.capGroup.children) { if (c.geometry !== this.capSrc) c.geometry.dispose(); c.material.dispose(); } this.capGroup.clear(); }
+
+  // garis potong: perpotongan semua segitiga dengan bidang potong (seperti section cut SketchUp), untuk geometri apa pun
+  sectionLines(ps) {
+    const out = [], a = new THREE.Vector3(), b = new THREE.Vector3(), c = new THREE.Vector3();
+    ps.forEach((plane, i) => {
+      const seg = [], others = ps.filter((_, k) => k !== i), n = plane.normal, d0 = plane.constant;
+      for (const p of this.parts) {
+        const arr = p.mesh.geometry.attributes.position.array, sp = p.mesh.geometry.boundingSphere || (p.mesh.geometry.computeBoundingSphere(), p.mesh.geometry.boundingSphere);
+        if (Math.abs(plane.distanceToPoint(sp.center)) > sp.radius) continue;
+        for (let j = 0; j < arr.length; j += 9) {
+          const da = n.x * arr[j] + n.y * arr[j + 1] + n.z * arr[j + 2] + d0, db = n.x * arr[j + 3] + n.y * arr[j + 4] + n.z * arr[j + 5] + d0, dc = n.x * arr[j + 6] + n.y * arr[j + 7] + n.z * arr[j + 8] + d0;
+          if ((da > 0 && db > 0 && dc > 0) || (da < 0 && db < 0 && dc < 0)) continue;
+          a.fromArray(arr, j); b.fromArray(arr, j + 3); c.fromArray(arr, j + 6);
+          const pts = [];
+          const cut = (u, v, du, dv) => { if ((du > 0) !== (dv > 0)) { const t = du / (du - dv); pts.push(u.x + (v.x - u.x) * t, u.y + (v.y - u.y) * t, u.z + (v.z - u.z) * t); } };
+          cut(a, b, da, db); cut(b, c, db, dc); cut(c, a, dc, da);
+          if (pts.length === 6) seg.push(...pts);
+        }
+      }
+      if (!seg.length) return;
+      const g = new THREE.BufferGeometry(); g.setAttribute("position", new THREE.BufferAttribute(new Float32Array(seg), 3));
+      const m = new THREE.LineBasicMaterial({ color: 0x1d1d1f, clippingPlanes: others, depthTest: true });
+      const l = new THREE.LineSegments(g, m); l.renderOrder = 30; out.push(l);
+    });
+    return out;
+  }
   capSource() {
     if (this.capSrc || !this.capPlan || !this.capPlan.tris) return this.capSrc;
     const { plan, tris, V, T } = this.capPlan, pos = new Float32Array(tris * 9), meta = this.meta; let j = 0;
@@ -334,9 +360,11 @@ export class Viewer3D {
     const g = new THREE.BufferGeometry(); g.setAttribute("position", new THREE.BufferAttribute(pos, 3)); g.computeBoundingSphere();
     return (this.capSrc = g);
   }
-  buildCaps() {
+  buildCaps(lines = true) {
     this.clearCaps();
-    const ps = this.clip; if (!ps.length || !this.sec.caps || !this.box) return;
+    const ps = this.clip; if (!ps.length || !this.box) return;
+    if (lines) for (const l of this.sectionLines(ps)) this.capGroup.add(l);
+    if (!this.sec.caps) return;
     const src = this.capSource(); if (!src) return;
     const size = this.box.getSize(new THREE.Vector3()).length() * 2, c = this.box.getCenter(new THREE.Vector3());
     ps.forEach((plane, i) => {
@@ -396,7 +424,7 @@ export class Viewer3D {
     else if (s.mode === "box") { const r = s.box[d.axis]; r[d.idx] = d.idx === 0 ? Math.min(mm, r[1] - 100) : Math.max(mm, r[0] + 100); }
     d.obj.position.setComponent(k, ((s.mode === "box" ? s.box[d.axis][d.idx] : mm) - o) / 1000);
     const ps = this.planes(); ps.forEach((p, i) => this.clip[i] && this.clip[i].copy(p));
-    if (!this.capT) this.capT = requestAnimationFrame(() => { this.capT = null; this.buildCaps(); this.redraw(); });
+    if (!this.capT) this.capT = requestAnimationFrame(() => { this.capT = null; this.buildCaps(false); this.redraw(); });   // garis potong dihitung saat dilepas
     this.redraw();
     if (this.onSection) this.onSection(this.sec);
   }
