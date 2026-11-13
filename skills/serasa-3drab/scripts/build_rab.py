@@ -216,6 +216,13 @@ def build_audit(spec, b, tab, start=1):
             [""]]
     price = {}
 
+    def references(numbers):
+        runs=[]
+        for n in sorted(set(numbers)):
+            if runs and n==runs[-1][-1]+1:runs[-1].append(n)
+            else:runs.append([n])
+        return "RAB: "+", ".join(f"F{x[0]}:F{x[-1]}" if len(x)>1 else f"F{x[0]}" for x in runs) if runs else "-"
+
     def block(title, items, note):
         rows.append([title]); rows.append([note])
         rows.append(["Kode", "Uraian / Komponen", "Satuan", "Koef", "Harga Komponen", "Jumlah", "Sumber", "Harga Satuan", "Dipakai di RAB"])
@@ -223,12 +230,14 @@ def build_audit(spec, b, tab, start=1):
             r0 = start + len(rows)
             used = b.audit_used.get(it["code"], [])
             rows.append([it["code"], it["name"], it["sat"], "", "", "", "", None,
-                         (", ".join(f"{tab}!{x}" for x in [f'F{u}' for u in used]) or "-") + (f" | {it['note']}" if it.get("note") else "")])
+                         references(used) + (f" | {it['note']}" if it.get("note") else "")])
             for c in it["components"]:
                 r = start + len(rows); p = c["price"]
                 if isinstance(p, str) and p.startswith("AHS:"):
                     p = f"=VLOOKUP({q(p[4:])};AHS!$A:$D;4;FALSE)"
-                rows.append(["", "   " + c["name"], c["sat"], c["koef"], p, f"=D{r}*E{r}", c.get("src", "Perlu verifikasi harga"), "", ""])
+                source=c.get("src", "Perlu verifikasi harga")
+                if c.get("url"): source=f"=HYPERLINK({q(c['url'])};{q(source)})"
+                rows.append(["", "   " + c["name"], c["sat"], c["koef"], p, f"=D{r}*E{r}", source, "", ""])
             r1 = start + len(rows) - 1
             rows[r0 - start][7] = f"=SUM(F{r0 + 1}:F{r1})"; price[it["code"]] = f"H{r0}"
             rows.append([""])
@@ -326,7 +335,7 @@ def audit_requests(asid, rows):
         vals = []
         for j, v in enumerate(r):
             kw = dict(size=10 if title else 9, bold=bool(title or hdr or code_row or (j == 7 and code_row)))
-            if j in (1, 8): kw["wrap"] = "WRAP"
+            if j in (1, 6, 8): kw["wrap"] = "WRAP"
             if j in (4, 5, 7): kw["num"] = RP
             if j == 3: kw["num"] = "#,##0.00"
             if secC and j == 3: kw["num"] = "0"
@@ -335,8 +344,9 @@ def audit_requests(asid, rows):
             vals.append({"userEnteredValue": _val(v), "userEnteredFormat": _fmt(**kw)})
         out.append({"values": vals})
     reqs = [{"updateCells": {"range": _rng(asid, 0, len(out), 0, 9), "rows": out, "fields": "userEnteredValue,userEnteredFormat"}}]
-    for c, w in [(0, 70), (1, 520), (2, 60), (3, 70), (4, 110), (5, 110), (6, 110), (7, 120), (8, 260)]:
+    for c, w in [(0, 70), (1, 520), (2, 60), (3, 70), (4, 110), (5, 110), (6, 220), (7, 120), (8, 300)]:
         reqs.append({"updateDimensionProperties": {"range": {"sheetId": asid, "dimension": "COLUMNS", "startIndex": c, "endIndex": c + 1}, "properties": {"pixelSize": w}, "fields": "pixelSize"}})
+    reqs.append({"autoResizeDimensions":{"dimensions":{"sheetId":asid,"dimension":"ROWS","startIndex":0,"endIndex":len(out)}}})
     return reqs
 
 def build_header(spec):

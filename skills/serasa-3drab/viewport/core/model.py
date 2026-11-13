@@ -78,6 +78,11 @@ def _highlight(src, wall):
     if (src or {}).get("pick"):  # sumber dipilih manual di viewport: daftar bagian "objek::tag"
         return {"ids": [], "tags": [], "room": None, "parts": src["pick"]}
     hl = {"ids": _ids(src), "tags": [], "room": None}
+    terms = ((src or {}).get("bind") or {}).get("terms") or {}
+    if terms.get("tags") and not wall:   # tautan model: sorot muka yang benar-benar dihitung (bukan seluruh objek)
+        hl["tags"] = sorted({("E|" + "|".join(t.split("|")[3:])) if t.startswith("Q|") else t for t in terms["tags"]})
+        if terms.get("ids"): hl["ids"] = [str(x) for x in terms["ids"]]; hl["tag_ids_only"] = True
+        return hl
     if wall:
         w, t = wall; types = FACE_TYPES.get(t, [t])
         if w.get("interior"):
@@ -109,9 +114,18 @@ def _status(cfg):
     except (OSError, ValueError, KeyError): return None
 
 
+def _export_status(cfg):   # ditulis plugin SketchUp saat mengekspor model setelah Save
+    try:
+        st = json.load(open(os.path.join(cfg["_base"], "export_status.json"), encoding="utf-8"))
+        if st.get("state") in ("running", "writing") and time.time() - time.mktime(time.strptime(st["at"], "%Y-%m-%d %H:%M:%S")) > 120:
+            st["state"] = "stale"   # SketchUp ditutup di tengah ekspor
+        return st
+    except (OSError, ValueError, KeyError): return None
+
+
 def empty(cfg, files):
     """proyek baru: input RAB belum ada -> viewport tetap tampil (model 3D + status kerja agen)."""
-    return {"empty": True, "project": {"title": cfg.get("title", ""), "tab": "", "sheet_link": None}, "meta": {}, "status": _status(cfg),
+    return {"empty": True, "project": {"title": cfg.get("title", ""), "tab": "", "sheet_link": None}, "meta": {}, "status": _status(cfg), "export_status": _export_status(cfg),
             "luasan": None, "babs": [], "rows": [], "stats": {}, "kinds": {str(k): v for k, v in KINDS.items()}, "total": 0, "errors": [],
             "history": {"log": [], "notes": [], "can_undo": False, "open_notes": 0}, "push_ready": False, "unpushed": 0,
             "files": {k: {"path": v, "mtime": os.path.getmtime(v) if os.path.exists(v) else None} for k, v in files.items()},
@@ -197,7 +211,7 @@ def load(cfg, base=None):
         "model_bind": bool((spec.get("meta") or {}).get("model_bind")),
         "ahs_state": rd(os.path.join(".koreksi", "ahs_state.json")) or None,
         "ahs_source": bool(cfg.get("ahs_source")),
-        "project": proj, "meta": spec.get("meta", {}), "status": _status(cfg),
+        "project": proj, "meta": spec.get("meta", {}), "status": _status(cfg), "export_status": _export_status(cfg),
         "estimated": sum(1 for r in rows if r.get("estimated")),
         "luasan": spec["luasan"],
         "babs": babs, "rows": rows, "stats": stats, "kinds": {str(k): v for k, v in KINDS.items()},
@@ -207,3 +221,20 @@ def load(cfg, base=None):
         "model3d": {"url": "/api/model3d", "mtime": os.path.getmtime(files["model3d"])} if os.path.exists(files.get("model3d", "")) else None,
         "generated_at": time.strftime("%H:%M:%S"),
     }
+
+
+def total_for_spec(spec, ahs_items, builder_path):
+    """Use the same component prices and builder quantities as the viewport."""
+    B=_import_builder(builder_path)
+    builder=B.Builder(json.loads(json.dumps(spec)), B.Ahs(ahs_items)).build()
+    by={}
+    for a in ahs_items:by.setdefault(a['u'],a)
+    audit=_audit_prices(spec,by)
+    total=0.0
+    for row in builder.rows:
+        c=row['c'];kind=row['k']
+        if kind=='ahs':price=_rp(by.get(c[5],{}).get('h'))
+        elif kind in ('audit','kusen'):price=audit.get(c[4],{}).get('price',0)
+        else:continue
+        total+=float(c[7] or 0)*price
+    return total

@@ -167,15 +167,27 @@ class Editor:
         sync, tb = self._tb()
         spec = self.spec()
         if not (spec.get("meta") or {}).get("model_bind"): return None
+        if spec["meta"]["model_bind"].get("basis") != tb["basis"]:     # plugin/format ekspor baru -> sesuaikan acuan, angka tetap
+            n = sync.rebase(spec, rows, tb)
+            return self._commit(spec, "bind", None, f"Model 3D format baru: {n} tautan disesuaikan, angka RAB tetap")
+        before = json.dumps(spec, sort_keys=True)
+        from core.model import total_for_spec
+        ahs_items=self._read(self.ahs,[])
+        total_before=total_for_spec(spec,ahs_items,self.builder)
         changes, conflicts, notes = sync.apply_model(spec, rows, tb)
+        spec["meta"]["model_bind"]["last_export"] = tb.get("revision")
         for r, obj, text in notes: self.add_note({"row": r["row"] if r else None, "object": obj, "text": text, "auto": True}, r)
-        if not changes and not conflicts:
-            return None
+        if not changes and not conflicts:        # volume tidak berubah: simpan data tautan saja, tidak masuk riwayat / Push
+            if json.dumps(spec, sort_keys=True) != before: self._write(self.input, spec)
+            return {"ok": True, "summary": f"Model 3D diperbarui, volume RAB tetap · {len(notes)} catatan baru"} if notes else None
         parts = []
         if changes: parts.append(f"{len(changes)} baris berubah")
         if conflicts: parts.append(f"{len(conflicts)} bentrok dengan koreksi manual")
-        return self._commit(spec, "model", None, f"Model SKP disimpan ({tb['exported']}): " + ", ".join(parts),
-                            details={"changes": changes, "conflicts": conflicts})
+        total_after=total_for_spec(spec,ahs_items,self.builder)
+        money=lambda x: "Rp"+f"{x:,.0f}".replace(",", ".")
+        summary=f"Save SKP ({tb['exported']}): "+", ".join(parts)+(f"; total {money(total_before)} → {money(total_after)}" if abs(total_after-total_before)>=1 else "; total tetap")
+        return self._commit(spec, "model", None, summary,
+                            details={"changes":changes,"conflicts":conflicts,"total_before":total_before,"total_after":total_after,"delta":total_after-total_before})
 
     # ---------------------------------------------------------------- AHS dari sheet Analisa Harga Satuan (link publik)
     @staticmethod
@@ -225,14 +237,30 @@ class Editor:
     def _base_spec(self):
         """input seperti saat push terakhir."""
         pushed, _ = self._paths()
-        if os.path.exists(pushed): return self._read(pushed, None)
+        manifest = self._read(os.path.join(self.snapdir, "pushed_target.json"), None)
+        if manifest is not None and manifest != self._sheet_target(): return self.spec()
+        if os.path.exists(pushed):
+            candidate = self._read(pushed, None)
+            if self._same_project(candidate): return candidate
         log = self._read(self.logf, [])
         last = max([i for i, e in enumerate(log) if e["op"] == "push" and e["summary"].startswith("push ke Sheet berhasil")] + [-1])
         for e in log[last + 1:]:
             if e.get("snap") and not e.get("target"):
                 p = os.path.join(self.snapdir, e["snap"])
-                if os.path.exists(p): return self._read(p, None)
+                if os.path.exists(p):
+                    candidate = self._read(p, None)
+                    if self._same_project(candidate): return candidate
         return self.spec()
+
+    def _same_project(self, candidate):
+        if not isinstance(candidate, dict): return False
+        a, b = candidate.get("project", {}), self.spec().get("project", {})
+        return all(a.get(k) == b.get(k) for k in ("title", "tab", "audit_tab"))
+
+    def _sheet_target(self):
+        return {"spreadsheet_id": self.cfg.get("spreadsheet_id"),
+                "sheet_gid": self.cfg.get("sheet_gid"), "input": os.path.realpath(self.input),
+                "tab": self.spec()["project"]["tab"]}
 
     def _creds(self):
         c = self.cfg
@@ -244,7 +272,14 @@ class Editor:
         spec = self.spec(); ahs = self._read(self.ahs, [])
         web, ds = SS.build_rows(self.builder, spec, ahs)
         _, sbase = self._paths()
-        base = self._read(sbase, None) if os.path.exists(sbase) else SS.build_rows(self.builder, self._base_spec(), ahs)[0]
+        fallback = SS.build_rows(self.builder, self._base_spec(), ahs)[0]
+        saved = self._read(sbase, None)
+        if isinstance(saved, dict) and saved.get("target") == self._sheet_target():
+            base = saved["rows"]
+        else:
+            # Legacy row-only snapshots have no destination identity. A historical
+            # snapshot from another project must never become this tab's baseline.
+            base = fallback
         vals = SS.read_tab(self._creds(), self.cfg["spreadsheet_id"], spec["project"]["tab"], ds, max(len(web), len(base)))
         sheet = SS.sheet_rows(vals, ds)
         d = SS.diff(base, sheet, web)
@@ -299,7 +334,7 @@ class Editor:
                    if st["type"] == "tambah" else f"Di Google Sheet baris '{st['uraian']} · {st['ruang']}' dihapus")
             self.add_note({"text": txt + " — masukkan ke input RAB atau abaikan.", "auto": True}, None)
         _, sbase = self._paths()
-        os.makedirs(os.path.dirname(sbase), exist_ok=True); self._write(sbase, sheet)   # editan Sheet sudah ditinjau
+        os.makedirs(os.path.dirname(sbase), exist_ok=True); self._write(sbase, {"target": self._sheet_target(), "rows": sheet})   # editan Sheet sudah ditinjau
         if not done:
             return {"ok": True, "summary": "Tidak ada perubahan yang diambil" + (f" ({len(skipped)} dilewati)" if skipped else ""), "skipped": skipped}
         return self._commit(spec, "sheet", None, f"Tarik dari Sheet: {len(done)} perubahan diambil" + (f", {len(skipped)} dilewati" if skipped else ""),
@@ -370,7 +405,10 @@ class Editor:
         if r.returncode == 0:   # dasar perbandingan berikutnya = input yang barusan di-push
             pushed, sbase = self._paths(); os.makedirs(os.path.dirname(pushed), exist_ok=True)
             shutil.copy2(self.input, pushed)
-            if os.path.exists(sbase): os.remove(sbase)
+            self._write(os.path.join(self.snapdir, "pushed_target.json"), self._sheet_target())
+            from core import sheetsync as SS
+            rows, _ = SS.build_rows(self.builder, self.spec(), self._read(self.ahs, []))
+            self._write(sbase, {"target": self._sheet_target(), "rows": rows})
         log = self._read(self.logf, [])
         log.append({"id": len(log) + 1, "at": _now(), "op": "push", "row": None, "uraian": None,
                     "summary": ("push ke Sheet berhasil" if r.returncode == 0 else "push GAGAL") + f" ({time.time() - t0:.0f} dtk)", "snap": None, "undone": True})

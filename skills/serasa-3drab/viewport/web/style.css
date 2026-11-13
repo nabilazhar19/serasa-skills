@@ -277,3 +277,24 @@ a.btn { text-decoration: none; display: inline-block; }
 .design-warn { padding: 8px 24px; background: #fff4e5; color: #8a4b00; font-size: 12px; border-bottom: .5px solid var(--line); }
 .placeholder { padding: 40px 20px !important; text-align: center; color: var(--muted); }
 .noproj { max-width: 520px; margin: 18vh auto; text-align: center; color: var(--muted); line-height: 1.6; } .noproj b { color: var(--ink); font-size: 20px; }
+
+/* ---- garis potong (v2.5) ---- */
+.cutctl { position: absolute; z-index: 3; top: 62px; left: 50%; transform: translateX(-50%); display: flex; align-items: center; gap: 10px; flex-wrap: wrap; justify-content: center;
+  padding: 7px 12px; max-width: calc(100% - 24px); font-size: 12.5px; color: var(--ink);
+  background: rgba(255, 255, 255, .72); backdrop-filter: blur(20px) saturate(180%); -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: .5px solid rgba(210, 210, 215, .6); border-radius: 14px; box-shadow: 0 4px 14px rgba(0, 0, 0, .08); }
+.cutctl .lbl { color: var(--muted); white-space: nowrap; }
+.cutctl input[type=range] { width: 170px; accent-color: var(--accent); }
+.cutctl b { font-weight: 600; font-variant-numeric: tabular-nums; min-width: 64px; }
+.cutctl .chip { padding: 4px 10px; }
+.cutctl .tog { display: inline-flex; align-items: center; gap: 6px; color: var(--muted); white-space: nowrap; cursor: pointer; }
+.cutctl .tog input { accent-color: var(--accent); margin: 0; }
+.cutctl .sep { width: .5px; align-self: stretch; background: var(--line); }
+.facebox { display: flex; gap: 14px; margin: 2px 0 16px; }
+.facebox div { flex: 1; padding: 10px 12px; background: var(--bg); border-radius: var(--r-sm); }
+.facebox b { display: block; font-size: 19px; font-weight: 600; letter-spacing: -.01em; font-variant-numeric: tabular-nums; }
+.facebox span { font-size: 11.5px; color: var(--muted); }
+.agent.exp { background: rgba(255, 159, 10, .12); color: #a35a00; } .agent.exp .spin { border-color: rgba(255, 159, 10, .3); border-top-color: #ff9f0a; }
+@media (max-width: 760px) { .cutctl { top: 52px; } .cutctl input[type=range] { width: 120px; } }
+details.objrows summary { list-style: none; cursor: pointer; } details.objrows summary::-webkit-details-marker { display: none; }
+details.objrows summary h3::after { content: " ›"; color: var(--faint); } details.objrows[open] summary h3::after { content: " ⌄"; }

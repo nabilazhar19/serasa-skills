@@ -12,7 +12,7 @@ tools.py - perintah viewport untuk agen AI apa pun (Claude, Codex, dll.) & plugi
   python3 tools.py note-done --project DIR --id N   # tandai catatan selesai setelah dikerjakan
   python3 tools.py stop                          # hentikan server
   python3 tools.py check                         # cek lingkungan: Python, library Google, kunci desain
-  python3 tools.py lock                          # (pengembang) perbarui web/LOCK.json setelah mengubah tampilan resmi
+  python3 tools.py lock --version X              # (pengembang skill saja) perbarui LOCK.json setelah mengubah file resmi
 
 Semua path di viewport.json relatif terhadap folder _serasa_tools proyek.
 """
@@ -131,23 +131,13 @@ def cmd_stop(a):
     print("server dihentikan")
 
 
-def lock_files():
-    out = {}
-    for root, _, fs in os.walk(os.path.join(HERE, "web")):
-        for f in sorted(fs):
-            if f == "LOCK.json": continue
-            p = os.path.join(root, f); rel = os.path.relpath(p, os.path.join(HERE, "web")).replace(os.sep, "/")
-            out[rel] = hashlib.sha256(open(p, "rb").read()).hexdigest()
-    return out
-
-
 def cmd_lock(a):
-    p = os.path.join(HERE, "web", "LOCK.json")
-    json.dump({"version": a.version, "files": lock_files()}, open(p, "w", encoding="utf-8"), indent=1)
-    print("LOCK.json diperbarui:", p)
+    from core import lock
+    print("LOCK.json diperbarui:", lock.write(a.version))
 
 
 def cmd_check(a):
+    from core import lock
     ok = True
     print(f"Python {sys.version.split()[0]} ({sys.executable})")
     try:
@@ -155,9 +145,14 @@ def cmd_check(a):
         print("library Google: ada")
     except ImportError:
         ok = False; print("library Google: BELUM (jalankan scripts/setup.py) — dibutuhkan untuk Push / Tarik dari Sheet")
-    lock = json.load(open(os.path.join(HERE, "web", "LOCK.json"), encoding="utf-8"))
-    bad = [k for k, v in lock_files().items() if lock["files"].get(k) != v]
-    print("kunci desain:", "OK" if not bad else f"BERUBAH {bad}"); ok = ok and not bad
+    st = lock.check()
+    print(f"kunci versi resmi {st['version']}:", "OK" if st["ok"] else "BERUBAH " + ", ".join(st["changed"]) + "  -> jalankan scripts/setup.py untuk mengembalikan"); ok = ok and st["ok"]
+    rb = os.path.join(lock.ROOT, "scripts", "skp_extract.rb")
+    try: plugs = json.load(open(os.path.join(lock.ROOT, "env.json"), encoding="utf-8")).get("plugins", [])
+    except (OSError, ValueError): plugs = []
+    for pth in plugs:
+        same = os.path.exists(pth) and os.path.exists(rb) and lock.sha(pth) == lock.sha(rb)
+        print("plugin SketchUp:", pth, "OK" if same else "BERBEDA dari versi resmi"); ok = ok and same
     print("server:", "jalan" if _ping() else "tidak jalan")
     sys.exit(0 if ok else 1)
 
@@ -174,7 +169,7 @@ def main():
     sub.add_parser("notes").add_argument("--project", required=True)
     p = sub.add_parser("note-done"); p.add_argument("--project", required=True); p.add_argument("--id", type=int, required=True)
     sub.add_parser("stop"); sub.add_parser("check")
-    p = sub.add_parser("lock"); p.add_argument("--version", default="1.0")
+    p = sub.add_parser("lock"); p.add_argument("--version", required=True)
     a = ap.parse_args()
     {"init": cmd_init, "status": cmd_status, "open": cmd_open, "ensure": lambda x: cmd_open(x, browser=False), "bind": cmd_bind,
      "notes": cmd_notes, "note-done": cmd_note_done, "stop": cmd_stop, "check": cmd_check, "lock": cmd_lock}[a.cmd](a)
