@@ -82,6 +82,16 @@ class Editor:
     # ---------------------------------------------------------------- operasi
     def apply(self, req, rows_by_no):
         op = req.get("op")
+        if op == "coverage":      # objek model: kecualikan dari RAB (dengan alasan) / kembalikan
+            from core import coverage
+            path = coverage.register_path(self.cfg)
+            if not os.path.exists(path): self._write(path, {"objects": {}})
+            st = req.get("status") or None
+            if st not in (None, "exclude", "rab"): raise ValueError("status cakupan tidak valid")
+            if st == "exclude" and not (req.get("reason") or "").strip(): raise ValueError("Tulis alasan objek ini tidak dihitung")
+            reg = coverage.set_status(self.cfg, req["pid"], st, (req.get("reason") or "").strip(), req.get("work") or "")
+            what = {"exclude": "dikecualikan dari RAB", "rab": "ditandai sudah masuk RAB", None: "dikembalikan ke belum masuk RAB"}[st]
+            return self._commit(reg, op, None, f"Objek {req.get('name') or req['pid']} {what}" + (f": {req.get('reason')}" if st == "exclude" else ""), target=path)
         if op == "building":      # RAB per bangunan: pindahkan baris ke bangunan lain
             from core import scopes
             L = scopes.labels(self.cfg); key = req.get("building"); row = rows_by_no.get(req.get("row"))
@@ -359,7 +369,7 @@ class Editor:
         n = 0
         for e in reversed(self._read(self.logf, [])):
             if e["op"] == "push" and e["summary"].startswith("push ke Sheet berhasil"): break
-            if not e.get("undone") and e["op"] not in ("push", "bind", "ahs"): n += 1
+            if not e.get("undone") and e["op"] not in ("push", "bind", "ahs", "coverage"): n += 1   # register cakupan bukan isi Sheet
         return n
 
     def undo(self):

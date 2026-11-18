@@ -44,6 +44,10 @@ supplier per m² (tulis di `src`).
 Hardware dihitung **per daun / per set**, bukan per m². Bahan yang ikut ukuran memakai `formula`.
 
 ## Harga
+Kelas spek **menengah, mengikuti desain** (material yang terlihat di model/render atau disebut pengguna). Jangan memilih spek
+atau merek termurah demi angka kecil; harga pasar wajar dari supplier/distributor resmi, bukan harga promo terendah.
+Total yang di bawah rentang Rp/m² wajar ([cakupan](cakupan.md)) adalah tanda spek terlalu murah atau objek terlewat.
+
 1. AHS (MASTER AHS → AHS) bila ada padanan per komponen → `"AHS:<uraian>"`.
 2. Harga pasar: ≥1 sumber (situs supplier/distributor/marketplace) → `market_reference`, tulis toko + tanggal + url.
 3. Tidak ketemu: estimasi wajar → `estimated`, tulis "Estimasi anggaran • tanggal". Laporkan di akhir (daftar komponen estimasi).

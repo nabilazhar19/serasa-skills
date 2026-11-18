@@ -20,7 +20,7 @@ import json, os
 
 HERE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))          # .../viewport
 DEFAULT_BUILDER = os.path.normpath(os.path.join(HERE, "..", "scripts", "build_rab.py"))
-PATH_KEYS = ("input", "ahs", "model3d", "builder", "creds")
+PATH_KEYS = ("input", "ahs", "model3d", "builder", "creds", "register")
 STATE = os.path.join(HERE, "state.json")                                     # proyek terakhir yang dibuka
 
 

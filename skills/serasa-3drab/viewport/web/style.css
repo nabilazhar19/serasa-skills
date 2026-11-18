@@ -312,3 +312,10 @@ a.btn { text-decoration: none; display: inline-block; }
 @media (max-width: 760px) { .cutctl { top: 52px; } .cutctl input[type=range] { width: 120px; } }
 details.objrows summary { list-style: none; cursor: pointer; } details.objrows summary::-webkit-details-marker { display: none; }
 details.objrows summary h3::after { content: " ›"; color: var(--faint); } details.objrows[open] summary h3::after { content: " ⌄"; }
+
+/* ---- cakupan model (v2.6) ---- */
+.stat.cov { cursor: pointer; }
+.covbox { display: flex; flex-direction: column; gap: 8px; margin: 0 0 16px; padding: 12px 14px; border-radius: var(--r-sm); background: var(--bg); font-size: 13px; }
+.covbox b { font-weight: 600; } .covbox span { color: var(--muted); }
+.covbox.miss { background: rgba(255, 59, 48, .08); } .covbox.miss b { color: #c4281c; }
+.covbox input { font: inherit; padding: 7px 10px; border: .5px solid var(--line); border-radius: 8px; background: #fff; }

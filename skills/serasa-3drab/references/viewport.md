@@ -74,3 +74,11 @@ Default satu tab RAB. Bila pengguna meminta tab terpisah (mis. Rumah / Kost / Ru
 - Tab & Audit tiap bangunan dibuat dulu di Sheet (salin format tab RAB template), `sheet_id`/`audit_id` = gid tab itu. Rekap proyek boleh berupa tab formula yang menjumlah total tiap tab.
 - Viewport: strip bangunan di bawah header (tabel, total, luas, sorotan model per bangunan; total proyek tetap tampil), pilihan "Bangunan RAB" di panel baris untuk memindahkan alokasi, tombol **Push semua RAB** (patch per tab; struktur berubah → konfirmasi rebuild tab itu saja; baseline per tab di `.koreksi/split_state.json`).
 - **Jangan** menjalankan `build_rab.py` langsung pada input induk proyek `building_tabs`; Push lewat viewport (`core/scope_sheets.py`).
+
+## Cakupan model & kewajaran harga (v2.6)
+- Kartu **Cakupan model**: persen luas muka model yang sudah masuk RAB (dirujuk sumber baris / tag muka, atau register `rab`) atau
+  dikecualikan (register `exclude` dengan alasan; kontur/vegetasi/mobil otomatis). Klik kartu → mode "Cakupan RAB": objek
+  **merah** = belum masuk RAB. Klik objek merah → "Kecualikan" (wajib alasan) atau tulis catatan untuk agen. Register di
+  `_serasa_tools/register.json` (Riwayat + Undo, tidak perlu Push).
+- Kartu **Rp/m² ekuivalen**: total ÷ `luasan.ekuivalen`, dibandingkan rentang `benchmark` di viewport.json (default 5,5–7 jt
+  dengan struktur; tanpa struktur dikurangi ±26%). `tools.py init --struktur ya|tidak`. Acuan & koefisien: [cakupan](cakupan.md).

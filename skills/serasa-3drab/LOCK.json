@@ -1,25 +1,26 @@
 {
- "version": "2.5",
+ "version": "2.6",
  "files": {
   "scripts/build_rab.py": "f4b1a3d878dd75e4e1f75baea9a31c4b20ed5342cff8ffecc635d0bfe75d9c03",
-  "scripts/setup.py": "0100eb59d112ee1cd638916c8ff174c198a4ec7d5888457bc43c20b2c540218e",
-  "scripts/skp_extract.rb": "3bdef0c3f0bc755e30e535b242372a3302d5c844aae92d8ff0cc9ac072bd147c",
+  "scripts/setup.py": "e47540e14b7763a40da0d955703ed05ae0aa6a171c434604ce923abfe9211edc",
+  "scripts/skp_extract.rb": "1a5e58aac0b3c5625f250dfad586ac6f9f4108f31e7ccabc20da38b1cfc0cdaf",
   "viewport/core/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
   "viewport/core/analysis.py": "89dacf6c22d3dde6dd8dbf4c2040837fe19c294398199706bd26d38ee29d4d08",
-  "viewport/core/edits.py": "bde40b69057f99ef3990ab41aa578bb3eb08bb5e2b98ed31913943d9ef161c2a",
+  "viewport/core/coverage.py": "d03a28f25bef6cd206b3a70e71eaccb7769564ad95e25537db9e3a6e9e1f7474",
+  "viewport/core/edits.py": "b70ac8b5c12dba147fd0f0a41eca82a66238e37d53f7f3dab0bebf21ff920879",
   "viewport/core/lock.py": "7ee2024f7800cad475e16ce7c616b56ee655222c20ee14da65422ed4f6ee64ae",
   "viewport/core/mesh.py": "9032186af9a0e61e1fe49120a497e866d48cfc9d2c805b82ad788226a011d6e0",
-  "viewport/core/model.py": "aff05b9123c5bfc1bc7f2e8bf07a86c18eb317dc54a47e4375d8adfd7b4319db",
-  "viewport/core/project.py": "5e39f5ad120b7d86fbdaecc3e151dff8dfb9a20c48d80593b18516688de641d3",
+  "viewport/core/model.py": "c7fa14b3f8ff762fe23ea9533d4db6330f6a223d835f7262f948331c8bf50301",
+  "viewport/core/project.py": "aa25ad454605501098bdc44f8022ffae95efe2a28cce8f282c33d8ccde3db829",
   "viewport/core/scope_sheets.py": "618d79b5902e2ce74adfbe5b836a2a038cd1aa2a8d906ca17c2feb0379c7a641",
   "viewport/core/scopes.py": "1f8671329f2eb2c0c01709af56626035b9620a70f85cb385b3a66e20a2c4beb1",
   "viewport/core/sheetsync.py": "5d17275103915b384773e1f49f4ab6f7b80dd7b47b3acde99d762faaa8ceb2fb",
   "viewport/core/sync.py": "4f3ab74774f76bdaaf124a39678e7aba6c5bb344b7dcf4959c26aa421d40cf97",
-  "viewport/server.py": "07fd513f52c3a9eb3236629453a4b8bcdb40e5ade5c63237ab53d0b35e3eae49",
-  "viewport/tools.py": "eb1409b4cdbb7a08a1b80a6bc5128b5179cc7d08af28066ac8a34e6bb1100484",
-  "viewport/web/app.js": "973533e155e74061ebadbb1e051ff209391820e3474376f3c8ff04e812b9f3dc",
-  "viewport/web/index.html": "bdbe34ca09076a04a777a50ec1191d9aec9de75e2604bc042b70dfe1c5b9b3ca",
-  "viewport/web/style.css": "3aa435de018bce7e3908c5ceb2fa559a31366c736981398884986d39fb7a85ba",
-  "viewport/web/viewer3d.js": "fbc21a981556689e46191b5a880a9e82fb58e1c07356eb65d8b500dfaba32503"
+  "viewport/server.py": "639d78b1bfbde53e4558e79a6309e19f93ce6482e85d9b1257c36c11e7910215",
+  "viewport/tools.py": "d90a026231c3e7d8b8ac30a75737045eb1200dc530a26da41fdd1eb829bee23d",
+  "viewport/web/app.js": "0e673279cfe8d98256aa0112883515d71de26f11fa5cc7e3985dee369fd2991e",
+  "viewport/web/index.html": "0fc34478ed0e975d64526ed857b2dcec19fbdd7dcb53ec38bac11462cd755e30",
+  "viewport/web/style.css": "519cf378d78505e27a266f13e76e3b4e0c1a8b45fc84b40daebd78d7fe2f3ff2",
+  "viewport/web/viewer3d.js": "2882bdc09c1b5c41a476d7d2a891a7415f75035f62317672a143feffb601d77b"
  }
 }

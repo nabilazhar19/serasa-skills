@@ -8,7 +8,8 @@ Urutan `bab` dan nama `uraian` mengikuti tab template `urutan pekerjaan`.
   "project": {"title": "...", "tab": "Ruko BKL", "audit_tab": "Audit", "zona": "Kota Bengkulu"},
   "luasan": {"tanah_label": "Luas Tapak ...", "tanah": 58.9,
              "lantai": [{"short": "Lt.1", "label": "Luas Lantai 1 ...", "items": [["toko", 47.9], ["teras", 7.9]]}],  // 1-2 lantai (template punya 2 baris)
-             "note": "..."},
+             "note": "...",
+             "ekuivalen": 149.4},                   // luas ekuivalen m2 (koefisien Serasa, references/cakupan.md) -> cek Rp/m2 di viewport
   "walls": [{"room": "Toko 1", "lantai": "Lantai 1", "interior": true, "parts": {"ekspos": 30.66, "putih": 34.85},
              "finish_spec": {"putih": "<uraian AHS lain bila beda dari default>"}}],
   "wall_specs": {                                   // uraian AHS PERSIS

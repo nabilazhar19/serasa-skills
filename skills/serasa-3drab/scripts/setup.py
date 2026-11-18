@@ -22,7 +22,7 @@ Tanpa library tambahan selain Python 3.8+.
 import argparse, glob, json, os, shutil, subprocess, sys, time
 
 SKILL = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-VERSION = "2.5"
+VERSION = "2.6"
 DEPS = {"googleapiclient": "google-api-python-client", "google.oauth2": "google-auth"}
 SKIP = {"__pycache__", "state.json", "server.log", ".DS_Store"}
 WIN = os.name == "nt"

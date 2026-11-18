@@ -39,6 +39,7 @@ export class Viewer3D {
       hl: lam({ color: 0xff9f0a, emissive: 0x7a4500, polygonOffset: true, polygonOffsetFactor: -1 }),
       ghost: lam({ color: 0xd2d2d7, transparent: true, opacity: 0.12, depthWrite: false }),
       used: lam({ color: 0x0071e3 }), unused: lam({ color: 0xc7c7cc, transparent: true, opacity: 0.35, depthWrite: false }),
+      missing: lam({ color: 0xff3b30, emissive: 0x5c0b07 }),   // objek belum masuk RAB (cakupan)
       pickSelf: lam({ color: 0x0071e3, emissive: 0x00346b, polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2 }),   // bidang yang diklik
       pickObj: lam({ color: 0xe8e8ed, emissive: 0x111114, polygonOffset: true, polygonOffsetFactor: -1 }),                               // objek induknya: abu netral
       edit: lam({ color: 0x34c759, emissive: 0x0d4a1c, polygonOffset: true, polygonOffsetFactor: -1 }),
@@ -182,7 +183,7 @@ export class Viewer3D {
     return !!idHit;
   }
 
-  setUsage(used) { this.used = used; this.apply(); }
+  setUsage(used, missing) { this.used = used; this.missing = missing || null; this.apply(); }
   setMode(m) { this.mode = m; this.apply(); }
 
   roomPlanes(name) {
@@ -224,8 +225,9 @@ export class Viewer3D {
     for (const p of this.parts) {
       if (hl && any) this.set(p, p.hit ? hm : this.M.ghost, p.hit ? this.E.hl : this.E.ghost, p.hit ? 2 : 1);
       else if (this.mode === "usage" && this.used) {
-        const u = this.used.has(p.obj.name) || this.used.has(String(p.obj.pid)) || this.used.has(p.key) || p.tags.some((t) => this.used.has(t));
-        this.set(p, u ? this.M.used : this.M.unused, this.E.normal, u ? 2 : 1);
+        const miss = this.missing && this.missing.has(String(p.obj.pid));
+        const u = !miss && (this.used.has(p.obj.name) || this.used.has(String(p.obj.pid)) || this.used.has(p.key) || p.tags.some((t) => this.used.has(t)));
+        this.set(p, miss ? this.M.missing : u ? this.M.used : this.M.unused, this.E.normal, miss || u ? 2 : 1);
       } else this.set(p, p.base, this.E.normal, 0);
     }
     if (hl && any) { const hitObj = new Set(this.parts.filter((p) => p.hit).map((p) => p.oi)); for (const l of this.objEdges) l.material = hitObj.has(l.userData.oi) ? this.E.normal : this.E.ghost; }

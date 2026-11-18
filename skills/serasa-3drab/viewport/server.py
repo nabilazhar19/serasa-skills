@@ -24,7 +24,7 @@ GET  /events          -> Server-Sent Events saat file proyek / kode berubah
 import argparse, glob, gzip, hashlib, importlib, json, os, sys, threading, time, urllib.request, webbrowser
 from http.server import ThreadingHTTPServer, BaseHTTPRequestHandler
 
-VERSION = "2.5"
+VERSION = "2.6"
 BASE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, BASE)
 import core.project as project  # noqa: E402
@@ -36,12 +36,13 @@ import core.sheetsync as sheetsync  # noqa: E402
 import core.analysis as analysis  # noqa: E402
 import core.scopes as scopes  # noqa: E402
 import core.scope_sheets as scope_sheets  # noqa: E402
+import core.coverage as coverage  # noqa: E402
 
 STATE = {"version": 0, "scope": "init", "cache": None, "mesh": None, "static": {}, "project": None, "lock": threading.Lock(),
          "push": threading.Lock(), "edit": threading.RLock(), "design": None}
 CT = {".html": "text/html; charset=utf-8", ".js": "text/javascript; charset=utf-8", ".css": "text/css; charset=utf-8",
       ".json": "application/json; charset=utf-8", ".png": "image/png", ".svg": "image/svg+xml"}
-CORRECTIONS = ("koreksi_log.json", "koreksi_catatan.json", "viewport_status.json", "export_status.json")
+CORRECTIONS = ("koreksi_log.json", "koreksi_catatan.json", "viewport_status.json", "export_status.json", "register.json")
 
 
 def cfg():
@@ -130,7 +131,7 @@ def switch(path):
 
 
 def watcher(interval):
-    global model, mesh, edits, sync, sheetsync, project, analysis, scopes, scope_sheets
+    global model, mesh, edits, sync, sheetsync, project, analysis, scopes, scope_sheets, coverage
     prev = snapshot()
     while True:
         time.sleep(interval)
@@ -144,7 +145,7 @@ def watcher(interval):
                 os.execv(sys.executable, [sys.executable, os.path.abspath(__file__)] + args)
             if "core" in changed_scopes:
                 try:
-                    project, model, mesh, edits, sync, sheetsync, analysis, scopes, scope_sheets = (importlib.reload(m) for m in (project, model, mesh, edits, sync, sheetsync, analysis, scopes, scope_sheets))
+                    project, model, mesh, edits, sync, sheetsync, analysis, scopes, scope_sheets, coverage = (importlib.reload(m) for m in (project, model, mesh, edits, sync, sheetsync, analysis, scopes, scope_sheets, coverage))
                 except Exception as e: print("reload core gagal:", e)
             if "model3d" in changed_scopes: model_changed()
             bump(changed_scopes)
