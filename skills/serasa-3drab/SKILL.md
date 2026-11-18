@@ -14,7 +14,9 @@ Hasil: tab RAB pada salinan Template Serasa atau tab tujuan yang diminta, disert
 3. **File kerja hanya di `<proyek>/_serasa_tools/work/`**, ditimpa (bukan versi-versian). Tidak membuat folder `output` atau salinan bertanggal. Hasil yang dipakai viewport: `_serasa_tools/<nama>_input.json`, `<nama>_model3d.json`, `viewport.json`.
 4. **Ekspor 3D hanya area yang dihitung** (`region`), ukuran khusus (volume, atap, roster, keliling) hanya untuk objek yang dipakai baris RAB lewat `measures` di `serasa_watch.json`.
 5. **Sheet hanya berubah lewat Push** (`build_rab.py --prepare patch`), kecuali pengguna meminta lain. Koreksi pengguna di viewport dihormati: baris koreksi manual tidak ditimpa.
-6. **Analisa non-AHS rinci** sesuai [analisa](references/analisa.md): komponen per bagian dengan rumus ukuran, hardware per daun, sumber + tanggal harga.
+6. **Analisa non-AHS rinci** sesuai [analisa](references/analisa.md): komponen per bagian dengan rumus ukuran, hardware per daun, sumber + tanggal harga. Kelas spek **menengah, mengikuti desain** — jangan memilih spek termurah.
+7. **Semua objek dihitung** ([cakupan](references/cakupan.md)): inventaris semua objek (`SerasaRAB.inventory`), tiap objek masuk RAB atau dikecualikan dengan alasan. Cakupan model dan Rp/m² ekuivalen (wajar 5,5–7 jt dengan struktur) dilaporkan; di bawah rentang = periksa objek yang terlewat sebelum melapor.
+8. **Struktur hanya bila pengguna menyatakan model strukturnya ada** (biasanya tag `STR` di SKP). Tanpa itu struktur tetap pending dan benchmark memakai rentang tanpa struktur.
 
 ## Aturan inti
 
@@ -27,7 +29,7 @@ Hasil: tab RAB pada salinan Template Serasa atau tab tujuan yang diminta, disert
 
 ## Persiapan & Viewport RAB (berlaku untuk Claude, Codex, atau agen lain; Windows & Mac)
 
-**Sekali per komputer:** di SketchUp `defined?(SerasaRAB) ? SerasaRAB::VERSION : 'belum'`. Bila belum atau < 2.5: `load "<skill>/scripts/skp_extract.rb"; SerasaRAB.install_plugin`, yang menjalankan `scripts/setup.py` dan memasang plugin ke semua versi SketchUp, viewport ke folder bersama, serta library Python. Tanpa akses SketchUp: `python3 scripts/setup.py` (Windows `py -3 scripts\setup.py`; tanpa Python: `setup.bat`/`setup.command`). Agen di cloud: salin folder skill ke folder proyek pengguna yang terhubung, lalu `load`/`install_plugin` dari sana. **Jangan menempel isi script.**
+**Sekali per komputer:** di SketchUp `defined?(SerasaRAB) ? SerasaRAB::VERSION : 'belum'`. Bila belum atau < 2.6: `load "<skill>/scripts/skp_extract.rb"; SerasaRAB.install_plugin`, yang menjalankan `scripts/setup.py` dan memasang plugin ke semua versi SketchUp, viewport ke folder bersama, serta library Python. Tanpa akses SketchUp: `python3 scripts/setup.py` (Windows `py -3 scripts\setup.py`; tanpa Python: `setup.bat`/`setup.command`). Agen di cloud: salin folder skill ke folder proyek pengguna yang terhubung, lalu `load`/`install_plugin` dari sana. **Jangan menempel isi script.**
 
 **Siklus viewport** — perintah lengkap di [viewport](references/viewport.md); `T` = `viewport/tools.py` di folder bersama:
 1. Begitu folder proyek & nama input diketahui: `T init --project DIR --input <nama>_input.json --title …` lalu `T open --project DIR`. Viewport terbuka di browser pengguna dan menunggu data.
@@ -57,7 +59,12 @@ Baca denah/batas merah, model aktif, tab tujuan dan tahap yang sudah selesai. Un
 
 Gunakan skill `sketchup-mcp-workflow` bila tersedia: verifikasi versi bridge dan path model aktif. Jika model berbeda, minta pengguna mengaktifkan model yang benar sambil mengerjakan sumber lain yang independen. Jangan mengukur model lain.
 
-Sumber SKP dan perubahan live pengguna dipertahankan; takeoff hanya inspeksi. Baca [metode SKP](references/skp-method.md) sebelum ekstraksi. Gunakan `SerasaRAB` (v2.5+); simpan hasil JSON lokal, bukan output panjang di chat. Periksa denah dan tampilan model, batas elevasi, tebal, material, bukaan dan bidang yang tidak dimodelkan. Nama material render tidak membuktikan bahan konstruksi.
+Urutan ukur (cara arsitek, [cakupan](references/cakupan.md)):
+1. `SerasaRAB.inventory(region, "<DIR>/_serasa_tools/work/inventory.json")` — daftar semua objek: material per orientasi, volume, panjang, komponen kembar, flag STR.
+2. Klasifikasikan tiap objek/part jadi pekerjaan (fasad, bench, ramp, atap per material, roster, railing, kanopi, planter, kusen, sanitair, dst.) → `_serasa_tools/register.json`.
+3. Dinding/lantai/plafon per ruang: `SerasaRAB.takeoff` **per bangunan** (ruang, pita lantai dan `wall_pids` masing-masing, sampel 100 mm). Objek lain: dasar ukur dari tabel di cakupan.md. Tag muka viewport bukan alat ukur volume.
+
+Sumber SKP dan perubahan live pengguna dipertahankan; takeoff hanya inspeksi. Baca [metode SKP](references/skp-method.md) sebelum ekstraksi. Gunakan `SerasaRAB` (v2.6+); simpan hasil JSON lokal, bukan output panjang di chat. Periksa denah dan tampilan model, batas elevasi, tebal, material, bukaan dan bidang yang tidak dimodelkan. Nama material render tidak membuktikan bahan konstruksi.
 
 ### 3. Rekonsiliasi kuantitas sebelum harga
 
@@ -67,7 +74,7 @@ Ketidaklengkapan model: ambil ukuran yang didukung denah; jika perlu keputusan p
 
 ### 4. Pilih AHS dan susun input
 
-Baca AHS live sekali ke cache lokal, cari padanan lokal sesuai [pemetaan finishing](references/finishing-mapping.md). Default template adalah pilihan anggaran, bukan bukti bahan model. Paket terpasang dibandingkan cakupannya dengan komponen lain agar tidak ganda. Bila AHS tidak sesuai, buat analisa Audit; jangan memaksakan padanan.
+Baca AHS live sekali ke cache lokal, cari padanan lokal sesuai [pemetaan finishing](references/finishing-mapping.md). Default template adalah pilihan anggaran, bukan bukti bahan model. Paket terpasang dibandingkan cakupannya dengan komponen lain agar tidak ganda. Bila AHS tidak sesuai, buat analisa Audit rinci dengan harga pasar kelas menengah sesuai desain; jangan memaksakan padanan dan jangan memilih spek murahan. Isi `luasan.ekuivalen` (koefisien di cakupan.md) untuk cek kewajaran.
 
 Gunakan [format input](references/input-format.md). Builder mendukung `estimated: true`, `quantity_note`, `audit_notes`, serta `layer_parts` untuk membedakan area plester/acian/finish. Input lama tanpa flag tidak menandai estimasi otomatis: klasifikasikan sumber dulu. Tulis input ke `<folder proyek>/_serasa_tools/<nama>_input.json` (sumber yang sama dibaca viewport), dengan `src` per bidang bila ada (asal angka untuk panel Sumber). Jalankan offline sebelum push. Contoh `examples/ruko_bkl2_input.json` hanya contoh struktur; ukuran, harga, lingkup dan persetujuannya tidak berlaku otomatis untuk proyek baru.
 
@@ -82,7 +89,7 @@ Audit A non-AHS, B analisa bukaan (rinci, [analisa](references/analisa.md)), C A
 
 ### 6. Verifikasi dan laporkan
 
-Periksa perubahan saja ditambah dependennya: formula error/harga nol, subtotal dan total, cakupan paket, register bidang, estimasi H kuning, pending tanpa angka, serta referensi Audit. Pastikan angka/formula/warna bab sebelumnya tetap kecuali koreksi yang diminta. Baca balik rentang tulis dan cek tampilan; bila render tidak tersedia, periksa format dan ukuran baris melalui API, sebutkan batas pemeriksaannya jika relevan.
+Cek cakupan dulu: kartu **Cakupan model** di viewport (objek merah = belum masuk RAB) harus 100% atau sisanya dikecualikan dengan alasan; kartu **Rp/m² ekuivalen** di rentang wajar — bila di bawah, telusuri objek terlewat, bab yang porsinya jauh di bawah acuan RBL, dan spek terlalu murah. Laporkan keduanya. Lalu periksa perubahan saja ditambah dependennya: formula error/harga nol, subtotal dan total, cakupan paket, register bidang, estimasi H kuning, pending tanpa angka, serta referensi Audit. Pastikan angka/formula/warna bab sebelumnya tetap kecuali koreksi yang diminta. Baca balik rentang tulis dan cek tampilan; bila render tidak tersedia, periksa format dan ukuran baris melalui API, sebutkan batas pemeriksaannya jika relevan.
 
 Laporkan link tab, link viewport, total sementara, perubahan utama dan pending yang material. Jangan menyebut RAB final lengkap bila struktur/detail atau volume manual belum terisi. Berhenti pada tahap yang diminta.
 

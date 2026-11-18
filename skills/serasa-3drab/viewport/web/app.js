@@ -82,7 +82,7 @@ function usage() {
   if (!S.data) return;
   const u = new Set();
   for (const r of scopeData().rows) if (r.hl && r.kind !== "pending") for (const k of ["ids", "tags", "parts"]) (r.hl[k] || []).forEach((x) => u.add(x));
-  viewer.setUsage(u); scopeHighlight(false);
+  const cov = S.data.coverage; viewer.setUsage(u, cov ? new Set(cov.missing_ids) : null); scopeHighlight(false);
 }
 
 async function post(url, body) {
@@ -140,6 +140,10 @@ function render(changed = new Set()) {
     ["Pending", pend, "", "menunggu data (belum di SKP)", "warn"],
     ...(d.estimated ? [["Volume estimasi", d.estimated, "", "kuning — isi ukuran final", "est"]] : []),
     ...(manual ? [["Koreksi manual", manual, "", "volume diubah di viewport", "edit"]] : []),
+    ...(d.coverage ? [["Cakupan model", num(d.coverage.pct), "%", d.coverage.n_missing ? `${d.coverage.n_missing} objek belum masuk RAB — klik untuk lihat` : "semua objek masuk RAB / dikecualikan", d.coverage.n_missing ? "warn cov" : "cov"]] : []),
+    ...(d.benchmark ? [["Rp/m² ekuivalen", (d.benchmark.rp_m2 / 1e6).toLocaleString("id-ID", { maximumFractionDigits: 2 }), "jt",
+      `${d.benchmark.status} · rentang ${(d.benchmark.min / 1e6).toLocaleString("id-ID", { maximumFractionDigits: 1 })}–${(d.benchmark.max / 1e6).toLocaleString("id-ID", { maximumFractionDigits: 1 })} jt${d.benchmark.struktur ? "" : " (tanpa struktur)"} · luas ekuivalen ${num(d.benchmark.ekuivalen)} m²`,
+      d.benchmark.status === "wajar" ? "" : "warn"]] : []),
   ].map(([k, v, u, s, c]) => `<div class="stat ${c || ""}" title="${esc(s)}"><div class="v">${unitHtml(v, u)}</div><div class="k">${esc(k)}</div><div class="s">${esc(s)}</div></div>`).join("");
 
   $("#babs").innerHTML = `<li data-bab="" class="${S.bab ? "" : "active"}"><span>Semua bab</span><span class="n">${d.rows.filter((r) => r.kind !== "sub").length}</span></li>` +
@@ -257,6 +261,15 @@ function detailRow(r) {
   el.innerHTML = h;
 }
 
+function covBlock(p) {   // status cakupan objek: belum masuk RAB / dikecualikan
+  const cov = S.data.coverage; if (!cov) return "";
+  const pid = String(p.pid), miss = cov.missing_ids.includes(pid), exc = cov.exclude_ids.includes(pid);
+  if (miss) return `<div class="covbox miss"><b>Belum masuk RAB</b><span>Objek ini tidak dirujuk baris mana pun. Tambahkan pekerjaannya (catatan untuk agen) atau kecualikan dengan alasan.</span>
+    <input id="cov-reason" placeholder="Alasan dikecualikan, mis. furnitur lepas / sudah termasuk paket kusen"><div class="actions"><button class="btn ghost" data-act="cov-ex" data-pid="${pid}" data-name="${esc(p.name)}">Kecualikan</button></div></div>`;
+  if (exc) return `<div class="covbox"><b>Dikecualikan dari RAB</b><span>Objek ini sengaja tidak dihitung.</span><div class="actions"><button class="btn ghost" data-act="cov-undo" data-pid="${pid}" data-name="${esc(p.name)}">Batalkan pengecualian</button></div></div>`;
+  return "";
+}
+
 function detailPick(p) {
   const rows = rowsForPick(p), what = p.whole ? "objek ini" : "bidang ini";
   $("#detail").innerHTML = `<div class="i-meta"><span class="src"><i class="k-skp"></i>${p.whole ? "Objek SKP" : "Bidang SKP"}</span><span class="bar">|</span><span>pid ${p.pid}</span></div>
@@ -264,7 +277,7 @@ function detailPick(p) {
     <div class="facebox">${p.whole ? "" : `<div><b>${num(p.area)} m²</b><span>bidang yang diklik</span></div>`}<div><b>${num(p.objArea)} m²</b><span>seluruh muka objek</span></div></div>
     ${!p.whole && p.tags.length ? `<div class="chips" style="margin-bottom:18px">${p.tags.map((t) => `<span class="t">${esc(t.replaceAll("|", " · "))}</span>`).join("")}</div>` : ""}
     <div class="actions" style="margin-bottom:16px"><button class="btn ghost" data-act="pick-whole" data-on="${p.whole ? 0 : 1}">${p.whole ? "Kembali ke bidang" : "Pilih seluruh objek"}</button></div>
-    ${pickRows(p, rows, what)}
+    ${covBlock(p)}${pickRows(p, rows, what)}
     <p class="hint">Salah masuk baris? Pilih barisnya, lalu “Pilih sumber di model 3D”.</p>` + noteForm(null, p.name);
   const nf = p.whole ? rows.length : rows.filter(faceSpecific).length;
   $("#hud").innerHTML = `<b>${esc(p.name)}</b>${p.whole ? "" : ` · ${num(p.area)} m²`}<span class="n">${nf} baris RAB menghitung ${what}</span>`;
@@ -484,6 +497,11 @@ document.addEventListener("click", async (e) => {
     else if (a === "note") { const tx = $("#note-text").value; if (await edit({ op: "note", row, object: act.dataset.object || null, text: tx })) $("#note-text").value = ""; }
     else if (a === "note-done") await edit({ op: "note_done", id: +act.dataset.id, done: act.dataset.done === "1" });
     else if (a === "close-hist") { S.view = "detail"; inspector(); }
+    else if (a === "cov-ex" || a === "cov-undo") {
+      const reason = a === "cov-ex" ? ($("#cov-reason").value || "").trim() : "";
+      if (a === "cov-ex" && !reason) { toast("Tulis alasan objek ini tidak dihitung", "warn"); return; }
+      edit({ op: "coverage", pid: act.dataset.pid, name: act.dataset.name, status: a === "cov-ex" ? "exclude" : null, reason });
+    }
     else if (a === "pick-whole" && S.pick) { S.pick.whole = act.dataset.on === "1"; viewer.pickWhole(S.pick.whole); render(); }
     return;
   }
@@ -508,6 +526,7 @@ document.addEventListener("click", async (e) => {
   const b = t.closest("[data-bab]"); if (b) { S.bab = b.dataset.bab || null; render(); return; }
   const k = t.closest("[data-kind]"); if (k) { S.kind = k.dataset.kind || null; render(); return; }
   const v = t.closest("[data-view]"); if (v) { document.querySelectorAll("[data-view]").forEach((x) => x.classList.toggle("on", x === v)); viewer.view(v.dataset.view); return; }
+  if (t.closest(".stat.cov")) { document.querySelector('[data-mode="usage"]').click(); return; }
   const m = t.closest("[data-mode]"); if (m) { document.querySelectorAll("[data-mode]").forEach((x) => x.classList.toggle("on", x === m)); viewer.setMode(m.dataset.mode); $("#legend").hidden = m.dataset.mode !== "usage"; return; }
   const sc = t.closest("[data-sec]"); if (sc) { setCut(sc.dataset.sec); return; }
   const sz = t.closest("[data-secz]"); if (sz) { viewer.setSection({ z: +sz.dataset.secz }); cutValues(); return; }

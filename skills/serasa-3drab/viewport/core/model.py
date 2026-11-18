@@ -221,6 +221,9 @@ def load(cfg, base=None):
         "model3d": {"url": "/api/model3d", "mtime": os.path.getmtime(files["model3d"])} if os.path.exists(files.get("model3d", "")) else None,
         "generated_at": time.strftime("%H:%M:%S"),
     }
+    from core import coverage      # cakupan model + kewajaran harga per m2 (v2.6)
+    result["coverage"] = coverage.compute(cfg, rows)
+    result["benchmark"] = coverage.benchmark(cfg, spec, result["total"])
     if cfg.get("building_tabs"):   # RAB per bangunan (hanya bila diminta pengguna)
         from core.scopes import view
         result.update(view(spec, rows, babs, cfg, ahs_items))

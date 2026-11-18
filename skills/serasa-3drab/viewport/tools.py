@@ -69,10 +69,11 @@ def cmd_init(a):
     tools = _tools_dir(a.project); os.makedirs(tools, exist_ok=True)
     path = os.path.join(tools, "viewport.json")
     cfg = json.load(open(path, encoding="utf-8")) if os.path.exists(path) else {}
-    for k in ("title", "input", "ahs", "model3d", "sheet_url", "spreadsheet_id", "creds", "ahs_source", "ahs_sheet_url"):
+    for k in ("title", "input", "ahs", "model3d", "sheet_url", "spreadsheet_id", "creds", "ahs_source", "ahs_sheet_url", "register"):
         v = getattr(a, k.replace("-", "_"), None)
         if v is not None: cfg[k] = v
     if a.sheet_gid is not None: cfg["sheet_gid"] = a.sheet_gid
+    if a.struktur: cfg.setdefault("benchmark", {"min": 5500000, "max": 7000000})["struktur"] = a.struktur == "ya"
     cfg.setdefault("ahs", "ahs.json"); cfg.setdefault("title", os.path.basename(os.path.dirname(tools)))
     json.dump(cfg, open(path, "w", encoding="utf-8"), ensure_ascii=False, indent=2)
     print(f"viewport.json: {path}")
@@ -161,7 +162,8 @@ def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     sub = ap.add_subparsers(dest="cmd", required=True)
     p = sub.add_parser("init"); p.add_argument("--project", required=True)
-    for k in ("title", "input", "ahs", "model3d", "sheet-url", "spreadsheet-id", "creds", "ahs-source", "ahs-sheet-url"): p.add_argument("--" + k)
+    for k in ("title", "input", "ahs", "model3d", "sheet-url", "spreadsheet-id", "creds", "ahs-source", "ahs-sheet-url", "register"): p.add_argument("--" + k)
+    p.add_argument("--struktur", choices=["ya", "tidak"], help="benchmark Rp/m2 termasuk struktur (model struktur ada)")
     p.add_argument("--sheet-gid", type=int)
     p = sub.add_parser("status"); p.add_argument("--project", required=True); p.add_argument("--message", required=True)
     p.add_argument("--stage", default="kerja"); p.add_argument("--step", type=int); p.add_argument("--steps", type=int)

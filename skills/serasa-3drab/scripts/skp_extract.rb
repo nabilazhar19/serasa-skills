@@ -1,4 +1,4 @@
-# skp_extract.rb - Serasa RAB: ekstraksi kuantitas dari model SketchUp + jembatan ke Viewport RAB (v2.5)
+# skp_extract.rb - Serasa RAB: ekstraksi kuantitas dari model SketchUp + jembatan ke Viewport RAB (v2.6)
 #
 # Pemasangan (sekali per komputer; Mac & Windows, semua versi SketchUp):
 #   load "<folder skill>/scripts/skp_extract.rb"; SerasaRAB.install_plugin
@@ -16,7 +16,7 @@ require 'fileutils'
 require 'open3'
 
 module SerasaRAB
-  VERSION = '2.5'
+  VERSION = '2.6'
   SRC = File.expand_path(__FILE__) rescue nil
   WIN = (Sketchup.platform == :platform_win rescue RUBY_PLATFORM =~ /mswin|mingw/)
   module_function
@@ -416,6 +416,92 @@ module SerasaRAB
       floors: JSON.parse(horizontals(region, zlo, zhi, true)),
       under: JSON.parse(horizontals(region, zlo, zhi, false)),
       openings: JSON.parse(glazing(region)) }.to_json
+  end
+
+  # 12) INVENTARIS SEMUA OBJEK (v2.6) — dasar "semua objek dihitung" ala arsitek ------------------------------------
+  # SerasaRAB.inventory(region, path, depth = 2)  -> tulis JSON ke path, kembalikan ringkasan pendek.
+  # Tiap objek root di area (termasuk yang biasanya dilewati: kontur, vegetasi, mobil -> "dilewati": alasan):
+  #   {id, pid, name, layer, layers (semua layer/tag di dalamnya), str (ada layer/tag STR), skip,
+  #    bbox [x0,y0,z0,x1,y1,z1] mm, size [panjang, lebar, tebal] mm, closed (semua leaf solid), volume_m3 (leaf solid),
+  #    faces {material: {atas, bawah, vertikal, miring, total}} m2 (material warisan grup ikut), edges_m (tepi keras),
+  #    parts [{id: "pid>Definisi", name, depth, count, layers, unit_size, faces, volume_m3, edges_m}] isi bertingkat per definisi
+  #    (angka part sudah termasuk isinya sendiri; part kedalaman 2 adalah rincian dari part kedalaman 1)}
+  # Agen mengklasifikasi tiap objek/part jadi pekerjaan (references/cakupan.md) dan mencatatnya di register proyek.
+  STR_RX = /(\A|[^a-z])str(\z|[^a-z])|struktur/i
+
+  def inv_faces(leaves)
+    faces = Hash.new { |h, k| h[k] = Hash.new(0.0) }; vol = 0.0; closed = true; edges = 0.0; layers = []
+    leaves.each { |d, t, inh, _|
+      g = def_geo(d)
+      d.entities.each { |e|
+        if e.is_a?(Sketchup::Face) && e.visible? && e.layer.visible?
+          mt = e.material || e.back_material || inh
+          a = e.area(t) * 645.16 / 1e6; next if a <= 0
+          n = e.normal.transform(t); n.normalize! if n.length > 0
+          cls = n.z > 0.9 ? 'atas' : n.z < -0.9 ? 'bawah' : n.z.abs <= 0.2 ? 'vertikal' : 'miring'
+          f = faces[mt ? mt.display_name : '(tanpa material)']; f[cls] += a; f['total'] += a
+          layers << e.layer.name
+        elsif e.is_a?(Sketchup::Edge) && e.visible? && !e.soft? && !e.smooth? && !e.hidden?
+          edges += e.start.position.transform(t).distance(e.end.position.transform(t)).to_mm
+        end
+      }
+      next if g[:faces].empty?
+      if g[:closed]
+        tris = world_tris(d, t); o = tris[0] && tris[0][0]
+        vol += tris.sum { |a| (a[0] - o).dot((a[1] - o) * (a[2] - o)) * 25.4**3 / 6.0 }.abs if o
+      else
+        closed = false
+      end
+    }
+    [faces.transform_values { |h| h.transform_values { |v| v.round(3) } }, (vol / 1e9).round(4), closed, (edges / 1000).round(2), layers.uniq]
+  end
+
+  def inv_size(bb)
+    s = [bb.width, bb.height, bb.depth].map { |v| mm(v).round }
+    [s.max(2), s.min].flatten
+  end
+
+  def inventory(region, path = nil, depth = 2)
+    m = Sketchup.active_model; t0 = Time.now; out = []
+    m.entities.each { |r|
+      next unless (r.is_a?(Sketchup::Group) || r.is_a?(Sketchup::ComponentInstance)) && r.visible? && in_region?(r.bounds, region)
+      skip = r.layer.name =~ SKIP_LAYERS ? "layer #{r.layer.name}" : r.definition.name =~ SKIP_DEFS ? "definisi #{r.definition.name}" : (r.layer.visible? ? nil : 'layer disembunyikan')
+      leaves = walk_leaves(r, Geom::Transformation.new, nil, '', [])
+      faces, vol, closed, edges, flayers = inv_faces(leaves)
+      layers = ([r.layer.name] + flayers).uniq
+      bb = r.bounds
+      o = { id: r.persistent_id.to_s, pid: r.persistent_id, name: r.definition.name, layer: r.layer.name, skip: skip,
+            bbox: [bb.min.x, bb.min.y, bb.min.z, bb.max.x, bb.max.y, bb.max.z].map { |v| mm(v).round }, size: inv_size(bb),
+            closed: closed, volume_m3: vol, faces: faces, edges_m: edges, parts: [] }
+      # isi bertingkat, dikelompokkan per definisi (mis. 1.236 modul roster = satu baris dengan count)
+      groups = {}
+      walk = lambda { |e, tr, dep|
+        next if dep > depth
+        tw = tr * e.transformation
+        e.definition.entities.each { |c|
+          next unless (c.is_a?(Sketchup::Group) || c.is_a?(Sketchup::ComponentInstance)) && c.visible? && c.layer.visible?
+          k = [c.definition.name, dep]
+          g = groups[k] ||= { id: "#{r.persistent_id}>#{c.definition.name}", name: c.definition.name, depth: dep, count: 0, layers: [],
+                              unit_size: inv_size(c.definition.bounds), faces: Hash.new { |h, kk| h[kk] = Hash.new(0.0) }, volume_m3: 0.0, edges_m: 0.0, closed: true }
+          g[:count] += 1; g[:layers] |= [c.layer.name]
+          f, v, cl, ed, fl = inv_faces(walk_leaves(c, tw, c.material || e.material, '', []))
+          f.each { |mn, h| h.each { |cls, a| g[:faces][mn][cls] += a } }
+          g[:volume_m3] += v; g[:edges_m] += ed; g[:closed] &&= cl; g[:layers] |= fl
+          walk.call(c, tw, dep + 1)
+        }
+      }
+      walk.call(r, Geom::Transformation.new, 1)
+      o[:parts] = groups.values.map { |g| g.merge(faces: g[:faces].transform_values { |h| h.transform_values { |v| v.round(3) } }, volume_m3: g[:volume_m3].round(4), edges_m: g[:edges_m].round(2)) }
+      o[:layers] = (layers + o[:parts].flat_map { |g| g[:layers] }).uniq
+      o[:str] = o[:layers].any? { |l| l =~ STR_RX }
+      out << o
+    }
+    tot = out.sum { |o| o[:faces].values.sum { |h| h['total'] } }
+    res = { model: m.path, region: region, made: Time.now.strftime('%Y-%m-%d %H:%M:%S'), plugin: VERSION, objects: out,
+            summary: { objects: out.length, skipped: out.count { |o| o[:skip] }, str_objects: out.count { |o| o[:str] }, face_m2: tot.round(1) } }
+    if path then tmp = path + '.tmp'; File.write(tmp, JSON.pretty_generate(res)); File.rename(tmp, path) end
+    "inventaris: #{out.length} objek (#{res[:summary][:skipped]} biasanya dilewati, #{res[:summary][:str_objects]} ber-tag STR), " \
+      "#{tot.round(1)} m2 muka, #{(Time.now - t0).round(1)} dtk" + (path ? " -> #{path}" : '')
   end
 
   # 11) EKSPOR 3D untuk Viewport RAB (format 4, v2.5) -----------------------------------------------

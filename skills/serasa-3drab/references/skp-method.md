@@ -1,9 +1,9 @@
 # Metode take-off dari SKP (v2)
 
-Fungsi ada di `scripts/skp_extract.rb` (modul `SerasaRAB`, VERSION 2.4). Satuan mm / m². Semua output JSON ringkas.
+Fungsi ada di `scripts/skp_extract.rb` (modul `SerasaRAB`, VERSION 2.6). Satuan mm / m². Semua output JSON ringkas.
 
 ## 0. Muat script (hemat token)
-1. `defined?(SerasaRAB) ? SerasaRAB::VERSION : 'belum'` — kalau `2.4`+, langsung pakai (plugin sudah terpasang).
+1. `defined?(SerasaRAB) ? SerasaRAB::VERSION : 'belum'` — kalau `2.6`+, langsung pakai (plugin sudah terpasang).
 2. Kalau belum / versi lama: `load "<folder skill>/scripts/skp_extract.rb"; SerasaRAB.install_plugin`.
    `install_plugin` menjalankan `scripts/setup.py` dengan Python yang ditemukan: plugin `serasa_skp_extract.rb` ke folder
    Plugins **semua versi SketchUp** (Mac & Windows), viewport + builder ke folder bersama, library Python, `env.json`.
@@ -72,3 +72,9 @@ Sampling 100 mm per pita z membantu membagi dinding menerus, tetapi melewatkan d
 - `SerasaRAB.viewport` — buka viewport untuk folder model aktif (juga lewat menu). `SerasaRAB.run_tools([...], wait: true)` menjalankan
   `tools.py` di komputer pengguna (untuk agen tanpa shell lokal).
 - Plugin menyalakan server viewport di belakang layar saat model yang punya `_serasa_tools/viewport.json` dibuka.
+
+## Inventaris semua objek (v2.6)
+`SerasaRAB.inventory(region, "<proyek>/_serasa_tools/work/inventory.json", depth = 2)` — semua objek di area (termasuk yang
+biasanya dilewati, ditandai `skip`): luas per material × orientasi (atas/bawah/vertikal/miring; material warisan grup ikut),
+volume leaf solid, panjang tepi keras, ukuran terurut, layer/tag + flag `str` (STR/struktur), dan `parts` = isi bertingkat per
+definisi dengan `count` (mis. modul roster, kursi, lampu). Dasar klasifikasi & ukur: [cakupan](cakupan.md).
