@@ -1,0 +1,31 @@
+---
+name: serasa-strfast
+description: Buat atau revisi skematik struktur dari desain arsitektur SketchUp, SKP, atau denah dan potongan. Gunakan untuk koordinasi as, kolom, balok, bukaan, kantilever, rangka atap, perimeter dan pagar, serta penelusuran kuantitas skematik ke RAB. Mendukung model aktif, salinan SKP, dan tabel koordinasi jika akses model terbatas.
+---
+
+# Serasa StrFast
+
+Hasil utama adalah skematik struktur yang mengikuti ruang, selubung, dan elevasi desain. Gunakan satu grup induk `STRUKTUR SKEMATIK` dengan subgrup per lantai atau sistem. Buat daftar elemen dan catatan konflik secukupnya agar revisi dan pemeriksaan dapat dilanjutkan tanpa mengulang pengukuran.
+
+## Pilih akses dan lingkup
+
+- **Model bisa dibaca dan diedit** — Konfirmasi file, area, satuan, konteks edit, dan perubahan pengguna yang masih terbuka. Gunakan integrasi SketchUp, Ruby API, atau antarmuka aplikasi yang tersedia. Jika pengguna meminta model aktif, kerjakan di sana setelah membuat salinan pemulihan yang mencakup perubahan aktif. Untuk pekerjaan lain, edit salinan kecuali pengguna mengizinkan penyimpanan ke file asal.
+- **Model hanya bisa dibaca** — Ukur dari sumber yang bisa diakses. Buat tabel as, level, elemen, konflik, dan bagian siap dimodelkan. Untuk input yang terukur, siapkan daftar geometri sesuai [format batch SketchUp](references/sketchup-batch.md) bila berguna bagi pengguna.
+- **Hanya ada gambar, denah, atau potongan** — Gunakan dimensi dan level yang tertulis. Pisahkan fakta terukur, asumsi skematik, dan informasi yang masih dibutuhkan. Jika skala belum diketahui atau gambar perspektif saja, pakai penanda relatif yang bisa ditelusuri dan kosongkan dimensi yang tak dapat diukur. Kerjakan bagian yang bisa ditetapkan sambil meminta hanya keputusan yang mengubah hasil secara material.
+
+## Empat langkah kerja
+
+1. **Petakan desain sekali.** Ambil denah tiap level, dua potongan atau tampak yang relevan, dan satu tampak 3D. Catat sistem koordinat, level struktur dan finishing, tebal dinding, bukaan beserta elevasinya, void, batas lahan, bidang atap, skylight, dan elemen struktur yang sudah ada. Terapkan seluruh transformasi grup dan komponen bertingkat, termasuk rotasi, cermin, dan skala. Gunakan bounding box untuk menyaring kandidat dan profil, muka atau potongan untuk batas akhir. Simpan ringkasan dan referensi sumber per zona. Saat revisi, ukur ulang hanya bagian yang berubah atau terkait.
+2. **Susun grid, tumpuan, dan daftar elemen.** Mulai dari garis struktur yang menerus, dinding tetap, sudut, perubahan bentang dan pertemuan balok. Jejak beban skematik dari atap/pelat ke balok, kolom atau dinding penumpu, lalu titik tumpuan bawah. Periksa program ruang, parkir, kaca penuh, tangga, void dan jalur MEP. Gunakan dimensi struktur yang diberikan proyek terlebih dahulu. Untuk studi Serasa, bila diminta atau sesuai untuk skematik beton, pakai `h ≈ L/12` untuk bentang biasa (as ke as) dan `h ≈ L/6` untuk kantilever (muka tumpuan ke ujung bebas). Bulatkan ke atas ke modul yang tersedia dan catat bentang dasar. Tentukan lebar dan kedalaman kolom secara independen. Jika penampang awal keluar dari batas desain, geser as, evaluasi tumpuan tambahan atau opsi sistem, atau tandai konflik. Jika inti sempit dimodelkan untuk koordinasi, tandai sebagai selubung geometris sementara.
+3. **Modelkan per sistem dalam satu batch.** Ikuti urutan tumpuan → kolom → balok/pengikat → atap → perimeter/pagar yang termasuk lingkup. Gunakan komponen modul yang tersedia atau buat geometri bernama per tipe. Untuk atap, ukur muka bawah tiap bidang, potong anggota terhadap perimeter dan bukaan, lalu atur kontak reng, usuk, gording, nok, pengaku, dan elemen utama sesuai sistem atap. Periksa keterhubungan di tepi, jurai, perubahan kemiringan, dan sekitar bukaan. Untuk perimeter dan pagar, ikuti profil tanah, batas dinding, elevasi serta ruang gerak daun. Baca [gerbang pemeriksaan geometri](references/coordination.md) untuk titik rawan. Terapkan satu transaksi atau rangkaian undo yang terkendali. Pada revisi, pertahankan subgrup yang berada di luar lingkup dan geometri arsitektur; pakai ID stabil dan periksa hasil sebelum mengulang operasi yang timeout.
+4. **Verifikasi dan serahkan.** Bandingkan daftar dengan geometri baru dan lama. Periksa kontak tumpuan, kelengkapan, penampang, benturan, solid, duplikasi, dan kecocokan selubung pada denah, potongan, serta 3D. Periksa arsitektur dinyalakan untuk mencari tonjolan, lalu isolasi struktur untuk melihat tumpuan dan sambungan antar elemen. Lihat masing-masing sisi dan sedikitnya satu potongan per zona kritis. Jika hanya bisa menghitung dari dokumen, sebutkan pemeriksaan yang belum bisa dilakukan. Laporkan bagian selesai, asumsi yang berpengaruh, konflik terbuka, dan status penyimpanan file.
+
+## Daftar elemen dan serah terima
+
+- Catat ID, zona/lantai, jenis, as atau koordinat ujung, ukuran, level, bentang dasar jika relevan, status tumpuan, dan rujukan minimal ke sumber. Gunakan `terukur`, `skematik`, atau `perlu data` untuk basis ukuran. Bedakan status penyelesaian geometri dan status perhitungan struktur.
+- Untuk QTO, tentukan pemilik volume fisik antar elemen dan arsitektur sebelum menjumlah. Pisahkan elemen baru dari overlay koordinasi dinding, pagar, atau atap. Hitung per elemen atau paket sekali. Bahan, tulangan, pekerjaan tanah, sambungan, dan biaya mengikuti data serta lingkup yang tersedia. Gunakan alur QTO/RAB proyek jika pengguna meminta pembaruan anggaran.
+- Tunjukkan batas penggunaan dengan jelas. Rasio dan geometri skematik membantu koordinasi dan estimasi awal. Kapasitas, stabilitas, gempa, lendutan, sambungan, pondasi, dan dimensi konstruksi perlu desain serta verifikasi sesuai proyek.
+
+## Cara menghemat waktu
+
+Kumpulkan pengukuran relevan dalam satu inspeksi yang terfokus. Kirim ringkasan elevasi, batas zona, dan daftar anomali ke model AI, dengan geometri rinci tetap di file kerja. Buat daftar perubahan sebelum menulis, gunakan satu batch untuk tiap lingkup logis, dan jalankan ulang pemeriksaan hanya di zona terdampak. Jika tersedia, pakai [adapter batch Ruby](references/sketchup-batch.md) untuk validasi daftar dan pembuatan solid di SketchUp. Alur inti, daftar elemen, dan pemeriksaan dapat digunakan melalui model AI lain atau secara manual tanpa adapter.

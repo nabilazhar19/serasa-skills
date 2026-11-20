@@ -1,0 +1,4 @@
+interface:
+  display_name: "Serasa StrFast"
+  short_description: "Skematik struktur dari desain SketchUp atau denah"
+  default_prompt: "Gunakan $serasa-strfast untuk membuat skematik struktur dan mengecek koordinasinya terhadap desain proyek ini."
