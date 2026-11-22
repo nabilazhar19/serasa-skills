@@ -1,0 +1,4 @@
+interface:
+  display_name: "Serasa RenderFlow"
+  short_description: "Render fotorealistik scene SketchUp di Google Flow"
+  default_prompt: "Gunakan $serasa-renderflow untuk merender scene SketchUp proyek ini di Google Flow dan merapikan hasilnya ke folder render."

@@ -5,6 +5,8 @@ Kumpulan skill agent AI internal PT Serasa Rancang Indonesia.
 | Skill | Fungsi |
 |---|---|
 | `serasa-3drab` | Buat, lanjutkan, dan koreksi RAB dari SketchUp + denah ke Google Sheets; AHS live, Audit volume, penanda estimasi, perlindungan input manual, dan Viewport RAB 3D lokal |
+| `serasa-strfast` | Skematik struktur dari desain SketchUp/denah: as, kolom, balok, atap, koordinasi ke RAB |
+| `serasa-renderflow` | Render fotorealistik scene SketchUp di Google Flow (Nano Banana) dengan prompt blueprint Serasa; hasil 2K rapi di folder `render/` proyek. Claude & ChatGPT, Mac & Windows |
 
 ## Install (Claude Code, Codex, Cursor, dll.)
 
